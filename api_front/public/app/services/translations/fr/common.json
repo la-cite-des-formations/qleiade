@@ -1,0 +1,223 @@
+{
+    "signout": "Déconnexion",
+    "yes": "Oui",
+    "no": "Non",
+    "filter": "Filtrer",
+    "period": "Période",
+    "next": "Suivant",
+    "back": "Précédent",
+    "notprovided": "Non renseigné",
+    "student": "Apprenant",
+    "group": "Groupe",
+    "groups": "Groupes",
+    "formation": "Formation",
+    "formations": "Formations",
+    "indicator": "Indicateur",
+    "indicator_label": "Indicateur {{id}} : {{label}}",
+    "indicators": "Indicateurs",
+    "sutdents": "Apprenants",
+    "periods": "Périodes",
+    "audit_type": "Type d'auditeur",
+    "breadcrumbs": {
+        "home": "ACCUEIL"
+    },
+    "error": {
+        "audit": {
+            "date_required": "la date est requise",
+            "name_required": "le nom de l'audit est requis",
+            "audit_type_required": "le type d'audit est requis",
+            "wealths_required": "Il n'y a pas de preuves validées"
+        }
+    },
+    "home": {
+        "edito": {
+            "title": "Edito",
+            "description": "mon super edito"
+        },
+        "feed": {
+            "title": "File d'actualité",
+            "description": "Le dernier audit c'est super bien passé"
+        },
+        "welcome": {
+            "title": "Bienvenue",
+            "description": "Le portail de la qualité au CFA"
+        },
+        "administer": {
+            "title": "Interface Administrateur",
+            "description": "Console administrateur"
+        },
+        "overview": {
+            "title": "Les labels",
+            "description": "Tous les labels du CFA"
+        },
+        "button": {
+            "administer": "Administration",
+            "overview": "Tout voir",
+            "dashboard": "Voir plus"
+        },
+        "dashboard": {
+            "title": "Les services",
+            "description": "Les dashboards de vos services"
+        }
+    },
+    "quality_label": {
+        "welcome": {
+            "title": "Label {{label}}",
+            "description": "Qu'est ce que le label {{label}} ?"
+        },
+        "button": {
+            "follow": "Suivre",
+            "audit": "Auditer",
+            "seeMore": "Voir plus"
+        },
+        "audit": {
+            "title": "Parcours Audit {{label}}",
+            "description": "Veuillez suivre les étapes suivantes",
+            "step": {
+                "one": "Contexte",
+                "two": "Formations",
+                "three": "Groupes",
+                "four": "Apprenants",
+                "five": "Confirmation"
+            },
+            "next": "suivant",
+            "back": "précédent",
+            "since": "Du",
+            "until": "Au",
+            "auditor": "Auditeur Externe",
+            "audit_list": {
+                "header": {
+                    "id": "Id",
+                    "name": "Nom de l'audit",
+                    "type": "Type",
+                    "date": "Date de validation"
+                },
+                "question": "Voulez-vous choisir un audit de référence ?",
+                "info": "Les informations sont préremplies avec les paramètres de l'audit précédent",
+                "replace": "pas d'audit de référence"
+            },
+            "first_step": {
+                "subtitle": "L'audit",
+                "description": "Saisir les informations d'audit",
+                "audit_type": "Type d'audit",
+                "preparation": "Audit préparatoire",
+                "interne": "Audit interne",
+                "externe": "Audit externe"
+            },
+            "second_step": {
+                "subtitle": "Construction de l'échantillon",
+                "description": "Choisir des formations"
+            },
+            "third_step": {
+                "subtitle": "Construction de l'échantillon",
+                "description": "Les groupes"
+            },
+            "fourth_step": {
+                "subtitle": "Construction de l'échantillon",
+                "description": "Les apprenants"
+            },
+            "confirm": {
+                "audit_type": "Type d'auditeur",
+                "extern": "Auditeur externe",
+                "intern": "Auditeur interne",
+                "formations": "Formations sélectionnées",
+                "groups": "Groupes sélectionnés",
+                "students": "Nombre d'apprenants sélectionnés",
+                "continue": "Confirmez & Continuez",
+                "subtitle": "Récapitulatif de l'échantillonnage",
+                "description": ""
+            },
+            "success": {
+                "thankyou": "Merci !",
+                "info": "Vous allez être redirigé vers la page de résultat"
+            }
+        },
+        "result": {
+            "summary": {
+                "title": "Audit {{label}}",
+                "subtitle": "Informations de l'audit en cour",
+                "audit_type": "Type d'échantillonage",
+                "extern": "Type d'auditeur",
+                "intern": "Auditeur interne",
+                "notprovided": "Non renseigné",
+                "periods": "Périodes",
+                "formations": "Formations sélectionnés",
+                "groups": "Groupes sélectionnés",
+                "students": "Nombre d'apprenants sélectionnés",
+                "wealths": "Preuves validées"
+            },
+            "tooltips": {
+                "synthese": "Synthèse",
+                "validate_audit": "Enregistrement de l'audit"
+            },
+            "presenter": {
+                "wealth": "Preuve {{id}}",
+                "indicator": "Indicateur {{id}}"
+            },
+            "filters": {
+                "title": "Filtres",
+                "indicator": "Indicateur"
+            },
+            "validating": {
+                "title": "Validation de l'audit {{label}}",
+                "name": "Nom de l'audit",
+                "auditor": "Nom de l'auditeur",
+                "notes": "Notes",
+                "date": "Date de validation de l'audit",
+                "wealths": {
+                    "details": "pour les indicateur : {{indicator}} / granularité : {{granularity.type}} {{granularity.id}}"
+                },
+                "tooltips": {
+                    "validate": "Assurez vous d'avoir des preuves validées"
+                },
+                "audit_type": "Type d'audit",
+                "validate": "L'audit est-il validé ?",
+                "closeButton": "Cloturer"
+            },
+            "messages": {
+                "success": {
+                    "save_audit": "l'audit est enregistré",
+                    "save_close_audit": "l'audit est enregistré et cloturé"
+                },
+                "error": {
+                    "reuiqred_field": "Ce champ est obligatoire"
+                }
+            }
+        }
+    },
+    "appBar": {
+        "search": "Rechercher...",
+        "submenu": {
+            "profile": "Profil",
+            "administer": "Administrateur",
+            "labels": "Mes labels",
+            "dashboard": "Tableau de bord",
+            "dashboards": "Mes services",
+            "signout": "Déconnexion"
+        }
+    },
+    "group_list": {
+        "header": {
+            "id": "Code",
+            "name": "Nom",
+            "formation": "Formation"
+        },
+        "question": "Sélectionner un ou plusieurs groupes ?",
+        "info": "Tous les groupes des formations choisies seront sélectionnés",
+        "replace": "Sélectionner une ou des formations pour définir des groupes"
+    },
+    "student_list": {
+        "header": {
+            "id": "Code apprenant",
+            "firstname": "Prénom",
+            "lastname": "Nom",
+            "birthdate": "Date de naissance"
+        },
+        "content": {
+            "name": "students",
+            "question": "Voulez-vous choisir des apprenants à partir des informations saisies dans les étapes précédentes ?",
+            "info": "Tous les apprenants des groupes et des formations choisies seront sélectionnées, s'il n'y a ni formations ni groupes sélectionnés, tous les apprenants seront affichés mais aucun ne sera sélectionné",
+            "replace": "pas d'apprenants à sélectionner, passez à la suite"
+        }
+    }
+}

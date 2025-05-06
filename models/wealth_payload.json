@@ -1,0 +1,41 @@
+{
+    "id": "id de la preuve",
+    "name": "nom de la preuve",
+    "parent_id": "id du parent le cas échéant",
+    "granularity_type": "formation",
+    "granularity_id": "id de la formation",
+    "conformity_level": 100,
+    "validity_date": "27/12/2023",
+    "created_at": "date de création de la preuve",
+    "archived": 0,
+    "unit": "nom du unit",
+    "wealth_type": "type de preuve",
+    "indicators": [
+        {
+            "label": "nom de l'indicateur",
+            "quality_label": "qualiopy"
+        },
+        {
+            "label": "nom de l'indicateur",
+            "quality_label": "qualiopy"
+        }
+    ],
+    "tags": [
+        {
+            "label": "nom du tag"
+        },
+        {
+            "label": "nom du tag"
+        }
+    ],
+    "actions": [
+        {
+            "label": "nom de l'action 1",
+            "stage": "nom de l'étape"
+        },
+        {
+            "label": "nom de l'action 2",
+            "stage": "nom de l'activité"
+        }
+    ]
+}
