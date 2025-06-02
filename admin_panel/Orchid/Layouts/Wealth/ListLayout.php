@@ -53,23 +53,33 @@ class ListLayout extends Table
         return [
             TD::make('archived', __('archived'))
                 ->sort()
-                ->render(fn(Wealth $w) => View('tools.archived_cell', ['archived' => !is_null($w->archived_at)])),
+                ->render(function (Wealth $wealth) {
+                    return View('tools.archived_cell', ['archived' => !is_null($wealth->archived_at)]);
+                }),
 
-            TD::make('name', __('name'))
+            TD::make(__('name'))
                 ->sort()
-                ->render(fn(Wealth $w) => optional($w)->name),
+                ->render(function (Wealth $wealth) {
+                    return $wealth->name;
+                }),
 
-            TD::make('unit_name', __('wealth_unit'))
+            TD::make('Unit', __('wealth_unit'))
                 ->sort()
-                ->render(fn(Wealth $w) => optional($w->unit)->name),
+                ->render(function (Wealth $wealth) {
+                    return $wealth->unit->name;
+                }),
 
-            TD::make('wealth_type', __('wealth_type'))
+            TD::make(__('wealth_type'))
                 ->sort()
-                ->render(fn(Wealth $w) => optional($w->wealthType)->label),
+                ->render(function (Wealth $wealth) {
+                    return $wealth->wealthType->label;
+                }),
 
             TD::make('validity_date', __('wealth_validity_date'))
                 ->sort()
-                ->render(fn(Wealth $w) => optional($w)->validity_date),
+                ->render(function (Wealth $wealth) {
+                    return $wealth->validity_date;
+                }),
 
             TD::make(__('Actions_form'))
                 ->align(TD::ALIGN_CENTER)

@@ -1,0 +1,16 @@
+services:
+  meilisearch:
+    image: getmeili/meilisearch:v0.29
+    container_name: qleiade_search_engine
+    ports:
+      - '7700:7700'
+    environment:
+      # écoute sur toutes les interfaces
+      - MEILI_HTTP_ADDR=0.0.0.0:7700
+      # clé maître (choisis-en une pour la prod !)
+      - MEILI_MASTER_KEY=TRldhaS6zbV2cGvdm19W
+      # configuration de l'environnement
+      - MEILI_ENV=development
+    # si tu veux persister les données entre les relances :
+    volumes:
+      - ./meili_data:/MEILI_DATA

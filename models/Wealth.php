@@ -123,6 +123,7 @@ class Wealth extends Model
         'archived_at',
     ];
 
+
     /**
      * Create a new factory instance for the model.
      */
@@ -244,10 +245,9 @@ class Wealth extends Model
     {
         // $array = $this->toArray();
 
-        return [
+        $array = [
             "id" => $this->id,
             "name" => $this->name,
-            "description" => $this->description,
             "parent_id" => $this->parent_id,
             "granularity_type" => $this->granularity['type'],
             "granularity_id" => isset($this->granularity['id']) ? $this->granularity['id'] : null,
@@ -255,19 +255,17 @@ class Wealth extends Model
             "validity_date" => $this->validity_date ? $this->validity_date->toDateTimeString() : null,
             "created_at" => $this->created_at->toDateTimeString(),
             "archived" => !is_null($this->archived_at),
-            "unit_name" => $this->unit->name,
             "unit" => [
-                "id" => $this->unit->id,
                 "name" => $this->unit->name,
                 "label" => $this->unit->label
             ],
             "wealth_type" => $this->wealthType->label,
             "indicators" => $this->indicators->map(function ($item, $key) {
-                return [
-                    "id" => $item["id"],
+                $value = [
                     "label" => $item["label"],
                     "quality_label" => $item['qualityLabel']->label,
                 ];
+                return $value;
             })->toArray(),
             "tags" => $this->tags->map(function ($item, $key) {
                 $value = [
@@ -283,6 +281,7 @@ class Wealth extends Model
                 return $value;
             })->toArray(),
         ];
+        return $array;
     }
 
     /**

@@ -2,8 +2,6 @@
 
 namespace Admin\Orchid\Screens\Wealth;
 
-use Admin\Orchid\Layouts\Parts\SearchLayout;
-use Admin\Orchid\Layouts\Wealth\ListLayout;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -13,11 +11,10 @@ use Orchid\Screen\Actions\Link;
 use Orchid\Support\Facades\Toast;
 
 use Models\Wealth;
+use Models\Unit;
 
-use Admin\Orchid\Layouts\Wealth\SearchListener;
-use Illuminate\Support\Facades\Log;
-use Models\WealthType;
-use Orchid\Support\Facades\Layout;
+use Admin\Orchid\Layouts\Parts\SearchLayout;
+use Admin\Orchid\Layouts\Wealth\ListListener;
 
 class ListScreen extends Screen
 {
@@ -28,9 +25,11 @@ class ListScreen extends Screen
      */
     public function query(): iterable
     {
-        $payload = array_merge(["sort" => request('sort')], request('search') ?? []);
-
-        return $this->asyncFilterList($payload);
+        return [
+            'wealths' => Wealth::with(['indicators', 'unit', 'wealthType'])
+                ->filters()
+                ->paginate(10),
+        ];
     }
 
     /**
@@ -74,6 +73,7 @@ class ListScreen extends Screen
             Link::make(__('Add'))
                 ->icon('plus')
                 ->route('platform.quality.wealth.create')
+                //it works
                 ->canSee(Auth::user()->hasAccess('platform.quality.wealth.create')),
         ];
     }
@@ -85,117 +85,76 @@ class ListScreen extends Screen
      */
     public function layout(): iterable
     {
+        $searchForm = new SearchLayout();
         return [
-            SearchLayout::class,
-            SearchListener::class,
+            $searchForm->title(__('search')),
+            ListListener::class,
         ];
     }
 
     /**
-     * Asynchronous filter list method.
      *
-     * @param  array  $payload
-     * @return array
+     * @return string[]
      */
     public function asyncFilterList($payload)
     {
-        Log::info('asyncFilterList called', $payload);
-
-        // dd($payload);
-
         $validator = Validator::make($payload, [
-            'keyword' => 'nullable|string|max:255',
-            'units' => 'nullable|array',
-            'indicators'=> 'nullable|array',
-            'conformity' => 'nullable|in:0,essentielle,complémentaire',
-            'wealth_type' => 'nullable|numeric',
-            'sort' => 'nullable|string'
+            'keyword' => "nullable|regex:/^[-'a-zA-ZÀ-ÖØ-öø-ÿ]+$/",
+            'unit' => 'nullable|numeric',
+            'archived' => 'nullable'
         ]);
 
         if ($validator->fails()) {
-            Log::info('asyncFilterList : error 403');
             abort(403);
         }
 
         $data = $validator->validated();
-        $keyWord = $data['keyword'] ?? '';
-        $filters = [];
 
-        if (! empty($data['units'][0])) {
-            $ids = implode(',', $data['units']);
-            $filters[] = "unit.id IN [{$ids}]";
+        $keyWord = $data['keyword'];
+        $filter = "";
+        if (isset($data['archived'])) {
+            // filter archived
+            $filter .= "archived = true";
         }
 
-        if (! empty($data['indicators'][0])) {
-            $ids = implode(',', $data['indicators']);
-            $filters[] = "indicators.id IN [{$ids}]";
+        if (isset($data['archived']) && (isset($data['unit']) && !is_null($data['unit']))) {
+            $filter .= ' AND ';
         }
 
-        if (! empty($data['conformity'])) {
-            $filters[] = "conformity_level = '{$data['conformity']}'";
+        $unitLabel = '';
+        if (isset($data['unit']) && !is_null($data['unit'])) {
+            $unitLabel = Unit::find($data['unit'])->label;
+            $filter .= "unit.label = '" . $unitLabel . "'";
         }
-
-        if (! empty($data['wealth_type'])) {
-            $wt = WealthType::find($data['wealth_type']);
-            if ($wt) {
-                $filters[] = "wealth_type = '{$wt->label}'";
-            }
-        }
-
-        $filter = implode(' AND ', $filters);
-
-        // Récupération des paramètres de recherche et de tri
-        $rawSort = $data['sort'] ?? NULL;
-
-        // Détection du signe - pour le sens
-        $sort  = null;
-        $order = 'asc';
-
-        if ($rawSort) {
-            if (str_starts_with($rawSort, '-')) {
-                $sort  = substr($rawSort, 1);
-                $order = 'desc';
-            } else {
-                $sort  = $rawSort;
-                $order = 'asc';
-            }
-        }
-
         try {
-            $wealths = Wealth::search($keyWord, function ($meilisearch, $query, $options) use ($filter, $sort, $order) {
-                if ($filter) {
-                    $options['filter'] = $filter;
-                }
-
-                if ($sort) {
-                    $options['sort'] = ["{$sort}:{$order}"];
-                }
+            $wealths = Wealth::search($keyWord, function ($meilisearch, $query, $options) use ($filter) {
+                $options['filter'] = $filter;
 
                 return $meilisearch->search($query, $options);
-            })
-            ->paginate(10)
-            ->withPath(route('platform.quality.wealths'));
-
+            })->get();
         } catch (\Symfony\Component\HttpKernel\Exception\HttpException $e) {
             abort(500, "connexion_error");
         }
-        return ['wealths' => $wealths];
+        return [
+            'wealths' => $wealths,
+        ];
     }
 
     /**
-     * Remove a wealth.
+     * remove
      *
-     * @param  Request  $request
+     * @param  Request $request
      * @return void
      */
     public function remove(Request $request): void
     {
         $wealth = Wealth::findOrFail($request->get('id'));
+
         $wealth->actions()->detach();
         $wealth->tags()->detach();
         $wealth->indicators()->detach();
-        $wealth->delete();
 
+        $wealth->delete();
         Toast::info(__('Wealth_was_removed'));
     }
 }
