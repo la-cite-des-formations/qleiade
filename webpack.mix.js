@@ -42,6 +42,7 @@ let ImageminPlugin = require('imagemin-webpack-plugin').default;
  */
 
 mix.js('resources/js/app.jsx', 'public/js')
+    .js('resources/js/admin/search-reactive.js', 'public/js')
     .react()
     .sass('resources/sass/app.scss', 'public/css')
     .copyDirectory('resources/images', 'public/images');

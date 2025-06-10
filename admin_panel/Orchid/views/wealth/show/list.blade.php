@@ -20,4 +20,4 @@
         @endforeach
 
     </div>
-    @endif
+@endisset

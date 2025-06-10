@@ -97,6 +97,11 @@ trait Meilisearchable
                         $this->info('Updated settings ...');
                         break;
 
+                    case 'searchable_attributes':
+                        $client->index($index)->updateSearchableAttributes($value);
+                        $this->info("Updated searchable attributes for [{$index}]");
+                        break;
+
                     default:
                         $this->info('No settings to update...');
                         break;

@@ -2,14 +2,16 @@
 
 namespace Admin\Orchid\Layouts\Parts;
 
-use Admin\Orchid\Fields\SearchField;
+use Models\Indicator;
 use Orchid\Screen\Field;
 use Orchid\Screen\Fields\Group;
 use Orchid\Screen\Fields\Relation;
 use Orchid\Screen\Layouts\Rows;
 use Models\Unit;
+use Models\WealthType;
 use Orchid\Screen\Actions\Link;
-use Orchid\Screen\Fields\Switcher;
+use Orchid\Screen\Fields\Input;
+use Orchid\Screen\Fields\Select;
 
 class SearchLayout extends Rows
 {
@@ -29,29 +31,60 @@ class SearchLayout extends Rows
     {
         return [
             Group::make([
-                SearchField::make('search.keyword', __('search_input'))
+                Input::make('search.keyword', __('search_input'))
+                    ->type('search')
                     ->title(__('search_input'))
-                    ->type("search")
-                    ->placeholder(__('What to search...'))
-                    ->class("form-control rounded")
-                    ->id("search_wealths_elements"),
+                    ->placeholder(__('Search...'))
+                    ->value(request('search.wealth_type'))
+            ]),
 
-                Relation::make('search.unit', __('unit'))
+            Group::make([
+                Relation::make('search.units', __('units'))
                     ->fromModel(Unit::class, 'label', 'id')
                     ->displayAppend('full')
+                    ->multiple()
                     ->chunk(50)
-                    ->title(__('unit_select_title')),
+                    ->title(__('units'))
+                    ->placeholder(__('Select...'))
+                    ->value(request('search.units') ? explode(',', request('search.units')[0]) : []),
 
-                Switcher::make('search.archived', __('archived'))
-                    ->title(__('archived')),
+                Relation::make('search.indicators', __('indicators'))
+                    ->fromModel(Indicator::class, 'label', 'id')
+                    ->multiple()
+                    ->displayAppend('full')
+                    ->chunk(50)
+                    ->title(__('indicators'))
+                    ->placeholder(__('Select...'))
+                    ->value(request('search.indicators') ? explode(',', request('search.indicators')[0]) : []),
             ]),
-            // ->set('align', ''),
+
             Group::make([
+                Relation::make('search.wealth_type', __('wealth_type'))
+                    ->fromModel(WealthType::class, 'label', 'id')
+                    ->chunk(50)
+                    ->title(__('wealth_type'))
+                    ->placeholder(__('Select...'))
+                    ->value(request('search.wealth_type')),
+
+                Select::make('search.conformity')
+                    ->title(__('conformity_level'))
+                    ->options([
+                        'essentielle' => __('conformity_level_essential'),
+                        'complémentaire' => __('conformity_level_complementary'),
+                    ])
+                    ->empty(__('Select...'), 0)
+                    ->value(request('search.conformity')),
+
                 Link::make('reinitialize', __('reinitialize'))
                     ->icon('reload')
-                    ->class('btn btn-secondary btn-initialize')
+                    ->class('btn btn-outline-secondary')
                     ->route('platform.quality.wealths')
-            ])
+            ])->alignEnd(),
+
+            // Champ caché pour le sort
+            Input::make('sort')
+                ->type('hidden')
+                ->value(request('sort', '')),
         ];
     }
 }
