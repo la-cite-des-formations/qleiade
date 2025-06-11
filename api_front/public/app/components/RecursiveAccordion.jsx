@@ -101,14 +101,14 @@ export default function RecursiveAccordion(props) {
                             </Typography>
                         </Stack>
                     </Box>
-                    <Tooltip title={item.description || t("no_description")}>
+                    <Tooltip title={item.name || t("no_description")}>
                         <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '20rem' }}>
                             <Typography noWrap sx={{ color: 'text.secondary' }}>{item.label || item.name}</Typography>
                         </div>
                     </Tooltip>
-                    <Stack direction={"row"}>
+                    {/* <Stack direction={"row"}>
                         {counter ? <Counter counter={counter} /> : <div />}
-                    </Stack>
+                    </Stack> */}
                 </AccordionSummary>
                 <AccordionDetails>
                     {

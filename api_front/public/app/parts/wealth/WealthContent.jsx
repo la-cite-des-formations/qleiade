@@ -22,14 +22,12 @@ function getContent(wealth) {
         }
     }
     if (wealth?.wealth_type?.name === 'link') {
-        content = <Box>
-            <Typography noWrap sx={{ color: 'text.secondary' }}>
-                {`Voici le lien ${wealth.attachment.link.type} permettant d'accéder à cette preuve`}
-            </Typography>
-            <a href={wealth.attachment.link.url} target="_blank" rel="noopener noreferrer" className="text-u-l">
-                {wealth?.attachment?.link.url}
-            </a>
-        </Box>;
+        content =
+            <Box>
+                <a href={wealth.attachment.link.url} target="_blank" rel="noopener noreferrer" className="text-u-l">
+                    {wealth?.attachment?.link.url}
+                </a>
+            </Box>;
     }
 
     if (wealth?.wealth_type?.name === 'ypareo') {
@@ -52,13 +50,13 @@ function WealthContent(props) {
     }, [props.wealth]);
 
     return (
-        <Box className="col-md-6 my-2">
+        <Box className="col-md-9 my-2">
             {/* <Typography variant="h4" color="textSecondary" fontWeight="light">
                 <span className="ms-3 text-grey">{t('wealth.content.title')}</span>
             </Typography> */}
-            <Typography component="div" className="ms-md-5 ps-md-1">
-                {
-                    getContent(wealth)}
+            <Typography component="div">
+                {htmlDecode(wealth.description)}
+                {getContent(wealth)}
             </Typography>
         </Box>
     );
