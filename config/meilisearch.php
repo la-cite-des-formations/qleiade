@@ -18,8 +18,9 @@ return [
             'searchable_attributes'  => [
                 'name',
                 'description',
-                'indicators.label',
-                'tags.label',
+                'indicators_labels',
+                'indicators_quality_labels',
+                'tags_label',
             ],
         ],
     ],

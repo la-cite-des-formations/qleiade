@@ -252,29 +252,21 @@ class Wealth extends Model
             "granularity_type" => $this->granularity['type'] ?? null,
             "granularity_id" => $this->granularity['id'] ?? null,
             "conformity_level" => $this->conformity_level == 100 ? "essentielle" : "complémentaire",
-            "validity_date" => $this->validity_date ? $this->validity_date->toDateTimeString() : null,
-            "created_at" => $this->created_at ? $this->created_at->toDateTimeString() : null,
+            "validity_date" => $this->validity_date?->toDateTimeString(),
+            "created_at" => $this->created_at?->toDateTimeString(),
             "archived" => !is_null($this->archived_at),
             "unit_name" => $this->unit->name,
             "unit" => [
                 "id" => $this->unit->id,
-                "name" => $this->unit->name,
                 "label" => $this->unit->label
             ],
             "wealth_type" => $this->wealthType->label,
-            "indicators" => $this->indicators->map(function ($item, $key) {
-                return [
-                    "id" => $item["id"],
-                    "label" => $item["label"],
-                    "quality_label" => $item['qualityLabel']->label,
-                ];
-            })->toArray(),
-            "tags" => $this->tags->map(function ($item, $key) {
-                $value = [
-                    "label" => $item["label"],
-                ];
-                return $value;
-            })->toArray(),
+            "indicators_labels" => $this->indicators->pluck('label')->all(),
+            "indicators_quality_labels" => $this->indicators->map(fn($item) => $item['qualityLabel']->label)->unique()->all(),
+            "indicators" => $this->indicators->map(fn($item) => [
+                'id' => $item['id'],
+            ])->toArray(),
+            "tags_label" => $this->tags->pluck('label')->all(),
             "actions" => $this->actions->map(function ($item, $key) {
                 $value = [
                     "label" => $item["label"],

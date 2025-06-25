@@ -1,4 +1,4 @@
-import { map, filter, concat } from "lodash";
+import { map, filter, concat, sortBy } from "lodash";
 import React, { useEffect, useState, useContext, useCallback } from "react";
 // import { useTranslation } from "react-i18next";
 import RecursiveAccordion from "@components/RecursiveAccordion";
@@ -124,7 +124,7 @@ export default function Presenter(props) {
             }
         })
         setStepperFilter(prevState => prevState + 1);
-        return indicators;
+        return sortBy(indicators, ['item.number']);
     }
 
     return (

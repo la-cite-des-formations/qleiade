@@ -32,6 +32,7 @@ class Wealth extends JsonResource
             "indicators" => new IndicatorsCollection($this->indicators),
             // "actions" => new ActionsCollection($this->actions),
             "unit" => $this->unit->id,
+            "unit_label" => $this->unit->label,
             "granularity" => $this->granularity,
             "wealth_type" => $this->wealthType,
             "attachment" => $this->attachment,

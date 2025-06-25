@@ -51,7 +51,7 @@ class QualityLabel extends Model
      */
     public function indicators()
     {
-        return $this->hasMany(Indicator::class);
+        return $this->hasManyThrough(Indicator::class, Criteria::class);
     }
 
     /**

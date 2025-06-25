@@ -101,7 +101,7 @@ export default function RecursiveAccordion(props) {
                             </Typography>
                         </Stack>
                     </Box>
-                    <Tooltip title={item.name || t("no_description")}>
+                    <Tooltip title={item.label || item.name || t("no_description")}>
                         <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '20rem' }}>
                             <Typography noWrap sx={{ color: 'text.secondary' }}>{item.label || item.name}</Typography>
                         </div>

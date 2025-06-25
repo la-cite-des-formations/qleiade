@@ -50,7 +50,6 @@ class Indicator extends Model
         );
     }
 
-    //NOTE peut être faut il supprimer ce lien direct mais attention ça casse tout le crud
     /**
      * qualityLabel
      *
@@ -58,7 +57,11 @@ class Indicator extends Model
      */
     public function qualityLabel()
     {
-        return $this->belongsTo(QualityLabel::class);
+        return $this->hasOneThrough(
+            QualityLabel::class, Criteria::class,
+            'id', 'id',
+            'criteria_id', 'quality_label_id'
+        );
     }
 
     /**

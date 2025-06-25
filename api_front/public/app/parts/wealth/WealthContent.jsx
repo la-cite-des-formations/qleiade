@@ -10,12 +10,11 @@ function getContent(wealth) {
         if (wealth?.files?.length > 0) {
             content = <>
                 {wealth.files.map((file) => (
-                    <Box key={file.id}>
-                        <Typography noWrap sx={{ color: 'text.secondary' }}>{"Voici le lien du fichier gdrive"}</Typography>
-
-                        <a href={file.gdrive_shared_link} target="_blank" rel="noopener noreferrer" className="text-u-l">
-                            {file.original_name}
-                        </a>
+                    <Box key={file.id} sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                        <Button color="primary" variant="contained" sx={{ '&:hover': {color: 'white'}}}
+                                href={file.gdrive_shared_link} target="_blank" rel="noopener noreferrer">
+                            {"Ouvrir"}
+                        </Button>
                     </Box>
                 ))}
             </>;
@@ -23,19 +22,19 @@ function getContent(wealth) {
     }
     if (wealth?.wealth_type?.name === 'link') {
         content =
-            <Box>
-                <a href={wealth.attachment.link.url} target="_blank" rel="noopener noreferrer" className="text-u-l">
-                    {wealth?.attachment?.link.url}
-                </a>
+            <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 1 }}>
+                <Button color="primary" variant="contained" sx={{ '&:hover': {color: 'white'}}}
+                        href={wealth.attachment.link.url} target="_blank" rel="noopener noreferrer">
+                    {"Ouvrir"}
+                </Button>
             </Box>;
     }
 
     if (wealth?.wealth_type?.name === 'ypareo') {
         content = <Box>
-            <Typography noWrap sx={{ color: 'text.secondary' }}>
-                {"Voici le process ypareo permettant d'accéder à cette preuve"}
-            </Typography>
-            {/* <div dangerouslySetInnerHTML={{ __html: wealth?.attachment?.ypareo?.process }} /> */}
+            <h6 style={{ fontWeight: 'bold' }}>
+                {"Process ypareo"}
+            </h6>
             {htmlDecode(wealth?.attachment?.ypareo?.process)}
         </Box>;
     }
@@ -50,11 +49,12 @@ function WealthContent(props) {
     }, [props.wealth]);
 
     return (
-        <Box className="col-md-9 my-2">
+        <Box className="col-md-12 my-2">
             {/* <Typography variant="h4" color="textSecondary" fontWeight="light">
                 <span className="ms-3 text-grey">{t('wealth.content.title')}</span>
             </Typography> */}
             <Typography component="div">
+                <h5 style={{ fontWeight: 'bold' }}>{"Service " + wealth.unit_label}</h5>
                 {htmlDecode(wealth.description)}
                 {getContent(wealth)}
             </Typography>
