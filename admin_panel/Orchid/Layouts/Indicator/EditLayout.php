@@ -32,6 +32,7 @@ class EditLayout extends Rows
      */
     protected function fields(): iterable
     {
+        // dd($this->query);
 
         return [
             Input::make('indicator.id')
@@ -50,7 +51,6 @@ class EditLayout extends Rows
 
             Relation::make('indicator.criteria_id')
                 ->fromModel(Criteria::class, 'label', 'id')
-                ->applyScope('label', $this->query->get('indicator.quality_label_id'))
                 ->required()
                 ->chunk(50)
                 ->title(__('criteria_select_title')),

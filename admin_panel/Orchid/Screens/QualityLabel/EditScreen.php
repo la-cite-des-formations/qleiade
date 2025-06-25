@@ -206,8 +206,6 @@ class EditScreen extends Screen
 
         //Create Indicator model
         $indicator->fill($indicatorData)
-            ->qualityLabel()
-            ->associate(intval($indicatorData['quality_label_id']))
             ->criteria()
             ->associate(intval($indicatorData['criteria_id']))
             ->save();
