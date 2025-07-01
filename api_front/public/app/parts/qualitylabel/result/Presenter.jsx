@@ -1,5 +1,6 @@
-import { map, filter, concat, sortBy } from "lodash";
+import { map, filter, concat, groupBy, sortBy } from "lodash";
 import React, { useEffect, useState, useContext, useCallback } from "react";
+import { Tabs, Tab, Box, Tooltip } from "@mui/material";
 // import { useTranslation } from "react-i18next";
 import RecursiveAccordion from "@components/RecursiveAccordion";
 import { ResultContext } from "./Context";
@@ -10,14 +11,22 @@ export default function Presenter(props) {
     const [list, setList] = useState([]);
     const [expanded, setExpanded] = useState(false);
     const [stepperFilter, setStepperFilter] = useState(0);
+    const [activeTab, setActiveTab] = useState(0);
+    const [tabsData, setTabsData] = useState([]);
+
 
     useEffect(() => {
         setStepperFilter(0);
-        setList(makeList(wrapper.current, setData(wealths)));
+        const grouped = makeList(wrapper.current, setData(wealths));
+        setTabsData(grouped);
     }, [wrapper.current, wealths, audit]);
 
     function handleExpand(panel, isExpanded) {
         setExpanded(isExpanded ? panel : false);
+    };
+
+    const handleTabChange = (event, newValue) => {
+        setActiveTab(newValue);
     };
 
     const validateWealth = useCallback((wealth) => {
@@ -94,42 +103,79 @@ export default function Presenter(props) {
     }
 
     const makeList = (wrapper, data) => {
-        //sur chaque preuve j'ai les infos dans granularity {"global":""} ou {"formation":"AbrégéFormation"}
-        const indicators = map(wrapper, (indicator) => {
-            const wealthList = filter(data, (wealth) => {
-                const find = filter(wealth.indicators, (element) => {
-                    return element.id === indicator.id;
-                })
-                return find.length === 1;
-            })
+        const grouped = groupBy(wrapper, (indicator) => indicator.criteria.id);
 
-            const wlist = map(wealthList, (element) => {
-                element.step = stepperFilter;
+        const listByCriteria = map(grouped, (indicators, criteriaId) => {
+            const criterion = indicators[0].criteria; // tous les indicateurs partagent le même critère
+
+            const list = map(indicators, (indicator) => {
+                const wealthList = filter(data, (wealth) => {
+                    return wealth.indicators.some((element) => element.id === indicator.id);
+                });
+
+                const wlist = map(wealthList, (element) => {
+                    element.step = stepperFilter;
+                    return {
+                        item: {
+                            ...element,
+                            currentWrapper: {
+                                id: indicator.id,
+                                name: indicator.name,
+                                label: indicator.label,
+                                validated: isValid(element, indicator)
+                            }
+                        },
+                        details: element.content || element.description
+                    };
+                });
+
                 return {
-                    item: {
-                        ...element,
-                        currentWrapper: {
-                            id: indicator.id,
-                            name: indicator.name,
-                            label: indicator.label,
-                            validated: isValid(element, indicator)
-                        }
-                    },
-                    details: element.content || element.description
-                }
+                    item: indicator,
+                    details: wlist,
+                };
             });
+
             return {
-                item: indicator,
-                details: wlist,
-            }
-        })
-        setStepperFilter(prevState => prevState + 1);
-        return sortBy(indicators, ['item.number']);
+                id: criterion.id,
+                label: criterion.label,
+                description: criterion.description,
+                order: criterion.order ?? 0, // fallback si absent
+                list: sortBy(list, ['item.number']),
+            };
+        });
+
+        setStepperFilter(prev => prev + 1);
+
+        // Tri final par ordre croissant des critères
+        return sortBy(listByCriteria, ['order']);
     }
 
     return (
         <>
-            <RecursiveAccordion item={null} details={list} level={0} expanded={expanded} handlers={{ "expand": handleExpand, "validateItem": validateWealth }} />
+            <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+                <Tabs value={activeTab} onChange={handleTabChange} variant="scrollable" scrollButtons="auto">
+                    {tabsData.map((tab, index) => (
+                        <Tooltip key={tab.id} title={tab.description || ""} arrow>
+                            <Tab label={tab.label} />
+                        </Tooltip>
+                    ))}
+                </Tabs>
+            </Box>
+
+            {tabsData.map((tab, index) => (
+                <Box
+                    key={tab.id}
+                    sx={{ width: "100%", display: activeTab === index ? "block" : "none" }}
+                >
+                    <RecursiveAccordion
+                        item={null}
+                        details={tab.list}
+                        level={0}
+                        expanded={expanded}
+                        handlers={{ expand: handleExpand, validateItem: validateWealth }}
+                    />
+                </Box>
+            ))}
         </>
     );
 }

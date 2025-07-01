@@ -85,30 +85,54 @@ export default function RecursiveAccordion(props) {
                 key={item.id + level}
                 expanded={expanded === panelName}
                 onChange={handleChange(panelName)}
-                sx={{ width: '100%' }}
+                sx={{
+                    width: '100%',
+                    bgcolor:
+                        expanded === panelName
+                            ? item.hasOwnProperty('criteria')
+                                ? '#f1f8e9' // Couleur pour une preuve (vert très clair)
+                                : item.hasOwnProperty('wealth_type')
+                                    ? '#e3f2fd' // Couleur pour un indicateur (bleu clair)
+                                    : '#fffde7' // Autre (par exemple un regroupement ?)
+                            : 'background.paper',
+                    transition: 'background-color 0.3s ease-in-out',
+                }}
             >
                 <AccordionSummary
                     expandIcon={<ExpandMoreIcon />}
                     aria-controls={panelName + "bh-content"}
                     id={panelName + "bh-header"}
+                    sx={{
+                        // on force le flex-parent à gérer l'ellipsis
+                        '& .MuiAccordionSummary-content': {
+                            display: 'flex',
+                            alignItems: 'center',
+                            overflow: 'hidden',        // coupe ce qui dépasse
+                            textOverflow: 'ellipsis',  // ajoute "..."
+                            whiteSpace: 'nowrap',      // tout sur une seule ligne
+                            gap: '0.5rem',             // espace entre icônes / texte
+                        },
+                    }}
                 >
-                    <Box sx={{ width: '33%', flexShrink: 0 }}>
-                        <Stack direction={"row"} spacing={2} >
-                            {!Array.isArray(details) ? <ValidationIcon item={item} handlers={handlers} validated={item.currentWrapper.validated} /> : <></>}
-                            <TitleIcon item={item} />
-                            <Typography >
-                                {item.hasOwnProperty('criteria') ? t("quality_label.result.presenter.indicator", { id: item.number }) : item.hasOwnProperty('wealth_type') ? t("quality_label.result.presenter.wealth", { id: item.id }) : item.name}
-                            </Typography>
-                        </Stack>
-                    </Box>
                     <Tooltip title={item.label || item.name || t("no_description")}>
-                        <div style={{ overflow: "hidden", textOverflow: "ellipsis", width: '20rem' }}>
-                            <Typography noWrap sx={{ color: 'text.secondary' }}>{item.label || item.name}</Typography>
-                        </div>
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                flex: 1,
+                                minWidth: 0,   // nécessaire pour que l’ellipsis fonctionne
+                                gap: 1,
+                            }}
+                        >
+                            {!Array.isArray(details) && (
+                                <ValidationIcon item={item} handlers={handlers} validated={item.currentWrapper.validated} />
+                            )}
+                            <TitleIcon item={item} />
+                            <Typography component="div" noWrap sx={{ flex: 1 }}>
+                                {item.hasOwnProperty('criteria') ? `${item.criteria.order}.${item.number} – ${item.label}` : item.name}
+                            </Typography>
+                        </Box>
                     </Tooltip>
-                    {/* <Stack direction={"row"}>
-                        {counter ? <Counter counter={counter} /> : <div />}
-                    </Stack> */}
                 </AccordionSummary>
                 <AccordionDetails>
                     {

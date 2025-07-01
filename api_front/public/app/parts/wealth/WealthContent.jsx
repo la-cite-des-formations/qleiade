@@ -54,7 +54,7 @@ function WealthContent(props) {
                 <span className="ms-3 text-grey">{t('wealth.content.title')}</span>
             </Typography> */}
             <Typography component="div">
-                <h5 style={{ fontWeight: 'bold' }}>{"Service " + wealth.unit_label}</h5>
+                <h6 style={{ fontWeight: 'bold' }}>{"Service " + wealth.unit_label}</h6>
                 {htmlDecode(wealth.description)}
                 {getContent(wealth)}
             </Typography>
