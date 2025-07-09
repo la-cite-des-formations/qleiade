@@ -37,12 +37,6 @@ class RelationsLayout extends Rows
                 ->chunk(50)
                 ->title(__('unit_select_title')),
 
-            Relation::make('wealth.qualityLabel')
-                ->fromModel(QualityLabel::class, 'label', 'id')
-                ->required()
-                ->chunk(50)
-                ->title(__('qualityLabel_select_title')),
-
             Group::make([
                 Relation::make('wealth.tags')
                     ->fromModel(Tag::class, 'label')

@@ -55,7 +55,7 @@ class EditLayout extends Rows
                 ->acceptedFiles('.png') // Accepted file types (images)
                 ->title(__('Image')),
 
-            Quill::make('qualityLabel.description')
+            Input::make('qualityLabel.description')
                 ->title('Description')
                 ->popover("Soyez concis s'il vous plait"),
         ];

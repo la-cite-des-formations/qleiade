@@ -40,7 +40,7 @@ class EditLayout extends Rows
                 ->title(__("criteria_order"))
                 ->type('number'),
 
-            Quill::make('criteria.description')
+            Input::make('criteria.description')
                 ->title('Description'),
         ];
     }

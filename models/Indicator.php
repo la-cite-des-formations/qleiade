@@ -47,7 +47,9 @@ class Indicator extends Model
             "wealths_indicators",
             "indicator_id",
             "wealth_id"
-        );
+        )
+        ->withPivot('is_essential')
+        ->withTimestamps();
     }
 
     /**
