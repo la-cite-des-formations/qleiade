@@ -14,14 +14,22 @@ class Indicator extends JsonResource
      */
     public function toArray($request)
     {
-        $proc = [
-            'id' => $this->id,
-            'name' => $this->name,
-            'label' => $this->label,
-            "qualityLabel" => $this->qualityLabel->label,
-            "order" => $this->order,
-            'type' => 'Indicator'
+        return [
+        'id' => $this->id,
+        'name' => $this->name,
+        'label' => $this->label,
+        'number' => $this->number,
+        'description' => $this->description,
+        'conformity_level_expected' => $this->conformity_level_expected,
+        'order' => $this->order,
+        'type' => 'Indicator',
+
+        'pivot' => $this->pivot ? [
+            'is_essential' => (bool) $this->pivot->is_essential,
+        ] : null,
+
+        'criteria' => new Criteria($this->whenLoaded('criteria')),
+        'qualityLabel' => $this->qualityLabel->label ?? null,
         ];
-        return $proc;
     }
 }
