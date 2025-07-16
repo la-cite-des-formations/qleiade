@@ -132,7 +132,16 @@ class ListScreen extends Screen
         }
 
         if (! empty($data['conformity'])) {
-            $filters[] = "conformity_level = '{$data['conformity']}'";
+            $ids = Wealth::whereHas('indicators', function($query) use ($data) {
+                $query->where('is_essential', $data['conformity'] === 'essentielle');
+            })
+            ->pluck('id')
+            ->all();
+
+            if (! empty($ids)) {
+                // Scout/Meili supporte le filter d'ID
+                $filters[] = "id IN [".implode(',', $ids)."]";
+            }
         }
 
         if (! empty($data['wealth_type'])) {
