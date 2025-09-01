@@ -5,6 +5,7 @@ import { htmlDecode } from '@services/utils';
 
 //TODO-FRONT ajouter les traductions pour gérer les différents cas file - ypareo - link
 function getContent(wealth) {
+    console.log(wealth)
     var content = "no content";
     if (wealth.wealth_type.name === 'file') {
         if (wealth?.files?.length > 0) {

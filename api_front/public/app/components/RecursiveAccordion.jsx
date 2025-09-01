@@ -7,7 +7,6 @@ import ValidationIcon from "@components/ValidationIcon";
 import { Typography, Tooltip, Accordion, AccordionDetails, AccordionSummary, Skeleton, Stack, Box, Button } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import TitleIcon from "@components/ItemIcon";
-import Counter from "@components/Counter";
 import _ from 'lodash';
 
 function makeDetails(pdetails, plevel, pexpanded, phandlers) {
@@ -99,7 +98,7 @@ export default function RecursiveAccordion(props) {
                             return isExpanded ? '#e3f2fd' : 'background.paper';
                         }
                         else {
-                            return isExpanded ? '#d0e0f0 ' : '#eeeeee';
+                            return isExpanded ? '#d0e0f0' : '#eeeeee';
                         }
                     }
 
@@ -161,7 +160,10 @@ export default function RecursiveAccordion(props) {
                         );
                     })()
                 ) : Array.isArray(details) ? (
-                    makeDetails(details, level+1, subExpanded, { expand: handleSubChange, validateItem: handlers.validateItem })
+                    // Si details est un tableau mais vide -> feuille => afficher WealthContent
+                    details.length > 0
+                    ? makeDetails(details, level+1, subExpanded, { expand: handleSubChange, validateItem: handlers?.validateItem })
+                    : <WealthContent wealth={item} />
                 ) : (
                     <WealthContent wealth={item} />
                 )}
