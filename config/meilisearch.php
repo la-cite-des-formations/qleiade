@@ -8,7 +8,7 @@ return [
         'wealths' => ['archived', 'name', 'unit_name', 'wealth_type', 'validity_date'],
     ],
     'filtrable_attributes' => [
-        'wealths' => ['unit', 'indicators', 'conformity_level', 'actions', 'archived', 'granularity', 'granularity_type', 'granularity_id', 'validity_date', 'wealth_type'],
+        'wealths' => ['id', 'unit', 'indicators', 'actions', 'archived', 'granularity', 'granularity_type', 'granularity_id', 'validity_date', 'wealth_type'],
     ],
 
     'settings' => [
@@ -18,8 +18,9 @@ return [
             'searchable_attributes'  => [
                 'name',
                 'description',
-                'indicators.label',
-                'tags.label',
+                'indicators_labels',
+                'indicators_quality_labels',
+                'tags_label',
             ],
         ],
     ],

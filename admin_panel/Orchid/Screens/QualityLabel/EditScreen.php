@@ -57,15 +57,15 @@ class EditScreen extends Screen
         return $this->qualityLabel->exists ? __('quality_label_edit :label', ['label' => $this->qualityLabel->label]) : __('quality_label_create');
     }
 
-    /**
-     * Display header description.
-     *
-     * @return string|null
-     */
-    public function description(): ?string
-    {
-        return __('quality_label_description');
-    }
+    // /**
+    //  * Display header description.
+    //  *
+    //  * @return string|null
+    //  */
+    // public function description(): ?string
+    // {
+    //     return __('quality_label_description');
+    // }
 
     //DOC: orchid add permission to a screen
     /**
@@ -170,9 +170,9 @@ class EditScreen extends Screen
         $qualityLabel->fill($qualityLabelData)
             ->save();
 
-        $qualityLabel->attachment()->syncWithoutDetaching(
-            $request->input('qualityLabel.image', "")
-        );
+        // $qualityLabel->attachment()->syncWithoutDetaching(
+        //     $request->input('qualityLabel.image', "")
+        // );
 
 
         Toast::success(__('quality_label_was_saved'));
@@ -206,8 +206,6 @@ class EditScreen extends Screen
 
         //Create Indicator model
         $indicator->fill($indicatorData)
-            ->qualityLabel()
-            ->associate(intval($indicatorData['quality_label_id']))
             ->criteria()
             ->associate(intval($indicatorData['criteria_id']))
             ->save();

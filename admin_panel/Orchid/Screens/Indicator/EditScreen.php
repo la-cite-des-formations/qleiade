@@ -11,7 +11,7 @@ use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Actions\Button;
 use Orchid\Support\Facades\Toast;
 use Admin\Orchid\Layouts\Indicator\EditLayout;
-
+use Models\QualityLabel;
 
 class EditScreen extends Screen
 {
@@ -19,6 +19,11 @@ class EditScreen extends Screen
      * @var Indicator
      */
     public $indicator;
+
+    /**
+     * @var QualityLabel
+     */
+    public $qualityLabel;
 
     /**
      * @var string
@@ -38,7 +43,7 @@ class EditScreen extends Screen
      */
     public function query($qualityLabelId, Indicator $indicator): iterable
     {
-        $indicator->qualityLabel()->associate(intval($qualityLabelId));
+        $this->qualityLabel = QualityLabel::find($qualityLabelId);
         $this->indicator = $indicator;
         // dd($this->indicator);
         return [
@@ -87,7 +92,7 @@ class EditScreen extends Screen
         return [
             Link::make(__('Cancel'))
                 ->icon('action-undo')
-                ->route($this->cancelRouteName, ['quality_label' => $this->indicator->qualityLabel]),
+                ->route($this->cancelRouteName, ['quality_label' => $this->qualityLabel]),
 
             Button::make('Save', __('Save'))
                 ->icon('check')
@@ -143,14 +148,12 @@ class EditScreen extends Screen
 
         //Create Indicator model
         $indicator->fill($indicatorData)
-            ->qualityLabel()
-            ->associate(intval($indicatorData['quality_label_id']))
             ->criteria()
             ->associate(intval($indicatorData['criteria_id']))
             ->save();
 
         Toast::success(__('Indicator_was_saved'));
-        return redirect()->route($this->redirectRouteName, ["quality_label" => $indicatorData['quality_label_id']]);
+        return redirect()->route($this->redirectRouteName, ["quality_label" => $criteria->qualityLabel->id]);
     }
 
     /**

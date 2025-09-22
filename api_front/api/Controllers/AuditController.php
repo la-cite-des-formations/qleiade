@@ -151,7 +151,7 @@ class AuditController extends Controller
         // a reprendre je n'ai qualityLabel et criteria que sur indicateur, criteria
         return $modelClass::with(['qualityLabel', 'criteria'])
             ->whereHas('qualityLabel', function ($query) use ($qualityLabel) {
-                $query->where('label', '=', $qualityLabel);
+                $query->where('quality_label.label', '=', $qualityLabel);
             })
             ->get();
     }

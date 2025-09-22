@@ -7,8 +7,8 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 use Carbon\Carbon;
-use Illuminate\Support\Arr;
 
 use Orchid\Screen\Screen;
 use Orchid\Screen\Actions\Link;
@@ -21,7 +21,6 @@ use Models\Action;
 use Models\Wealth;
 use Models\Indicator;
 use Models\WealthType;
-use Models\QualityLabel;
 use Models\File as FileModel;
 use App\Http\Traits\DriveManagement;
 use App\Http\Traits\WithAttachments;
@@ -32,8 +31,13 @@ use Admin\Orchid\Layouts\Wealth\RelationsLayout;
 use Admin\Orchid\Layouts\Wealth\AttachmentListener;
 use Admin\Orchid\Layouts\Wealth\GranularityListener;
 use Admin\Orchid\Layouts\Wealth\UnitListener;
-use Admin\Orchid\Layouts\Wealth\QualityLabelListener;
-use Orchid\Support\Facades\Alert;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Str;
+use Models\QualityLabel;
+use Orchid\Screen\Field;
+use Orchid\Screen\Fields\Label;
+use Orchid\Screen\Fields\Switcher;
+use Orchid\Screen\TD;
 
 class EditScreen extends Screen
 {
@@ -59,65 +63,83 @@ class EditScreen extends Screen
     {
         $datas = [];
 
-        //get whoShouldSee in session when wealth create validation fail
-        $whoShouldSee = $request->session()->get('whoShouldSee');
-        if (!is_null($whoShouldSee)) {
-            $datas['whoShouldSee'] = $whoShouldSee;
-        } else {
-            $datas['whoShouldSee'] = "";
-        }
+        // 1) Récupère le whoShouldSee depuis la session, si présent
+        $datas['whoShouldSee'] = $request->session()->get('whoShouldSee', '');
 
+        // 2) Nouveau / Edit
         if (!$wealth->exists) {
             # create
             $datas['wealth'] = $wealth;
             $datas['duplicate'] = false;
-        } else {
-            # edit
+        }
+        else {
+            // édition ou duplication
             if (is_null($duplicate)) {
-                # update
+                // édition
                 $wealth->wealth_type = $wealth->wealthType->id;
+                $wealth->load(['files', 'actions', 'indicators.qualityLabel']);
 
-                //load qualitylabel according to indicators
-                if (count($wealth->indicators) > 0) {
-                    $wealth->qualityLabel = $wealth->indicators[0]->qualityLabel->id;
-                }
-
-                if (count($wealth->files) >= 1) {
-                    $wealth->file = $wealth->files[0];
-                }
-                $wealth->load("actions");
-
-                //add value to data if you want to map values accross multiple layouts and listeners
                 $datas = [
                     'wealth' => $wealth,
                     'duplicate' => false,
                     'whoShouldSee' => $wealth->wealthType->name,
                     'unit' => $wealth->unit->id,
                     'granularity' => ['type' => $wealth->granularity['type']],
-                    'qualityLabel' => $wealth->indicators[0]->qualityLabel->id
                 ];
 
-                //add attachment if exists in db
+                // Attachement
                 if (!is_null($wealth->attachment)) {
                     $datas['attachment'] = $wealth->attachment;
                 }
-            } else {
-                # duplicate
-                $replicatedWealth = $wealth->replicate([
+            }
+            else {
+                // duplication
+                $replicated = $wealth->replicate([
                     'id',
                     'conformity_level',
-                    'validity_date'
+                    'validity_date',
                 ]);
+                $replicated->parent_id = $wealth->id;
+                $replicated['indicators'] = $wealth->indicators;
+                $replicated['tags'] = $wealth->tags;
+                $replicated['actions'] = $wealth->actions;
 
-                $replicatedWealth->parent_id = $wealth->id;
-                $replicatedWealth['indicators'] = $wealth->indicators;
-                $replicatedWealth['tags'] = $wealth->tags;
-                $replicatedWealth['actions'] = $wealth->actions;
-                $wealth = $replicatedWealth;
-                $datas["wealth"] = $replicatedWealth;
+                $datas = [
+                    'wealth' => $replicated,
+                    'duplicate' => true,
+                    'whoShouldSee' => $wealth->wealthType->name,
+                ];
+            }
+        }
 
-                $datas['wealth'] = $replicatedWealth;
-                $datas['duplicate'] = true;
+        // 3) Précharge tous les labels qualité avec leurs critères et indicateurs
+        $qualityLabels = QualityLabel::with(['criterias.indicators'])
+            ->orderBy('name')
+            ->get();
+
+        $datas['qualityLabels'] = $qualityLabels;
+
+        // POUR CHAQUE CRITÈRE, préparer une collection "rows_{critère_id}"
+        foreach ($qualityLabels as $ql) {
+            foreach ($ql->criterias as $crit) {
+                $rows = $crit->indicators
+                    ->sortBy('number')
+                    ->map(function (Indicator $i) use ($wealth) {
+                        $attached = $wealth->indicators->contains($i->id);
+                        $pivot    = $wealth->indicators
+                            ->firstWhere('id', $i->id)?->pivot;
+
+                        return (object) [
+                            'id'           => $i->id,
+                            'number'       => $i->number,
+                            'label'        => $i->label,
+                            'attached'     => $attached,
+                            'is_essential' => $pivot->is_essential ?? false,
+                        ];
+                    });
+
+                // Injecte dans le repo sous la clé rows_{id}
+                $datas['indicators_crit_' . $crit->id] = $rows;
             }
         }
 
@@ -202,8 +224,73 @@ class EditScreen extends Screen
                 [
                     __('wealth') => EditLayout::class,
                     __('wealth_element') => AttachmentListener::class,
-                    __('wealth_relation') => [RelationsLayout::class],
-                    __('details') => [GranularityListener::class, UnitListener::class, QualityLabelListener::class],
+                    __('wealth_relation') => RelationsLayout::class,
+                    __('indicators') => Layout::tabs(
+                        // Premier niveau : QualityLabel
+                        QualityLabel::with(['criterias.indicators'])
+                            ->orderBy('name')
+                            ->get()->mapWithKeys(fn($ql) => [
+                                // Sous-onglets : critères du label
+                                '<span title="'.$ql->description.'">'.$ql->label.'</span>' => Layout::tabs(
+                                    $ql->criterias->sortBy('order')->mapWithKeys(
+                                        fn($crit) => [
+                                            '<span title="'.$crit->description.'">'.$crit->label.'</span>' =>
+                                                Layout::table("indicators_crit_{$crit->id}", [
+                                                    TD::make('attached', __('Associer'))
+                                                        ->render(fn($r) => new HtmlString('
+                                                            <div>
+                                                                '.Switcher::make("wealth[indicators][{$r->id}][attached]")
+                                                                    ->sendTrueOrFalse()
+                                                                    ->value($r->attached)
+                                                                    ->id("attached_{$r->id}")
+                                                                    ->toHtml().'
+                                                            </div>
+                                                            <script>
+                                                                setTimeout(function () {
+                                                                    const attached = document.getElementById("attached_'.$r->id.'");
+                                                                    const essential = document.getElementById("is_essential_'.$r->id.'");
+
+                                                                    if (attached && essential) {
+                                                                        const toggleEssential = () => {
+                                                                            const wrapper = essential.closest("label");
+                                                                            if (wrapper) {
+                                                                                wrapper.classList.toggle("disabled", !attached.checked);
+                                                                            }
+                                                                            essential.disabled = !attached.checked;
+                                                                        };
+
+                                                                        toggleEssential(); // état initial
+                                                                        attached.addEventListener("change", toggleEssential);
+                                                                    }
+                                                                }, 100);
+                                                            </script>
+                                                        ')),
+
+                                                    TD::make('number', __('Numéro'))
+                                                        ->render(fn($r) => $r->number),
+
+                                                    TD::make('label', __('Indicateur'))
+                                                        ->render(fn($r) =>
+                                                            new HtmlString(
+                                                                "<span title=\"".e($r->label)."\">".
+                                                                e(Str::limit($r->label, 100))."</span>"
+                                                            )
+                                                        ),
+
+                                                    TD::make('is_essential', __('Essentielle ?'))
+                                                        ->render(
+                                                            fn($r) => Switcher::make("wealth[indicators][{$r->id}][is_essential]")
+                                                                ->sendTrueOrFalse()
+                                                                ->value($r->is_essential)
+                                                                ->id("is_essential_{$r->id}")
+                                                        ),
+                                                ]),
+                                        ]
+                                    )->all()
+                                )
+                            ])->all()
+                    ),
+                    __('details') => [GranularityListener::class, UnitListener::class],
                 ]
             )->activeTab(__('wealth')),
         ];
@@ -275,25 +362,6 @@ class EditScreen extends Screen
     }
 
     /**
-     * send data to qualitylabel listener
-     * @param [type] $payload
-     * @return array
-     */
-    public function asyncQualityLabel($payload, Request $request)
-    {
-        //wealth to update
-        if (isset($payload['id']) && (!is_null($payload['id']) || $payload['id'] != "")) {
-            $wealth = Wealth::find($payload['id']);
-        } else {
-            $wealth = new Wealth();
-        }
-        return [
-            "wealth" => $wealth,
-            "qualityLabel" => isset($payload['qualityLabel']) ? $payload['qualityLabel'] : null,
-        ];
-    }
-
-    /**
      * @param Wealth    $wealth
      * @param WealthRequest $request
      *
@@ -323,7 +391,7 @@ class EditScreen extends Screen
         }
 
         //Datas from request
-        $wealthData = $request->all('wealth')['wealth'];
+        $wealthData = $request->input('wealth', []);
 
         //Attachments
         //NOTE : ajouter un controle sur la validité de l'url
@@ -358,21 +426,32 @@ class EditScreen extends Screen
                 ->unit()->associate($wealthData['unit']);
         }
 
-        \Models\Wealth::withoutSyncingToSearch(function () use ($wealth) {
+        Wealth::withoutSyncingToSearch(function () use ($wealth) {
             $wealth->save();
         });
 
-        //DOC: update accross relationships
-        if (isset($wealthData['indicators'])) {
-            $indicators = Indicator::find($wealthData['indicators']);
-        } else {
-            $indicators = [];
+        // —————————————————————————————————————————
+        // Mise à jour du pivot wealths_indicators
+        // —————————————————————————————————————————
+        $raw = $wealthData['indicators'] ?? [];
+
+        // On préparera un tableau [ indicateur_id => ['is_essential'=>bool], ... ]
+        $sync = [];
+
+        foreach ($raw as $id => $flags) {
+            // Si l’utilisateur a décoché “Associer”, on ignore cet indicateur
+            if (empty($flags['attached'])) {
+                continue;
+            }
+
+            // Sinon, on l’attache avec le bon flag
+            $sync[(int)$id] = [
+                'is_essential' => !empty($flags['is_essential']),
+            ];
         }
-        if (empty($indicators)) {
-            // $wealth->indicators()->detach();
-        } else {
-            $wealth->indicators()->sync($indicators);
-        }
+
+        // Synchronise la relation many‑to‑many en passant par le pivot
+        $wealth->indicators()->sync($sync);
 
         //Actions
         if (isset($wealthData['actions'])) {

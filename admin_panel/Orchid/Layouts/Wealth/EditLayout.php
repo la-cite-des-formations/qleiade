@@ -11,7 +11,6 @@ use Orchid\Screen\Field;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Fields\Quill;
 use Orchid\Screen\Layouts\Rows;
-use Orchid\Screen\Fields\Select;
 use Orchid\Screen\Fields\Relation;
 use Orchid\Screen\Fields\DateTimer;
 
@@ -48,14 +47,6 @@ class EditLayout extends Rows
                 ->required()
                 ->disabled(!$this->canEditAttachment($this->query))
                 ->help(__('wealth_type_help')),
-
-            Select::make('wealth.conformity_level')
-                ->options([
-                    '' => "",
-                    '100'   => __('Essentielle'),
-                    '0' => __('Complémentaire'),
-                ])
-                ->title(__('conformity_level')),
 
             DateTimer::make('wealth.validity_date')
                 ->title(__('wealth_validity_date'))
