@@ -57,7 +57,8 @@ class EditLayout extends Rows
 
             Quill::make('wealth.description')
                 ->title(__('Description'))
-                ->popover("Soyez concis s'il vous plait"),
+                ->required()
+                ->popover("Important pour l'audit ! Soyez le plus précis possible s'il vous plait."),
         ];
     }
 }
