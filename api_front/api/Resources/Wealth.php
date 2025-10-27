@@ -36,7 +36,7 @@ class Wealth extends JsonResource
             "granularity" => $this->granularity,
             "wealth_type" => $this->wealthType,
             "attachment" => $this->attachment,
-            "files" => $this->files,
+            "file" => $this->file,
         ];
         return $wealth;
     }

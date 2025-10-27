@@ -179,13 +179,15 @@ class Wealth extends Model
      *
      * @return Collection
      */
-    public function files()
+    public function file()
     {
-        return $this->belongsToMany(
+        return $this->hasOneThrough(
             File::class,
-            "wealths_files",
-            "wealth_id",
-            "file_id"
+            FileWealth::class,
+            'wealth_id',
+            'id',
+            'id',
+            'file_id'
         );
     }
 
