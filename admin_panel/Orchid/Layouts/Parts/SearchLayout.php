@@ -3,6 +3,7 @@
 namespace Admin\Orchid\Layouts\Parts;
 
 use Models\Indicator;
+use Models\QualityLabel;
 use Orchid\Screen\Field;
 use Orchid\Screen\Fields\Group;
 use Orchid\Screen\Fields\Relation;
@@ -29,32 +30,69 @@ class SearchLayout extends Rows
      */
     protected function fields(): iterable
     {
+        // Charge et tri des options
+
+        // Options pour les services associés
+        $unitOptions = Unit::all()
+            ->sortBy('name')
+            ->mapWithKeys(function ($unit) {
+                return [$unit->id => $unit->full];
+            });
+
+        // Options pour l'importance de la preuve
+        $conformityOptions = [
+            'essentielle' => __('conformity_level_essential'),
+            'complémentaire' => __('conformity_level_complementary'),
+        ];
+
+        // Options pour le label qualité
+        $qualityLabelOptions = QualityLabel::all()
+            ->sortBy('name')
+            ->pluck('name', 'id');
+
         return [
             Group::make([
                 Input::make('search.keyword', __('search_input'))
                     ->type('search')
                     ->title(__('search_input'))
                     ->placeholder(__('Search...'))
-                    ->value(request('search.wealth_type'))
+                    ->value(request('search.keyword'))
             ]),
 
             Group::make([
-                Relation::make('search.units', __('units'))
-                    ->fromModel(Unit::class, 'label', 'id')
+                Select::make('search.units', __('units'))
+                    ->options($unitOptions)
                     ->displayAppend('full')
                     ->multiple()
-                    ->chunk(50)
                     ->title(__('units'))
-                    ->placeholder(__('Select...'))
+                    ->set('data-placeholder', __('Select...'))
                     ->value(request('search.units') ? explode(',', request('search.units')[0]) : []),
 
+                Select::make('search.quality_label', __('quality_label'))
+                    // ->fromModel(QualityLabel::class, 'name', 'id')
+                    ->options($qualityLabelOptions)
+                    ->title(__('quality_label'))
+                    ->set('data-placeholder', __('Select...'))
+                    ->allowEmpty()
+                    ->value(request('search.quality_label')),
+
                 Relation::make('search.indicators', __('indicators'))
-                    ->fromModel(Indicator::class, 'label', 'id')
+                    ->fromModel(Indicator::class, 'indicator.label', 'id')
                     ->multiple()
-                    ->displayAppend('full')
-                    ->chunk(50)
                     ->title(__('indicators'))
                     ->placeholder(__('Select...'))
+
+                    // AFFICHE l'accesseur 'full' (1.1 . Label)
+                    ->displayAppend('full')
+
+                    // DÉCLENCHE l'AJAX quand 'quality_label' change
+                    ->dependsOn('search.quality_label')
+
+                    // APPELLE notre nouveau scope pour filtrer ET trier
+                    ->applyScope('byQualityLabelAndSort')
+
+                    // (Le tri des valeurs au chargement ne fonctionnera pas,
+                    // c'est notre compromis à cause du bug Orchid)
                     ->value(request('search.indicators') ? explode(',', request('search.indicators')[0]) : []),
             ]),
 
@@ -68,11 +106,8 @@ class SearchLayout extends Rows
 
                 Select::make('search.conformity')
                     ->title(__('conformity_level'))
-                    ->options([
-                        'essentielle' => __('conformity_level_essential'),
-                        'complémentaire' => __('conformity_level_complementary'),
-                    ])
-                    ->empty(__('Select...'), 0)
+                    ->options($conformityOptions)
+                    ->set('data-placeholder', __('Select...'))
                     ->value(request('search.conformity')),
 
                 Link::make('reinitialize', __('reinitialize'))

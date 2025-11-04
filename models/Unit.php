@@ -2,6 +2,7 @@
 
 namespace Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Orchid\Filters\Filterable;
@@ -71,10 +72,20 @@ class Unit extends Model
     }
 
     /**
+     * @param Builder $query
+     *
+     * @return Builder
+     */
+    public function scopeByAlphaSort(Builder $query)
+    {
+        return $query->orderBy('name', 'asc');
+    }
+
+    /**
      * @return string
      */
     public function getFullAttribute(): string
     {
-        return $this->attributes['name'] . ' - ' . $this->attributes['label'];
+        return sprintf('%s - %s', $this->name, $this->label);
     }
 }

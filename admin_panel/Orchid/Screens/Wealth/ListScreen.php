@@ -106,6 +106,7 @@ class ListScreen extends Screen
         $validator = Validator::make($payload, [
             'keyword' => 'nullable|string|max:255',
             'units' => 'nullable|array',
+            'quality_label' => 'nullable|numeric',
             'indicators'=> 'nullable|array',
             'conformity' => 'nullable|in:0,essentielle,complémentaire',
             'wealth_type' => 'nullable|numeric',
