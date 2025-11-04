@@ -3,11 +3,16 @@
 namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use \Google_Service_Drive as DriveService;
-use Hypweb\Flysystem\GoogleDrive\GoogleDriveAdapter;
-use League\Flysystem\Filesystem;
 use Illuminate\Support\Facades\Storage;
-use Google\Client as GoogleClient;
+use Illuminate\Support\Facades\Log;
+use League\Flysystem\Filesystem;
+
+// Les imports Google (corrects)
+use Google\Client;
+use Google\Service\Drive;
+
+// LE VRAI NAMESPACE (sans le sous-dossier en trop)
+use Masbug\Flysystem\GoogleDriveAdapter;
 
 class GoogleDriveServiceProvider extends ServiceProvider
 {
@@ -28,38 +33,42 @@ class GoogleDriveServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        //DOC: Configure google drive adapter to interacte with
-        Storage::extend('google', function ($app, $config) {
-            $credentials_file = base_path($config['credentialsFile']);
+        try {
+            Storage::extend('google', function ($app, $config) {
+                $credentials_file = base_path($config['credentialsFile']);
 
-            $client = new GoogleClient();
-            //ide error no namespace in file but it work
-            $client->setScopes(DriveService::DRIVE);
-            $client->setAuthConfig($credentials_file);
-            $client->useApplicationDefaultCredentials();
-            $client->setAuthConfig($credentials_file);
-            $client->setAccessType('offline');
+                $client = new Client();
+                $client->setScopes(Drive::DRIVE);
+                $client->setAuthConfig($credentials_file);
+                $client->useApplicationDefaultCredentials();
+                $client->setAuthConfig($credentials_file);
+                $client->setAccessType('offline');
 
-            //ide error no namespace in file but it work
-            $service = new DriveService($client);
+                $service = new Drive($client);
 
-            $options = [];
-            $options['defaultParams'] = [
-                'files.list' =>
-                [
-                    'driveId' => $config['folderId'],
-                    'includeItemsFromAllDrives' => true,
-                    'corpora' => 'drive',
-                    'supportsAllDrives' => true
-                ]
-            ];
-            if (isset($config['teamDriveId'])) {
-                $options['teamDriveId'] = $config['teamDriveId'];
-            }
+                $options = [];
+                $options['defaultParams'] = [
+                    'files.list' =>
+                    [
+                        'driveId' => $config['folderId'],
+                        'includeItemsFromAllDrives' => true,
+                        'corpora' => 'drive',
+                        'supportsAllDrives' => true
+                    ]
+                ];
+                if (isset($config['teamDriveId'])) {
+                    $options['teamDriveId'] = $config['teamDriveId'];
+                }
 
-            $adapter = new GoogleDriveAdapter($service, $config['folderId'], $options);
+                // On utilise la classe "Masbug\Flysystem\GoogleDriveAdapter"
+                $adapter = new GoogleDriveAdapter($service, $config['folderId'], $options);
 
-            return new Filesystem($adapter);
-        });
+                // CORRECTION FLYSYSTEM V3
+                return new Filesystem($adapter, $config);
+            });
+        } catch (\Exception $e) {
+            // Gérer l'erreur si besoin
+            Log::error('Erreur lors du chargement du Google Drive Service Provider: ' . $e->getMessage());
+        }
     }
 }
