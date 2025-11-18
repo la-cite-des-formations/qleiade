@@ -8,33 +8,31 @@
     ],
     "license": "MIT",
     "require": {
-        "php": "^7.3|^8.0",
-        "fruitcake/laravel-cors": "^2.0",
+        "php": "^8.0.2",
         "guzzlehttp/guzzle": "^7.0.1",
         "http-interop/http-factory-guzzle": "^1.2",
         "intervention/image": "^2.7",
         "laravel/fortify": "^1.13",
-        "laravel/framework": "^8.75",
-        "laravel/sanctum": "^2.11",
+        "laravel/framework": "^9.19",
+        "laravel/sanctum": "^3.0",
         "laravel/scout": "^9.4",
         "laravel/socialite": "^5.5",
-        "laravel/tinker": "^2.5",
+        "laravel/tinker": "^2.7",
         "laravel/ui": "^3.4",
+        "masbug/flysystem-google-drive-ext": "^2.0",
         "meilisearch/meilisearch-php": "^0.25.0",
-        "nao-pon/flysystem-google-drive": "^1.1",
-        "orchid/fortify": "^0.0.7",
-        "orchid/platform": "^11.0.1",
+        "orchid/platform": "^13.0",
         "voku/stop-words": "^2.0"
     },
     "require-dev": {
         "barryvdh/laravel-debugbar": "^3.7",
         "barryvdh/laravel-ide-helper": "^2.12",
-        "facade/ignition": "^2.5",
         "fakerphp/faker": "^1.9.1",
         "laravel/sail": "^1.0.1",
         "mockery/mockery": "^1.4.4",
-        "nunomaduro/collision": "^5.10",
-        "phpunit/phpunit": "^9.5.10"
+        "nunomaduro/collision": "^6.1",
+        "phpunit/phpunit": "^9.5.10",
+        "spatie/laravel-ignition": "^1.0"
     },
     "autoload": {
         "psr-4": {
@@ -67,8 +65,7 @@
         ],
         "post-create-project-cmd": [
             "@php artisan key:generate --ansi"
-        ],
-        "pre-autoload-dump": "Google\\Task\\Composer::cleanup"
+        ]
     },
     "config": {
         "optimize-autoloader": true,
@@ -79,15 +76,5 @@
         }
     },
     "minimum-stability": "dev",
-    "prefer-stable": true,
-    "extra": {
-        "laravel": {
-            "dont-discover": [
-                "barryvdh/laravel-ide-helper"
-            ]
-        },
-        "google/apiclient-services": [
-            "Drive"
-        ]
-    }
+    "prefer-stable": true
 }
