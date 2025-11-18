@@ -4,6 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Support\Facades\Log;
 use Orchid\Filters\Filterable;
 
 class Indicator extends Model
@@ -43,6 +44,7 @@ class Indicator extends Model
      */
     public function scopeByQualityLabelAndSort($query, $dependency = [])
     {
+        Log::info('--- DÉPENDANCE INDICATEUR REÇUE ---', $dependency);
         // 1. On récupère l'ID du label qualité depuis le champ dépendant
         // (le '?' est important si le champ est vide)
         $qualityLabelId = $dependency['search.quality_label'] ?? null;
