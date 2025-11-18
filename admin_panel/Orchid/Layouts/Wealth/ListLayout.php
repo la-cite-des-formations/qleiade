@@ -2,8 +2,6 @@
 
 namespace Admin\Orchid\Layouts\Wealth;
 
-use Illuminate\Support\Facades\Auth;
-
 use Models\Wealth;
 use App\Http\Traits\WithAttachments;
 use Orchid\Screen\TD;
@@ -19,9 +17,6 @@ class ListLayout extends Table
 
     /**
      * Data source.
-     *
-     * The name of the key to fetch it from the query.
-     * The results of which will be elements of the table.
      *
      * @var string
      */
@@ -53,7 +48,14 @@ class ListLayout extends Table
         return [
             TD::make('archived', __('archived'))
                 ->sort()
-                ->render(fn(Wealth $w) => View('tools.archived_cell', ['archived' => !is_null($w->archived_at)])),
+                // RECONSTRUCTION : Remplacement du "hack" de la vue Blade par un render() propre
+                ->render(function (Wealth $w) {
+                    $isArchived = !is_null($w->archived_at);
+                    $icon = $isArchived ? 'bs.archive-fill' : 'bs.archive';
+                    $class = $isArchived ? 'text-danger' : 'text-success';
+
+                    return "<i class='{$icon} {$class}'></i>";
+                })->align(TD::ALIGN_CENTER),
 
             TD::make('name', __('name'))
                 ->sort()
@@ -85,12 +87,14 @@ class ListLayout extends Table
                             Link::make(__('Edit'))
                                 ->route('platform.quality.wealth.edit', ["wealth" => $wealth->id, "duplicate" => false])
                                 ->icon('pencil')
-                                ->canSee(Auth::user()->hasAccess('platform.quality.wealth.edit') && is_null($wealth->archived_at)),
+                                // RECONSTRUCTION : Utilisation de la permission v13+
+                                ->canSee(request()->user()->can('platform.quality.wealth.edit') && is_null($wealth->archived_at)),
 
                             Link::make(__('Duplicate'))
                                 ->route('platform.quality.wealth.edit', ["wealth" => $wealth->id, "duplicate" => true])
                                 ->icon('paste')
-                                ->canSee(Auth::user()->hasAccess('platform.quality.wealth.create')),
+                                // RECONSTRUCTION : Utilisation de la permission v13+
+                                ->canSee(request()->user()->can('platform.quality.wealth.create')),
 
                             Button::make(__('Delete'))
                                 ->icon('trash')
@@ -98,7 +102,8 @@ class ListLayout extends Table
                                 ->method('remove', [
                                     'id' => $wealth->id,
                                 ])
-                                ->canSee(Auth::user()->hasAccess('platform.quality.wealth.edit') && is_null($wealth->archived_at)),
+                                // RECONSTRUCTION : Utilisation de la permission v13+
+                                ->canSee(request()->user()->can('platform.quality.wealth.edit') && is_null($wealth->archived_at)),
                         ]);
                 }),
         ];

@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Models\Audit;
 use Orchid\Attachment\Attachable;
 use Orchid\Attachment\AttachOne;
+use Orchid\Screen\AsSource;
 
 // use Orchid\Screen\AsSource;
 
 class QualityLabel extends Model
 {
-    use HasFactory, Attachable;
+    use HasFactory, Attachable, AsSource;
 
     /**
      * The table associated with the model.

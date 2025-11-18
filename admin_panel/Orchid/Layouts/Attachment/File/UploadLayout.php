@@ -9,6 +9,13 @@ use Orchid\Screen\Layouts\Rows;
 class UploadLayout extends Rows
 {
     /**
+     * Data source.
+     *
+     * @var string
+     */
+    public $target = 'attachment'; // RECONSTRUCTION : Ajout de la cible v11
+
+    /**
      * Used to create the title of a group of form elements.
      *
      * @var string|null

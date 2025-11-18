@@ -18,7 +18,7 @@ class EditLayout extends Rows
      *
      * @var string
      */
-    public $target = 'tag';
+    public $target = 'tag'; // RECONSTRUCTION : On garde le $target v11
 
     /**
      * Views.
@@ -28,12 +28,12 @@ class EditLayout extends Rows
     public function fields(): array
     {
         return [
-            Input::make('tag.id')
+            Input::make('tag.id') // RECONSTRUCTION : On garde la notation "point" v11
                 ->hidden(),
 
             Input::make('tag.label')
                 ->title(__('tag_label'))
-                ->placeholder('cap 3 ans')
+                // ->placeholder('cap 3 ans') // RECONSTRUCTION : Bizarrerie supprimée
                 ->required(),
 
             Quill::make('tag.description')

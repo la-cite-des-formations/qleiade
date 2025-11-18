@@ -17,7 +17,7 @@
     <div class="row bg-light m-0 p-4 border-top rounded-bottom">
 
       @foreach($administerItems as $item)
-       @hasAccess($item->permission)
+       @can($item->permission)
         <div class="col-md-6 my-2">
             <h3 class="text-muted fw-light">
                 <x-orchid-icon path="{{ $item->icon }}" />
@@ -32,7 +32,7 @@
 
             </p>
         </div>
-       @endhasAccess
+       @endcan
       @endforeach()
 
 </div>

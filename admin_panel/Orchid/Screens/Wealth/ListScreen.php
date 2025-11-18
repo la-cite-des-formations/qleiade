@@ -5,7 +5,6 @@ namespace Admin\Orchid\Screens\Wealth;
 use Admin\Orchid\Layouts\Parts\SearchLayout;
 use Admin\Orchid\Layouts\Wealth\ListLayout;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 use Orchid\Screen\Screen;
@@ -74,7 +73,8 @@ class ListScreen extends Screen
             Link::make(__('Add'))
                 ->icon('plus')
                 ->route('platform.quality.wealth.create')
-                ->canSee(Auth::user()->hasAccess('platform.quality.wealth.create')),
+                // RECONSTRUCTION : Utilisation de la permission v13+
+                ->canSee(request()->user()->can('platform.quality.wealth.create')),
         ];
     }
 

@@ -3,7 +3,8 @@
 namespace Admin\Orchid\Screens\Action;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+// RECONSTRUCTION : Auth n'est plus nécessaire ici
+// use Illuminate\Support\Facades\Auth;
 
 use Models\Action;
 use Admin\Orchid\Layouts\Action\ListLayout;
@@ -23,6 +24,7 @@ class ListScreen extends Screen
      */
     public function query(): iterable
     {
+        // Cette requête est déjà parfaite (v13+)
         return [
             'actions' => Action::with(['stage'])
                 ->filters()
@@ -73,8 +75,9 @@ class ListScreen extends Screen
             Link::make(__('Add'))
                 ->icon('plus')
                 ->route('platform.quality.actions.create')
-                //it works
-                ->canSee(Auth::user()->hasAccess('platform.quality.actions.create')),
+                // RECONSTRUCTION : Remplacement de la vérification v11 par la v13+
+                // (Maintenant que notre AuthServiceProvider est corrigé)
+                ->canSee(request()->user()->can('platform.quality.actions.create')),
         ];
     }
 
@@ -85,6 +88,7 @@ class ListScreen extends Screen
      */
     public function layout(): iterable
     {
+        // Parfait, pas de changement
         return [
             FiltersLayout::class,
             ListLayout::class
@@ -96,6 +100,7 @@ class ListScreen extends Screen
      */
     public function remove(Request $request): void
     {
+        // Parfait, pas de changement
         $action = Action::findOrFail($request->get('id'));
 
         $action->delete();

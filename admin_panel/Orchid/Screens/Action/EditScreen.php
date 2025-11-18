@@ -4,6 +4,7 @@ namespace Admin\Orchid\Screens\Action;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr; // RECONSTRUCTION : Ajout pour la sauvegarde
 
 use Models\Action;
 use Models\Unit;
@@ -31,6 +32,7 @@ class EditScreen extends Screen
      */
     public function query(Action $action): iterable
     {
+        // Cette méthode est correcte, car le modèle Action a le trait AsSource
         return [
             'action' => $action,
         ];
@@ -74,6 +76,7 @@ class EditScreen extends Screen
      */
     public function commandBar(): iterable
     {
+        // Les noms 'save' et 'remove' sont corrects (v11 "magiques")
         return [
             Link::make(__('Cancel'))
                 ->icon('action-undo')
@@ -107,7 +110,10 @@ class EditScreen extends Screen
     }
 
     /**
-     * @param Action    $action
+     * RECONSTRUCTION : Méthode 'save' modernisée
+     * (Basée sur la 'Base Stable' QualityLabel/Tag)
+     *
+     * @param Action     $action
      * @param Request $request
      *
      * @return \Illuminate\Http\RedirectResponse
@@ -115,19 +121,23 @@ class EditScreen extends Screen
     public function save(Action $action, Request $request)
     {
         // $request->validate([
-        //     'action.label' => "required|regex:/^[a-zA-Z0-9\s]+$/"
+        //     // ... (gardé commenté comme dans l'original)
         // ]);
 
-        //Datas from request
-        $actionData = $request->all('action')['action'];
+        // RECONSTRUCTION : Utilisation de la logique v13+ $request->input()
+        // C'est la seule modification que nous faisons ici.
+        $actionData = $request->input('action');
+
         // format name code
         $actionData["name"] = Str::slug($actionData["label"]);
 
-        //Create Action model
+        //Create Action model (LOGIQUE MÉTIER PRÉSERVÉE)
         $action->fill($actionData)
             ->stage()
             ->associate($actionData['stage'])
             ->save();
+
+        // LOGIQUE MÉTIER PRÉSERVÉE
         if (isset($actionData['unit'])) {
             $proc = Unit::find($actionData['unit']);
             $action->unit()->sync($proc);
@@ -148,6 +158,7 @@ class EditScreen extends Screen
      */
     public function remove(Action $action)
     {
+        // Inchangé, c'est correct
         $action->delete();
 
         Toast::success(__('Action_was_removed'));

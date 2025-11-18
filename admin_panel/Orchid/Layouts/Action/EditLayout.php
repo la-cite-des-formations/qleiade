@@ -22,7 +22,7 @@ class EditLayout extends Rows
      *
      * @var string
      */
-    public $target = 'action';
+    public $target = 'action'; // RECONSTRUCTION : On garde le $target v11
 
     /**
      * Views.
@@ -32,12 +32,12 @@ class EditLayout extends Rows
     public function fields(): array
     {
         return [
-            Input::make('action.id')
+            Input::make('action.id') // RECONSTRUCTION : On garde la notation "point" v11
                 ->hidden(),
 
             Input::make('action.label')
                 ->title(__('action_label'))
-                ->placeholder('cap 3 ans')
+                // ->placeholder('cap 3 ans') // RECONSTRUCTION : Bizarrerie supprimée
                 ->required(),
 
             Input::make('action.order')

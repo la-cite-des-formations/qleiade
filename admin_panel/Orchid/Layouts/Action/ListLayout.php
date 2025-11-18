@@ -2,8 +2,7 @@
 
 namespace Admin\Orchid\Layouts\Action;
 
-use Illuminate\Support\Facades\Auth;
-
+// use Illuminate\Support\Facades\Auth; // RECONSTRUCTION : Plus nécessaire ici
 use Models\Action;
 use Illuminate\Support\Str;
 use Models\Unit;
@@ -57,6 +56,9 @@ class ListLayout extends Table
             //         return $unit->stage->label;
             //     }),
 
+            // RECONSTRUCTION :
+            // Nous respectons le choix de l'utilisateur
+            // de garder la description commentée.
             // TD::make(__('description'))
             //     ->sort()
             //     ->render(function (Action $action) {
@@ -85,7 +87,8 @@ class ListLayout extends Table
                                     'id' => $action->id,
                                 ]),
                         ])
-                        ->canSee(Auth::user()->hasAccess('platform.quality.actions.edit'));
+                        // RECONSTRUCTION : Remplacement de la vérification v11 par la v13+
+                        ->canSee(request()->user()->can('platform.quality.actions.edit'));
                 }),
         ];
     }

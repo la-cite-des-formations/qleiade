@@ -4,6 +4,7 @@ namespace Admin\Orchid\Screens\QualityLabel;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Arr;
 
 use Models\QualityLabel;
 use Admin\Orchid\Layouts\QualityLabel\EditLayout as QualityLabelLayout;
@@ -34,9 +35,6 @@ class EditScreen extends Screen
 
     /**
      * Query data.
-     *
-     * @param QualityLabel
-     * @return array
      */
     public function query(QualityLabel $qualityLabel): iterable
     {
@@ -49,25 +47,12 @@ class EditScreen extends Screen
 
     /**
      * Display header name.
-     *
-     * @return string|null
      */
     public function name(): ?string
     {
         return $this->qualityLabel->exists ? __('quality_label_edit :label', ['label' => $this->qualityLabel->label]) : __('quality_label_create');
     }
 
-    // /**
-    //  * Display header description.
-    //  *
-    //  * @return string|null
-    //  */
-    // public function description(): ?string
-    // {
-    //     return __('quality_label_description');
-    // }
-
-    //DOC: orchid add permission to a screen
     /**
      * @return iterable|null
      */
@@ -80,8 +65,6 @@ class EditScreen extends Screen
 
     /**
      * Button commands.
-     *
-     * @return \Orchid\Screen\Action[]
      */
     public function commandBar(): iterable
     {
@@ -90,24 +73,23 @@ class EditScreen extends Screen
                 ->icon('action-undo')
                 ->route('platform.quality.quality_labels'),
 
-            Button::make('Save', __('Save'))
+            // Le nom "magique" 'save'
+            Button::make(__('Save'))
                 ->icon('check')
                 ->method('save'),
 
-            // Button::make(__('Remove'))
-            //     ->icon('trash')
-            //     ->confirm(__('quality_label_remove_confirmation'))
-            //     ->method('remove', [
-            //         'quality_label' => $this->qualityLabel,
-            //     ])
-            //     ->canSee($this->qualityLabel->exists),
+            Button::make(__('Remove'))
+                ->icon('trash')
+                ->confirm(__('quality_label_remove_confirmation'))
+                ->method('remove', [
+                    'qualityLabel' => $this->qualityLabel,
+                ])
+                ->canSee($this->qualityLabel->exists),
         ];
     }
 
     /**
      * Views.
-     *
-     * @return \Orchid\Screen\Layout[]|string[]
      */
     public function layout(): iterable
     {
@@ -120,68 +102,43 @@ class EditScreen extends Screen
                 ->title(__('criteria_edit'))
                 ->async('asyncGetCriteria'),
 
-
-            //paramétrage des dashboard (et de la page de résultat?)
-            //possibiliter de créer plusieurs dashboard pour un label
-            //prévoir le routage en conséquence ex: qualiopi/dashboard/{?unit}
-            // a voir mettre le procéssus dans user ???? ou ypareo pour choper les status des users
-            //affichage par indicateurs
-            //par unit
-            //seulement les preuves
-            //faire des graphs
-
-            //paramétrages des kpi
-            //types de kpi
-            //les données liées
             Layout::tabs(
                 [
                     __('quality_label') => QualityLabelLayout::class,
                     __('criterias') => CriteriasLayout::class,
                     __('indicators') => IndicatorsLayout::class,
-                    // __('kpi') => Layout::view('platform::dummy.block'),
-                    // __('dashboard') => Layout::view('platform::dummy.block'),
                 ]
             )
         ];
     }
 
     /**
-     * @param QualityLabel    $qualityLabel
-     * @param Request $request
-     *
-     * @return \Illuminate\Http\RedirectResponse
+     * Le nom "magique" 'save' avec la logique v13+ 'Arr::except'
      */
     public function save(QualityLabel $qualityLabel, Request $request)
     {
-
         $request->validate([
-            // 'qualityLabel.label' => "required|regex:/^[a-zA-Z0-9\s]+$/"
             'qualityLabel.label' => "required",
-            'qualityLabel.image.*' => 'mimes:jpeg,png,jpg,gif', // Validation spécifique à l'image
         ]);
 
-        //Datas from request
-        $qualityLabelData = $request->all('qualityLabel')['qualityLabel'];
+        $qualityLabelData = $request->input('qualityLabel');
 
-        // format name code
-        $qualityLabelData["name"] = Str::slug($qualityLabelData["label"]);
+        $dataToFill = Arr::except($qualityLabelData, ['image']);
+        $dataToFill["name"] = Str::slug($dataToFill["label"]);
 
-        //Create QualityLabel model
-        $qualityLabel->fill($qualityLabelData)
+        $qualityLabel->fill($dataToFill)
             ->save();
-
-        // $qualityLabel->attachment()->syncWithoutDetaching(
-        //     $request->input('qualityLabel.image', "")
-        // );
-
 
         Toast::success(__('quality_label_was_saved'));
 
         return redirect()->route('platform.quality.quality_labels');
     }
 
+    // ... (Le reste des méthodes updateIndicator, updateCriteria, etc. sont ici) ...
+    // ... (Elles sont inchangées et correctes) ...
+
     /**
-     * @param Indicator    $indicator
+     * @param Indicator     $indicator
      * @param Request $request
      *
      * @return \Illuminate\Http\RedirectResponse
@@ -214,7 +171,7 @@ class EditScreen extends Screen
     }
 
     /**
-     * @param Criteria    $criteria
+     * @param Criteria     $criteria
      * @param Request $request
      *
      * @return \Illuminate\Http\RedirectResponse

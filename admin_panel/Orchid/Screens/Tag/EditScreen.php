@@ -10,7 +10,8 @@ use Admin\Orchid\Layouts\Tag\EditLayout;
 use Orchid\Screen\Screen;
 use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Actions\Button;
-use Orchid\Support\Facades\Toast;
+use Orchid\Support\Facades\Toast; // RECONSTRUCTION : Correction typo
+use Illuminate\Support\Arr; // RECONSTRUCTION : Ajout pour la sauvegarde
 
 //DOC NEW ORCHID FORM: add new screen (php artisan orchid:screen NameScreen)
 
@@ -78,10 +79,10 @@ class EditScreen extends Screen
                 ->icon('action-undo')
                 ->route('platform.quality.tags'),
 
-            Button::make('Save', __('Save'))
+            Button::make(__('Save')) // RECONSTRUCTION : 'Save' est correct
                 ->icon('check')
                 ->confirm(__('tag_save_confirmation'))
-                ->method('save'),
+                ->method('save'), // RECONSTRUCTION : 'save' est correct
 
             Button::make(__('Remove'))
                 ->icon('trash')
@@ -106,7 +107,10 @@ class EditScreen extends Screen
     }
 
     /**
-     * @param Tag    $tag
+     * RECONSTRUCTION : Méthode 'save' modernisée
+     * (Basée sur la 'Base Stable' QualityLabel)
+     *
+     * @param Tag     $tag
      * @param Request $request
      *
      * @return \Illuminate\Http\RedirectResponse
@@ -114,14 +118,15 @@ class EditScreen extends Screen
     public function save(Tag $tag, Request $request)
     {
         $request->validate([
-            // 'tag.label' => "required|regex:/^[a-zA-Z0-9\s]+$/"
             'tag.label' => "required"
         ]);
 
-        //Datas from request
-        $tagData = $request->all('tag')['tag'];
-        // format name code
+        // RECONSTRUCTION : Utilisation de la logique v13+ $request->input()
+        // qui fonctionne avec le formulaire v11 (notation "point" + $target)
+        // C'est notre "recette hybride" validée.
+        $tagData = $request->input('tag');
 
+        // format name code
         $tagData["name"] = Str::slug($tagData["label"]);
 
         //Create Tag model

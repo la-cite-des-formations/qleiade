@@ -6,7 +6,7 @@ use Orchid\Screen\Field;
 use Orchid\Screen\Layouts\Rows;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Fields\Quill;
-use Orchid\Screen\Fields\Cropper;
+use Orchid\Screen\Fields\Upload; // RECONSTRUCTION : Remplacement de Cropper
 
 class EditLayout extends Rows
 {
@@ -24,6 +24,11 @@ class EditLayout extends Rows
      */
     public function fields(): array
     {
+        // RECONSTRUCTION : Correction du bug 'exists on null'
+        // On vérifie si $qualityLabel n'est pas null *avant* de tester 'exists'
+        $isEdit = $this->query->get('qualityLabel')?->exists ?? false;
+
+
         return [
             Input::make('qualityLabel.id')
                 ->hidden(),
@@ -38,7 +43,7 @@ class EditLayout extends Rows
                 ->min(1)
                 ->max(20)
                 ->required()
-                ->disabled(!is_null($this->query->get('criteria'))),
+                ->disabled($isEdit),
 
             Input::make('qualityLabel.indicator_count_expected')
                 ->title(__("indicators_count_expected"))
@@ -46,16 +51,16 @@ class EditLayout extends Rows
                 ->min(1)
                 ->max(200)
                 ->required(),
-            //OBSERVE imposer la dimension, voir à l'usage
-            Cropper::make('qualityLabel.image')
-                ->storage('images')
-                ->disk('images')
-                ->group('quality_label')
-                ->targetId()
-                ->acceptedFiles('.png') // Accepted file types (images)
-                ->title(__('Image')),
 
-            Input::make('qualityLabel.description')
+            // RECONSTRUCTION : Remplacement de Cropper par Upload (v13+)
+            Upload::make('qualityLabel.image')
+                ->title(__('Image'))
+                ->acceptedFiles('image/*') // Accepte tous les types d'images
+                ->maxFiles(1)               // Limite à un seul fichier
+                ->disk('images'),
+
+            // RECONSTRUCTION : Remplacement de Input par Quill
+            Quill::make('qualityLabel.description')
                 ->title('Description')
                 ->popover("Soyez concis s'il vous plait"),
         ];

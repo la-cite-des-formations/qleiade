@@ -2,7 +2,7 @@
 
 namespace Admin\Orchid\Layouts\Tag;
 
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; // Gardé pour la compatibilité, mais on change la logique
 
 use Models\Tag;
 use Illuminate\Support\Str;
@@ -17,9 +17,6 @@ class ListLayout extends Table
     /**
      * Data source.
      *
-     * The name of the key to fetch it from the query.
-     * The results of which will be elements of the table.
-     *
      * @var string
      */
     protected $target = 'tags';
@@ -32,19 +29,16 @@ class ListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make(__('label'))
+            TD::make('label', __('label')) // RECONSTRUCTION : Simplifié (le render n'est pas nécessaire)
+                ->sort(),
+
+            TD::make('description', __('description'))
                 ->sort()
                 ->render(function (Tag $tag) {
-                    return $tag->label;
-                }),
-
-            TD::make(__('description'))
-                ->sort()
-                ->render(function (Tag $tag) {
-                    //NOTE : add function getFirstSentenceOfHtml($html) to a trait if anothers
-                    $truncatedDesc = Str::before(Str::after($tag->description, '<p>'), '</p>') . ' ...';
-
-                    return $truncatedDesc;
+                    // RECONSTRUCTION : Correction du bug d'affichage
+                    // strip_tags enlève le HTML (si 'description' vient d'un Quill)
+                    // Str::limit coupe proprement à 50 caractères
+                    return Str::limit(strip_tags($tag->description ?? ''), 50);
                 }),
 
 
@@ -66,7 +60,8 @@ class ListLayout extends Table
                                     'id' => $tag->id,
                                 ]),
                         ])
-                        ->canSee(Auth::user()->hasAccess('platform.quality.tags.edit'));
+                        // RECONSTRUCTION : Remplacement de la vérification v11 par la v13+
+                        ->canSee(request()->user()->can('platform.quality.tags.edit'));
                 }),
         ];
     }

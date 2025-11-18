@@ -6,10 +6,11 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Support\Facades\Log;
 use Orchid\Filters\Filterable;
+use Orchid\Screen\AsSource;
 
 class Indicator extends Model
 {
-    use HasFactory, Filterable;
+    use HasFactory, Filterable, AsSource;
 
     /**
      * The table associated with the model.

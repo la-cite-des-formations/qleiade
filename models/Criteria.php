@@ -5,10 +5,11 @@ namespace Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Orchid\Screen\AsSource;
 
 class Criteria extends Model
 {
-    use HasFactory;
+    use HasFactory, AsSource;
     /**
      * The table associated with the model.
      *

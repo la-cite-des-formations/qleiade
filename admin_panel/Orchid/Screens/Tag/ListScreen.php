@@ -3,7 +3,7 @@
 namespace Admin\Orchid\Screens\Tag;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Auth; // Gardé pour référence, mais on ne l'utilise plus dans commandBar
 
 use Models\Tag;
 use Admin\Orchid\Layouts\Tag\ListLayout;
@@ -23,7 +23,8 @@ class ListScreen extends Screen
     public function query(): iterable
     {
         return [
-            'tags' => Tag::all()
+            // RECONSTRUCTION : Remplacement de ::all() par ::paginate()
+            'tags' => Tag::paginate()
         ];
     }
 
@@ -68,8 +69,8 @@ class ListScreen extends Screen
             Link::make(__('Add'))
                 ->icon('plus')
                 ->route('platform.quality.tags.create')
-                //it works
-                ->canSee(Auth::user()->hasAccess('platform.quality.tags.create')),
+                // RECONSTRUCTION : Remplacement de la vérification v11 par la v13+
+                ->canSee(request()->user()->can('platform.quality.tags.create')),
         ];
     }
 

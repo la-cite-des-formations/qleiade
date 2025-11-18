@@ -3,8 +3,6 @@
 namespace Admin\Orchid\Layouts\QualityLabel;
 
 use Illuminate\Support\Str;
-use Illuminate\Support\Facades\Auth;
-
 use Models\QualityLabel;
 
 use Orchid\Screen\TD;
@@ -12,15 +10,12 @@ use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Layouts\Table;
 use Orchid\Screen\Actions\Button;
 use Orchid\Screen\Actions\DropDown;
+// Pas besoin de ModalToggle ici
 
 class ListLayout extends Table
 {
     /**
      * Data source.
-     *
-     * The name of the key to fetch it from the query.
-     * The results of which will be elements of the table.
-     *
      * @var string
      */
     protected $target = 'quality_labels';
@@ -33,18 +28,14 @@ class ListLayout extends Table
     protected function columns(): iterable
     {
         return [
-            TD::make(__('label'))
-                ->sort()
-                ->render(function (QualityLabel $qualityLabel) {
-                    return $qualityLabel->label;
-                }),
+            TD::make('label', __('label'))
+                ->sort(),
 
-            TD::make(__('description'))
+            TD::make('description', __('description'))
                 ->sort()
                 ->render(function (QualityLabel $qualityLabel) {
-                    //NOTE : add function getFirstSentenceOfHtml($html) to a trait if anothers
-                    $truncatedDesc = Str::before(Str::after($qualityLabel->description, '<p>'), '</p>') . ' ...';
-                    return $truncatedDesc;
+                    // Correction du bug d'affichage (gardée)
+                    return Str::limit(strip_tags($qualityLabel->description ?? ''), 50);
                 }),
 
             TD::make(__('Actions_form'))
@@ -54,22 +45,27 @@ class ListLayout extends Table
                     return DropDown::make()
                         ->icon('options-vertical')
                         ->list([
+
+                            // RESTAURATION : Le lien v11 d'origine
+                            // C'est la clé de tout.
                             Link::make(__('Edit'))
                                 ->route('platform.quality.quality_label.edit', $qualityLabel->id)
-                                ->icon('pencil'),
+                                ->icon('pencil')
+                                ->canSee(request()->user()->can('platform.quality.quality_label.edit')),
+
 
                             Link::make(__('Edit its indciators'))
                                 ->route('platform.quality.quality_label.indicators', ["quality_label" => $qualityLabel])
                                 ->icon('equalizer'),
 
-                            // Button::make(__('Delete'))
-                            //     ->icon('trash')
-                            //     ->confirm(__('qualityLabel_remove_confirmation'))
-                            //     ->method('remove', [
-                            //         'id' => $qualityLabel->id,
-                            //     ]),
-                        ])
-                        ->canSee(Auth::user()->hasAccess('platform.quality.quality_label.edit'));
+                            // Le bouton "Delete" (qui fonctionnait)
+                            Button::make(__('Delete'))
+                                ->icon('trash')
+                                ->confirm(__('qualityLabel_remove_confirmation'))
+                                ->method('remove', [
+                                    'qualityLabel' => $qualityLabel->id,
+                                ]),
+                        ]);
                 }),
         ];
     }

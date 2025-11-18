@@ -8,10 +8,12 @@ use Admin\Orchid\Layouts\QualityLabel\EditLayout;
 use Admin\Orchid\Layouts\QualityLabel\ListLayout;
 use Orchid\Screen\Screen;
 use Illuminate\Http\Request;
-use Illuminate\Support\Str;
 use Orchid\Support\Facades\Toast;
 use Orchid\Screen\Actions\ModalToggle;
 use Orchid\Support\Facades\Layout;
+use Illuminate\Support\Str; // Assurez-vous que Str est importé
+use Illuminate\Support\Arr; // Assurez-vous que Arr est importé
+
 
 class ListScreen extends Screen
 {
@@ -22,7 +24,10 @@ class ListScreen extends Screen
      */
     public function query(): iterable
     {
-        return ["quality_labels" => QualityLabel::all()];
+        // RECONSTRUCTION : Utilisation de la pagination
+        return [
+            "quality_labels" => QualityLabel::paginate()
+        ];
     }
 
     /**
@@ -45,8 +50,9 @@ class ListScreen extends Screen
         return [
             ModalToggle::make(__('quality_label_create'))
                 ->modal('qualityLabelModal')
-                ->method('createQualityLabel')
-                ->icon('plus'),
+                ->method('createOrUpdateQualityLabel') // Nom de méthode unifié
+                ->icon('plus')
+                ->modalTitle(__('quality_label_create')), // Titre pour la création
         ];
     }
 
@@ -60,88 +66,92 @@ class ListScreen extends Screen
         return [
             Layout::modal('qualityLabelModal', [
                 EditLayout::class
-            ])->title(__('quality_label_create')),
+            ])
+            ->title(__('quality_label_create')) // Titre par défaut (sera écrasé par le bouton Editer)
+            ->async('asyncGetQualityLabel'), // Méthode pour charger les données en mode édition
+
             ListLayout::class,
         ];
     }
 
     /**
-     * The action that will take place when
-     * the form of the modal window is submitted
+     * Méthode AJAX pour charger un label dans le modal
      */
-    public function createQualityLabel(Request $request)
+    public function asyncGetQualityLabel(Request $request): iterable
     {
-        $request->validate([
-            'qualityLabel.label' => "required|regex:/^[a-zA-Z0-9\s]+$/"
-        ]);
+        $qualityLabel = QualityLabel::findOrNew($request->input('qualityLabel'));
 
-        $data = $request->all('qualityLabel')['qualityLabel'];
-
-        //création du label en bdd
-        try {
-            $qualityLabel = $this->save($data);
-            $qualityLabel->attachment()->syncWithoutDetaching(
-                $data['image']
-            );
-            Toast::info(__('quality_label_was_saved'));
-        } catch (\Throwable $th) {
-            Toast::error(__('quality_label_saved_error'));
-        }
-
-        //Create criterias according to request criteria number expected
-        for ($i = 0; $i < $data['criterias_count_expected']; $i++) {
-            $order = $i + 1;
-            $criteria = new Criteria([
-                'name' => "criteria_" . $order,
-                'label' => "Critère " . $order,
-                'order' => $order,
-                'description' => 'CAGMJ: critère auto generé à mettre à jour',
-            ]);
-            $criteria
-                ->qualityLabel()
-                ->associate($qualityLabel->id)
-                ->save();
-        }
-
-        Toast::info('Cliquer sur ajouter pour créer de nouveaux indicateurs');
-
-        //rediriger sur liste indicateurs avec l'id du label créé et incité à créer le premier indicateur
-        return redirect(route('platform.quality.quality_label.indicators', ["quality_label" => $qualityLabel]));
+        return [
+            'qualityLabel' => $qualityLabel,
+        ];
     }
+
 
     /**
-     * @param QualityLabel    $qualityLabel
-     * @param Request $request
-     *
-     * @return QualityLabel
+     * Méthode de sauvegarde unifiée (Création ET Modification)
      */
-    public function save($data)
+    public function createOrUpdateQualityLabel(Request $request, QualityLabel $qualityLabel) // Orchid injecte un modèle vide si $request->input('qualityLabel.id') n'existe pas
     {
-        $qualityLabel = new QualityLabel();
-        // format name code
-        $data["name"] = Str::slug($data["label"]);
+        $request->validate([
+            'qualityLabel.label' => "required",
+        ]);
 
-        try {
-            //Create QualityLabel model
-            $qualityLabel->fill($data)
-                ->save();
-            // Toast::success(__('quality_label_was_saved'));
-        } catch (\Throwable $th) {
-            // Toast::error(__('quality_label_saved_error'));
-            throw $th;
+        // On récupère l'ID avant de 'filler' (pour savoir si c'est une création)
+        $qualityLabelId = $request->input('qualityLabel.id');
+
+        // 1. On récupère toutes les données du formulaire
+        $data = $request->input('qualityLabel');
+
+        // 2. On utilise 'Arr::except' pour retirer le champ 'image'
+        $dataToFill = Arr::except($data, ['image']);
+
+        // 3. LA CORRECTION : On ajoute la logique métier manquante
+        // (On génère le 'name' à partir du 'label')
+        if (isset($dataToFill['label'])) {
+            $dataToFill['name'] = Str::slug($dataToFill['label']);
         }
 
-        return $qualityLabel;
+        // 4. On 'fill' le modèle *uniquement* avec les données "sûres"
+        $qualityLabel->fill($dataToFill);
+
+        // 5. On sauvegarde.
+        $qualityLabel->save();
+
+        Toast::info(__('quality_label_was_saved'));
+
+        // Si c'est une *création* (pas d'ID), on exécute la logique "Criteria"
+        if (is_null($qualityLabelId)) {
+
+            //Create criterias according to request criteria number expected
+            for ($i = 0; $i < $data['criterias_count_expected']; $i++) {
+                $order = $i + 1;
+                $criteria = new Criteria([
+                    'name' => "criteria_" . $order,
+                    'label' => "Critère " . $order,
+                    'order' => $order,
+                    'description' => 'CAGMJ: critère auto generé à mettre à jour',
+                ]);
+                $criteria
+                    ->qualityLabel()
+                    ->associate($qualityLabel->id)
+                    ->save();
+            }
+
+            Toast::info('Cliquer sur ajouter pour créer de nouveaux indicateurs');
+
+            //rediriger sur liste indicateurs avec l'id du label créé et incité à créer le premier indicateur
+            return redirect(route('platform.quality.quality_label.indicators', ["quality_label" => $qualityLabel]));
+        }
     }
 
-    //  /**
-    //  * @param Request $request
-    //  */
-    // public function remove(Request $request): void
-    // {
-    //     $tag = QualityLabel::findOrFail($request->get('id'));
 
-    //     $tag->delete();
-    //     Toast::info(__('Quality_label_was_removed'));
-    // }
+    /**
+     * Méthode de suppression
+     */
+    public function remove(Request $request): void
+    {
+        $qualityLabel = QualityLabel::findOrFail($request->get('qualityLabel'));
+        $qualityLabel->delete();
+        Toast::info(__('quality_label_was_removed'));
+    }
 }
