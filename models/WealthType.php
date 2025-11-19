@@ -4,12 +4,10 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Orchid\Filters\Filterable;
-use Orchid\Screen\AsSource;
 
 class WealthType extends Model
 {
-    use HasFactory, AsSource, Filterable;
+    use HasFactory;
 
     /**
      * The table associated with the model.

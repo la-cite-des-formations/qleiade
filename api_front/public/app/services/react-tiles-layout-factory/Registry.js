@@ -14,7 +14,7 @@ export class MyCard extends React.Component {
     render() {
         var button = "";
         if (this.props.item.path === "/admin") {
-            //go to orchid admin panel
+            //go to admin panel
             button =
                 <Button
                     href={this.props.item.path}

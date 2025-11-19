@@ -5,11 +5,9 @@ namespace Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-use Orchid\Screen\AsSource;
-
 class Tag extends Model
 {
-    use HasFactory, AsSource;
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -27,20 +25,6 @@ class Tag extends Model
         'name',
         'label',
         'description',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $allowedSorts = [
-        'name',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $allowedFilters = [
-        'name',
     ];
 
     /**

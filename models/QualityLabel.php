@@ -4,15 +4,10 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Models\Audit;
-use Orchid\Attachment\Attachable;
-use Orchid\Attachment\AttachOne;
-
-// use Orchid\Screen\AsSource;
 
 class QualityLabel extends Model
 {
-    use HasFactory, Attachable;
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -20,11 +15,6 @@ class QualityLabel extends Model
      * @var string
      */
     protected $table = 'quality_label';
-
-    /**
-     * @AttachOne("image")
-     */
-    public $attachment;
 
     protected $primaryKey = 'id';
 

@@ -9,13 +9,10 @@ use Laravel\Scout\Searchable;
 use Laravel\Scout\EngineManager;
 
 use Database\Factories\WealthFactory;
-use Orchid\Filters\Filterable;
-use Orchid\Screen\AsSource;
-
 
 class Wealth extends Model
 {
-    use HasFactory, AsSource, Searchable, Filterable;
+    use HasFactory, Searchable;
 
     /**
      * The table associated with the model.
@@ -23,7 +20,6 @@ class Wealth extends Model
      * @var string
      */
     protected $table = 'wealth';
-
 
     //Scout functions
     /**
@@ -96,31 +92,6 @@ class Wealth extends Model
         'archived_at' => 'datetime',
         'attachment' => 'array',
         'granularity' => 'array',
-    ];
-
-    /**
-     * The attributes for which you can use filters in url.
-     *
-     * @var array
-     */
-    protected $allowedFilters = [
-        'id',
-        'name',
-        'unit',
-        'validity_date',
-        'archived_at',
-    ];
-
-    /**
-     * The attributes for which can use sort in url.
-     *
-     * @var array
-     */
-    protected $allowedSorts = [
-        'id',
-        'name',
-        'validity_date',
-        'archived_at',
     ];
 
     /**
@@ -228,16 +199,6 @@ class Wealth extends Model
     {
         return $this->hasMany(Wealth::class, 'parent_id')->with('wealths');
     }
-
-    // /**
-    //  * Get the presenter for the model.
-    //  *
-    //  * @return WealthPresenter
-    //  */
-    // public function presenter()
-    // {
-    //     return new WealthPresenter($this);
-    // }
 
     /**
      * Get the indexable data array for the model.

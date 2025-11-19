@@ -4,13 +4,10 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Orchid\Filters\Filterable;
-use Orchid\Screen\AsSource;
-
 
 class Action extends Model
 {
-    use HasFactory, AsSource, Filterable;
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -30,34 +27,6 @@ class Action extends Model
         'order',
         'description',
     ];
-
-    /**
-     * @var array
-     */
-    protected $allowedSorts = [
-        'name',
-        'order',
-        'label',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $allowedFilters = [
-        'name',
-        'order',
-        'label',
-    ];
-
-    // /**
-    //  * The attributes that should be hidden for serialization.
-    //  *
-    //  * @var array<int, string>
-    //  */
-    // protected $hidden = [
-    //     'password',
-    //     'remember_token',
-    // ];
 
     /**
      * wealths
@@ -89,7 +58,6 @@ class Action extends Model
      *
      * @return Collection
      */
-
     public function unit()
     {
         return $this->belongsToMany(

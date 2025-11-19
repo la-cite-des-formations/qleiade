@@ -6,11 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-use Orchid\Screen\AsSource;
-
 class File extends Model
 {
-    use HasFactory, AsSource, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * The table associated with the model.

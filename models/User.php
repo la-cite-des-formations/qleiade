@@ -2,11 +2,17 @@
 
 namespace Models;
 
-use Orchid\Platform\Models\User as Authenticatable;
-use Admin\Orchid\Presenters\UserPresenter;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Laravel\Sanctum\HasApiTokens;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable
+class User extends Authenticatable implements FilamentUser
 {
+    use HasApiTokens, HasFactory, Notifiable;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -40,46 +46,10 @@ class User extends Authenticatable
     ];
 
     /**
-     * The attributes for which you can use filters in url.
-     *
-     * @var array
-     */
-    protected $allowedFilters = [
-        'id',
-        'name',
-        'email',
-        'permissions',
-    ];
-
-    /**
-     * The attributes for which can use sort in url.
-     *
-     * @var array
-     */
-    protected $allowedSorts = [
-        'id',
-        'name',
-        'email',
-        'updated_at',
-        'created_at',
-    ];
-
-    /**
-     * Get the presenter for the model.
-     *
-     * @return UserPresenter
-     */
-    public function presenter()
-    {
-        return new UserPresenter($this);
-    }
-
-    /**
      * unit
      *
      * @return Collection
      */
-
     public function unit()
     {
         return $this->belongsToMany(
@@ -88,5 +58,10 @@ class User extends Authenticatable
             "user_id",
             "unit_id"
         );
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        return true;
     }
 }
