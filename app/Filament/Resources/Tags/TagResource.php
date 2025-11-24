@@ -23,33 +23,38 @@ use Illuminate\Support\Str;
 class TagResource extends Resource
 {
     protected static ?string $model = Tag::class;
+
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
-    protected static ?string $navigationLabel = 'Libellés';
+
     protected static ?string $modelLabel = 'libellé';
     protected static ?string $pluralModelLabel = 'libellés';
+
     protected static ?string $recordTitleAttribute = 'name';
+
+    protected static ?int $navigationSort = 30;
 
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 TextInput::make('label')
-                    ->label('Libellé')
+                    ->label('Intitulé')
                     ->required()
                     ->maxLength(255)
                     ->live(onBlur: true)
                     ->afterStateUpdated(function (Set $set, ?string $state) {
                         $set('name', Str::slug($state));
                     }),
+
                 Hidden::make('name')
                     ->required()
                     ->unique(ignoreRecord: true),
+
                 Textarea::make('description')
                     ->label('Description')
-                    ->rows(3)
-                    ->autosize()
+                    ->rows(5)
                     ->columnSpanFull()
-                    ->maxLength(1500),
+                    ->maxLength(1500)
             ]);
     }
 
@@ -61,6 +66,7 @@ class TagResource extends Resource
                 TextColumn::make('label')
                     ->label('Libellé')
                     ->searchable(),
+
                 TextColumn::make('description')
                     ->label('Description')
                     ->searchable(),
@@ -69,8 +75,12 @@ class TagResource extends Resource
                 //
             ])
             ->recordActions([
-                EditAction::make(),
-                DeleteAction::make(),
+                EditAction::make()
+                    ->iconButton()
+                    ->tooltip('Modifier'),
+                DeleteAction::make()
+                    ->iconButton()
+                    ->tooltip('Supprimer'),
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

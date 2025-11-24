@@ -4,6 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class Action extends Model
 {
@@ -24,8 +25,9 @@ class Action extends Model
     protected $fillable = [
         'name',
         'label',
-        'order',
         'description',
+        'order',
+        'stage_id',
     ];
 
     /**
@@ -48,7 +50,7 @@ class Action extends Model
      *
      * @return Stage
      */
-    public function stage()
+    public function stage(): BelongsTo
     {
         return $this->belongsTo(Stage::class);
     }
