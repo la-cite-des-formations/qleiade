@@ -127,12 +127,15 @@ class ActionResource extends Resource
                     ->tooltip('Voir')
                     ->modalHeading(fn (Action $record) => "{$record->order} - {$record->label}")
                     ->modalFooterActionsAlignment('right'),
+
                 EditAction::make()
                     ->iconButton()
                     ->tooltip('Modifier'),
+
                 DeleteAction::make()
                     ->iconButton()
                     ->tooltip('Supprimer'),
+
             ])
             ->toolbarActions([
                 BulkActionGroup::make([

@@ -22,6 +22,7 @@ class Criteria extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'quality_label_id',
         'name',
         'label',
         'order',

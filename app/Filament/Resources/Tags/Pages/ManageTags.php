@@ -13,7 +13,9 @@ class ManageTags extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->label('Nouveau Libellé')
+                ->modalWidth('2xl'),
         ];
     }
 }

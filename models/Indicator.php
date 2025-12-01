@@ -26,6 +26,7 @@ class Indicator extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'criteria_id',
         'name',
         'label',
         'description',
