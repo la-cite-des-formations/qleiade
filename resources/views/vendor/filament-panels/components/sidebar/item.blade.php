@@ -50,40 +50,13 @@
         class="fi-sidebar-item-btn"
         style="{{ ($grouped || $subGrouped) ? 'padding-inline-start: 1.5rem' : '' }}"
     >
-        {{-- Afficher l'icône : depuis le slot (Htmlable) ou générer depuis la prop string --}}
-        @php
-            $renderedIcon = false;
-        @endphp
-
-        {{-- n'afficher l'icône ici que si l'item n'est pas groupé (les items groupés afficheront l'icône à la place de la bordure) --}}
-
-            @if ($active && isset($activeIcon))
-                @php $renderedIcon = true; @endphp
-                @if ($activeIcon instanceof \Illuminate\Contracts\Support\Htmlable)
-                    <span class="fi-sidebar-item-icon">{{ $activeIcon }}</span>
-                @else
-                    {{
-                        \Filament\Support\generate_icon_html($activeIcon, attributes: (new \Illuminate\View\ComponentAttributeBag([
-                            'x-show' => ($subGrouped && $sidebarCollapsible) ? '! $store.sidebar.isOpen' : false,
-                        ]))->class(['fi-sidebar-item-icon']), size: \Filament\Support\Enums\IconSize::Large)
-                    }}
-                @endif
-
-            @elseif (isset($icon))
-                @php $renderedIcon = true; @endphp
-                @if ($icon instanceof \Illuminate\Contracts\Support\Htmlable)
-                    <span class="fi-sidebar-item-icon">{{ $icon }}</span>
-                @else
-                    {{
-                        \Filament\Support\generate_icon_html($icon, attributes: (new \Illuminate\View\ComponentAttributeBag([
-                            'x-show' => ($subGrouped && $sidebarCollapsible) ? '! $store.sidebar.isOpen' : false,
-                        ]))->class(['fi-sidebar-item-icon']), size: \Filament\Support\Enums\IconSize::Large)
-                    }}
-                @endif
-            @endif
-
-
-
+        @if (filled($icon))
+            {{
+                \Filament\Support\generate_icon_html(($active && $activeIcon) ? $activeIcon : $icon, attributes: (new \Illuminate\View\ComponentAttributeBag([
+                    'x-show' => ($subGrouped && $sidebarCollapsible) ? '! $store.sidebar.isOpen' : false,
+                ]))->class(['fi-sidebar-item-icon']), size: \Filament\Support\Enums\IconSize::Large)
+            }}
+        @endif
 
         <span
             @if ($sidebarCollapsible && (! $subNavigation))
