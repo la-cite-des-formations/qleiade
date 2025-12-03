@@ -1,6 +1,5 @@
 /* filmanent-custom.css
    Force display of child navigation icons in the Filament sidebar
-   We add multiple selectors to cover Filament CSS classnames across versions.
 */
 
 /* Generic fallback for icons used inside navigation list */
