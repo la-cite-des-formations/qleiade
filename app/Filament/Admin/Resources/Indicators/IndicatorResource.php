@@ -77,20 +77,22 @@ class IndicatorResource extends Resource
         return $table
             ->recordTitleAttribute('label')
             ->columns([
+                TextColumn::make('qualityLabel.label')
+                    ->label('Label Qualité')
+                    ->verticalAlignment('start'),
+                TextColumn::make('criteria.label')
+                    ->sortable()
+                    ->label('Critère')
+                    ->verticalAlignment('start'),
                 TextColumn::make('number')
                     ->sortable()
-                    ->label('N°'),
+                    ->label('N°')
+                    ->verticalAlignment('start'),
                 TextColumn::make('label')
                     ->searchable()
                     ->sortable()
-                    ->label('Nom'),
-                TextColumn::make('criteria.label')
-                    ->sortable()
-                    ->label('Critère'),
-                TextColumn::make('description')
-                    ->searchable()
-                    ->label('Description')
-                    ->limit(50),
+                    ->label('Nom')
+                    ->wrap(),
             ])
             ->filters([
                 //

@@ -69,7 +69,7 @@ class Indicator extends Model
     /**
      * wealths
      *
-     * @return Collection
+     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
      */
     public function wealths()
     {
@@ -79,8 +79,8 @@ class Indicator extends Model
             "indicator_id",
             "wealth_id"
         )
-        ->withPivot('is_essential')
-        ->withTimestamps();
+            ->withPivot('is_essential')
+            ->withTimestamps();
     }
 
     /**
@@ -91,9 +91,12 @@ class Indicator extends Model
     public function qualityLabel()
     {
         return $this->hasOneThrough(
-            QualityLabel::class, Criteria::class,
-            'id', 'id',
-            'criteria_id', 'quality_label_id'
+            QualityLabel::class,
+            Criteria::class,
+            'id',
+            'id',
+            'criteria_id',
+            'quality_label_id'
         );
     }
 

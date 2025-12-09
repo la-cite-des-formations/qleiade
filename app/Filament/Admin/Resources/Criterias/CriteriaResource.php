@@ -41,7 +41,7 @@ class CriteriaResource extends Resource
             ->components([
                 Select::make('quality_label_id')
                     ->relationship('qualityLabel', 'label')
-                    ->label('Label qualité')
+                    ->label('Label Qualité')
                     ->preload(),
                 TextInput::make('label')
                     ->required()
@@ -70,20 +70,19 @@ class CriteriaResource extends Resource
         return $table
             ->recordTitleAttribute('label')
             ->columns([
-                TextColumn::make('order')
-                    ->sortable()
-                    ->label('Ordre'),
                 TextColumn::make('label')
                     ->searchable()
                     ->sortable()
-                    ->label('Nom'),
+                    ->label('Critère')
+                    ->verticalAlignment('start'),
                 TextColumn::make('qualityLabel.label')
                     ->sortable()
-                    ->label('Label qualité'),
+                    ->label('Label Qualité')
+                    ->verticalAlignment('start'),
                 TextColumn::make('description')
                     ->searchable()
                     ->label('Description')
-                    ->limit(50),
+                    ->wrap(),
             ])
             ->filters([
                 //
