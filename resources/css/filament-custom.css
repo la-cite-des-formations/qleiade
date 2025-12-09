@@ -1,0 +1,96 @@
+/*
+ * Classes utilitaires pour les fonds de listes basées sur les couleurs du thème Filament.
+ * Pattern: .bg-[color]-list
+ * Syntax V4: Direct var usage & color-mix for transparency
+ */
+
+/* Primary */
+.fi-in-repeatable.bg-primary-list .fi-in-repeatable-item {
+    background-color: var(--primary-50);
+}
+
+:is(.dark .fi-in-repeatable.bg-primary-list .fi-in-repeatable-item) {
+    background-color: color-mix(in srgb, var(--primary-900), transparent 80%);
+}
+
+/* Gray */
+.fi-in-repeatable.bg-gray-list .fi-in-repeatable-item {
+    background-color: var(--gray-50);
+}
+
+:is(.dark .fi-in-repeatable.bg-gray-list .fi-in-repeatable-item) {
+    background-color: color-mix(in srgb, var(--gray-900), transparent 80%);
+}
+
+/* Info */
+.fi-in-repeatable.bg-info-list .fi-in-repeatable-item {
+    background-color: var(--info-50);
+}
+
+:is(.dark .fi-in-repeatable.bg-info-list .fi-in-repeatable-item) {
+    background-color: color-mix(in srgb, var(--info-900), transparent 80%);
+}
+
+/* Success */
+.fi-in-repeatable.bg-success-list .fi-in-repeatable-item {
+    background-color: var(--success-50);
+}
+
+:is(.dark .fi-in-repeatable.bg-success-list .fi-in-repeatable-item) {
+    background-color: color-mix(in srgb, var(--success-900), transparent 80%);
+}
+
+/* Warning */
+.fi-in-repeatable.bg-warning-list .fi-in-repeatable-item {
+    background-color: var(--warning-50);
+}
+
+:is(.dark .fi-in-repeatable.bg-warning-list .fi-in-repeatable-item) {
+    background-color: color-mix(in srgb, var(--warning-900), transparent 80%);
+}
+
+/* Danger */
+.fi-in-repeatable.bg-danger-list .fi-in-repeatable-item {
+    background-color: var(--danger-50);
+}
+
+:is(.dark .fi-in-repeatable.bg-danger-list .fi-in-repeatable-item) {
+    background-color: color-mix(in srgb, var(--danger-900), transparent 80%);
+}
+
+/* style d'origine de filament (pour référence) */
+/*
+.fi-in-repeatable .fi-in-repeatable-item {
+    display:block
+}
+
+.fi-in-repeatable.fi-contained .fi-in-repeatable-item {
+    border-radius: var(--radius-xl);
+    background-color: var(--color-white);
+    padding: calc(var(--spacing) * 4);
+    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, #0000000d);
+    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
+    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
+    --tw-ring-color: color-mix(in oklab, var(--gray-950) 5%, transparent)
+}
+
+.fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
+    background-color: #ffffff0d
+}
+
+@supports (color:color-mix(in lab, red, red)) {
+    .fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
+        background-color: color-mix(in oklab, var(--color-white) 5%, transparent)
+    }
+}
+
+.fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
+    --tw-ring-color: #ffffff1a
+}
+
+@supports (color:color-mix(in lab, red, red)) {
+    .fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
+        --tw-ring-color: color-mix(in oklab, var(--color-white) 10%, transparent)
+    }
+}
+*/

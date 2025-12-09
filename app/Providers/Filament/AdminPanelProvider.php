@@ -9,7 +9,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Pages\Dashboard;
 use Filament\Panel;
 use Filament\PanelProvider;
-// use Filament\Support\Assets\Css;
+use Filament\Support\Assets\Css;
 // use Filament\Support\Assets\Js;
 use Filament\Support\Colors\Color;
 use Filament\Widgets\AccountWidget;
@@ -54,7 +54,7 @@ class AdminPanelProvider extends PanelProvider
                 DispatchServingFilamentEvent::class,
             ])
             ->assets([
-                // Css::make('filament-custom', resource_path('css/filament-custom.css')),
+                Css::make('filament-custom', resource_path('css/filament-custom.css')),
             ])
             ->authMiddleware([
                 Authenticate::class,

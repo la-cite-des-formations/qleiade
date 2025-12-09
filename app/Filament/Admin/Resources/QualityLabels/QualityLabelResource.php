@@ -3,21 +3,26 @@
 namespace App\Filament\Admin\Resources\QualityLabels;
 
 use App\Filament\Admin\Resources\QualityLabels\Pages\ManageQualityLabels;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Models\QualityLabel;
+use Models\Criteria;
+use Models\Indicator;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
-use Filament\Forms\Components\DatePicker;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
 
 class QualityLabelResource extends Resource
 {
@@ -32,6 +37,34 @@ class QualityLabelResource extends Resource
     protected static ?string $pluralModelLabel = 'Labels Qualité';
 
     protected static ?string $recordTitleAttribute = 'label';
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('description')
+                    ->disableLabel(),
+                RepeatableEntry::make('criterias')
+                    ->label(
+                        fn(QualityLabel $qualityLabel): string =>
+                        "{$qualityLabel->indicators_count} indicateurs répartis sur {$qualityLabel->criterias_count} critères :"
+                    )
+                    ->schema([
+                        TextEntry::make('indicators')
+                            ->label(fn(Criteria $criteria): string => "{$criteria->label} - {$criteria->description} :")
+                            ->state(
+                                fn(Criteria $criteria): string => $criteria->indicators
+                                    ->sortBy('number', SORT_NATURAL)
+                                    ->map(fn(Indicator $indicator) => "{$indicator->number} - {$indicator->label}")
+                                    ->join('<br>')
+                            )
+                            ->html()
+                            ->columnSpanFull(),
+                    ])
+                    ->extraAttributes(['class' => 'bg-info-list'])
+                    ->columnSpanFull(),
+            ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -50,20 +83,15 @@ class QualityLabelResource extends Resource
                     ->dehydrated()
                     ->required(),
                 Textarea::make('description')
-                    ->maxLength(500)
+                    ->maxLength(1500)
                     ->label('Description')
-                    ->rows(3),
-                TextInput::make('criterias_count_expected')
-                    ->numeric()
-                    ->label('Nombre de critères attendus'),
-                TextInput::make('indicator_count_expected')
-                    ->numeric()
-                    ->label('Nombre d\'indicateurs attendus'),
-                TextInput::make('audit_frequency')
-                    ->numeric()
-                    ->label('Fréquence d\'audit (mois)'),
-                DatePicker::make('last_audit_date')
-                    ->label('Date du dernier audit'),
+                    ->rows(5)
+                    ->columnSpanFull(),
+                FileUpload::make('image')
+                    ->label('Logo')
+                    ->image()
+                    ->directory('quality-labels')
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -75,18 +103,26 @@ class QualityLabelResource extends Resource
                 TextColumn::make('label')
                     ->searchable()
                     ->sortable()
-                    ->label('Nom'),
+                    ->label('Label')
+                    ->verticalAlignment('start'),
                 TextColumn::make('description')
                     ->searchable()
                     ->label('Description')
-                    ->limit(50),
-                TextColumn::make('criterias_count_expected')
-                    ->label('Critères'),
-                TextColumn::make('indicator_count_expected')
-                    ->label('Indicateurs'),
+                    ->wrap(),
+                TextColumn::make('criterias_count')
+                    ->label('Critères')
+                    ->alignRight()
+                    ->sortable()
+                    ->verticalAlignment('start'),
+                TextColumn::make('indicators_count')
+                    ->label('Indicateurs')
+                    ->alignRight()
+                    ->sortable()
+                    ->verticalAlignment('start'),
                 TextColumn::make('last_audit_date')
                     ->date('d/m/Y')
-                    ->label('Dernier audit'),
+                    ->label('Dernier audit')
+                    ->verticalAlignment('start'),
             ])
             ->filters([
                 //
@@ -96,7 +132,8 @@ class QualityLabelResource extends Resource
                     ->icon(Heroicon::Eye)
                     ->iconButton()
                     ->hiddenLabel()
-                    ->tooltip(__('filament-actions::view.single.label')),
+                    ->tooltip(__('filament-actions::view.single.label'))
+                    ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}"),
                 EditAction::make()
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
@@ -120,5 +157,11 @@ class QualityLabelResource extends Resource
         return [
             'index' => ManageQualityLabels::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withCount(['criterias', 'indicators']);
     }
 }
