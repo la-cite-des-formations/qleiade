@@ -7,55 +7,56 @@
 /* Primary */
 .fi-in-repeatable.bg-primary-list .fi-in-repeatable-item {
     background-color: var(--primary-50);
+    --tw-ring-color: color-mix(in oklab, var(--primary-950) 5%, transparent)
 }
 
-:is(.dark .fi-in-repeatable.bg-primary-list .fi-in-repeatable-item) {
-    background-color: color-mix(in srgb, var(--primary-900), transparent 80%);
-}
-
-/* Gray */
-.fi-in-repeatable.bg-gray-list .fi-in-repeatable-item {
-    background-color: var(--gray-50);
-}
-
-:is(.dark .fi-in-repeatable.bg-gray-list .fi-in-repeatable-item) {
-    background-color: color-mix(in srgb, var(--gray-900), transparent 80%);
+.fi-in-repeatable.bg-primary-list .fi-in-repeatable-item:where(.dark, .dark *) {
+    background-color: color-mix(in oklab, var(--primary-950), transparent);
+    --tw-ring-color: color-mix(in oklab, var(--primary-900), transparent)
 }
 
 /* Info */
 .fi-in-repeatable.bg-info-list .fi-in-repeatable-item {
     background-color: var(--info-50);
+    --tw-ring-color: color-mix(in oklab, var(--info-950) 5%, transparent)
 }
 
-:is(.dark .fi-in-repeatable.bg-info-list .fi-in-repeatable-item) {
-    background-color: color-mix(in srgb, var(--info-900), transparent 80%);
+.fi-in-repeatable.bg-info-list .fi-in-repeatable-item:where(.dark, .dark *) {
+    background-color: color-mix(in oklab, var(--info-950), transparent);
+    --tw-ring-color: color-mix(in oklab, var(--info-900), transparent)
 }
 
 /* Success */
 .fi-in-repeatable.bg-success-list .fi-in-repeatable-item {
     background-color: var(--success-50);
+    --tw-ring-color: color-mix(in oklab, var(--success-950) 5%, transparent)
 }
 
-:is(.dark .fi-in-repeatable.bg-success-list .fi-in-repeatable-item) {
-    background-color: color-mix(in srgb, var(--success-900), transparent 80%);
+.fi-in-repeatable.bg-success-list .fi-in-repeatable-item:where(.dark, .dark *) {
+    background-color: color-mix(in oklab, var(--success-950), transparent);
+    --tw-ring-color: color-mix(in oklab, var(--success-900), transparent)
 }
 
 /* Warning */
 .fi-in-repeatable.bg-warning-list .fi-in-repeatable-item {
     background-color: var(--warning-50);
+    --tw-ring-color: color-mix(in oklab, var(--warning-950) 5%, transparent)
 }
 
-:is(.dark .fi-in-repeatable.bg-warning-list .fi-in-repeatable-item) {
-    background-color: color-mix(in srgb, var(--warning-900), transparent 80%);
+.fi-in-repeatable.bg-warning-list .fi-in-repeatable-item:where(.dark, .dark *) {
+    background-color: color-mix(in oklab, var(--warning-950), transparent);
+    --tw-ring-color: color-mix(in oklab, var(--warning-900), transparent)
 }
 
 /* Danger */
 .fi-in-repeatable.bg-danger-list .fi-in-repeatable-item {
     background-color: var(--danger-50);
+    --tw-ring-color: color-mix(in oklab, var(--danger-950) 5%, transparent)
 }
 
-:is(.dark .fi-in-repeatable.bg-danger-list .fi-in-repeatable-item) {
-    background-color: color-mix(in srgb, var(--danger-900), transparent 80%);
+.fi-in-repeatable.bg-danger-list .fi-in-repeatable-item:where(.dark, .dark *) {
+    background-color: color-mix(in oklab, var(--danger-950), transparent);
+    --tw-ring-color: color-mix(in oklab, var(--danger-900), transparent)
 }
 
 /* style d'origine de filament (pour référence) */
