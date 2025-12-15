@@ -5,7 +5,7 @@ namespace Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Orchid\Screen\AsSource;
 
 class File extends Model
@@ -48,9 +48,9 @@ class File extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return BelongsToMany
      */
-    public function wealths()
+    public function wealths(): BelongsToMany
     {
         return $this->belongsToMany(
             Wealth::class,

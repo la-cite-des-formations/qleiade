@@ -5,6 +5,8 @@ namespace Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Orchid\Filters\Filterable;
 use Orchid\Screen\AsSource;
 
@@ -34,9 +36,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return HasMany
      */
-    public function wealths()
+    public function wealths(): HasMany
     {
         return $this->hasMany(Wealth::class);
     }
@@ -44,9 +46,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return Collection
+     * @return BelongsToMany
      */
-    public function users()
+    public function users(): BelongsToMany
     {
         return $this->belongsToMany(
             User::class,
@@ -59,9 +61,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return Collection
+     * @return BelongsToMany
      */
-    public function actions()
+    public function actions(): BelongsToMany
     {
         return $this->belongsToMany(
             Action::class,
@@ -76,7 +78,7 @@ class Unit extends Model
      *
      * @return Builder
      */
-    public function scopeByAlphaSort(Builder $query)
+    public function scopeByAlphaSort(Builder $query): Builder
     {
         return $query->orderBy('name', 'asc');
     }

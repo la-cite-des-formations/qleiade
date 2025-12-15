@@ -4,6 +4,8 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Orchid\Filters\Filterable;
 use Orchid\Screen\AsSource;
 
@@ -62,9 +64,9 @@ class Action extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return BelongsToMany
      */
-    public function wealths()
+    public function wealths(): BelongsToMany
     {
         return $this->belongsToMany(
             Wealth::class,
@@ -77,9 +79,9 @@ class Action extends Model
     /**
      * stage
      *
-     * @return Stage
+     * @return BelongsTo
      */
-    public function stage()
+    public function stage(): BelongsTo
     {
         return $this->belongsTo(Stage::class);
     }
@@ -87,10 +89,10 @@ class Action extends Model
     /**
      * unit
      *
-     * @return Collection
+     * @return BelongsToMany
      */
 
-    public function unit()
+    public function unit(): BelongsToMany
     {
         return $this->belongsToMany(
             Unit::class,

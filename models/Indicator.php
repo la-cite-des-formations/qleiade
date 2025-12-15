@@ -4,6 +4,9 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Support\Facades\Log;
 use Orchid\Filters\Filterable;
 
@@ -69,9 +72,9 @@ class Indicator extends Model
     /**
      * wealths
      *
-     * @return Collection
+     * @return BelongsToMany
      */
-    public function wealths()
+    public function wealths(): BelongsToMany
     {
         return $this->belongsToMany(
             Wealth::class,
@@ -86,9 +89,9 @@ class Indicator extends Model
     /**
      * qualityLabel
      *
-     * @return QualityLabel
+     * @return HasOneThrough
      */
-    public function qualityLabel()
+    public function qualityLabel(): HasOneThrough
     {
         return $this->hasOneThrough(
             QualityLabel::class, Criteria::class,
@@ -98,11 +101,11 @@ class Indicator extends Model
     }
 
     /**
-     * qualityLabel
+     * criteria
      *
-     * @return Criteria
+     * @return BelongsTo
      */
-    public function criteria()
+    public function criteria(): BelongsTo
     {
         return $this->belongsTo(Criteria::class);
     }

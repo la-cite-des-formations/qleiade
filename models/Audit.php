@@ -4,6 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\EngineManager;
 use Models\QualityLabel;
@@ -31,9 +32,9 @@ class Audit extends Model
     /**
      * qualityLabel
      *
-     * @return QualityLabel
+     * @return BelongsTo
      */
-    public function qualityLabel()
+    public function qualityLabel(): BelongsTo
     {
         return $this->belongsTo(QualityLabel::class);
     }

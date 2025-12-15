@@ -9,6 +9,9 @@ use Laravel\Scout\Searchable;
 use Laravel\Scout\EngineManager;
 
 use Database\Factories\WealthFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Orchid\Filters\Filterable;
 use Orchid\Screen\AsSource;
 
@@ -134,9 +137,9 @@ class Wealth extends Model
     /**
      * actions
      *
-     * @return Collection
+     * @return BelongsToMany
      */
-    public function actions()
+    public function actions(): BelongsToMany
     {
         return $this->belongsToMany(
             Action::class,
@@ -149,9 +152,9 @@ class Wealth extends Model
     /**
      * wealthType
      *
-     * @return WealthType
+     * @return BelongsTo
      */
-    public function wealthType()
+    public function wealthType(): BelongsTo
     {
         return $this->belongsTo(WealthType::class);
     }
@@ -159,10 +162,10 @@ class Wealth extends Model
     /**
      * indicators
      *
-     * @return Collection
+     * @return BelongsToMany
      */
 
-    public function indicators()
+    public function indicators(): BelongsToMany
     {
         return $this->belongsToMany(
             Indicator::class,
@@ -177,9 +180,9 @@ class Wealth extends Model
     /**
      * files
      *
-     * @return Collection
+     * @return HasOneThrough
      */
-    public function file()
+    public function file(): HasOneThrough
     {
         return $this->hasOneThrough(
             File::class,
@@ -195,9 +198,9 @@ class Wealth extends Model
     /**
      * unit
      *
-     * @return Collection
+     * @return BelongsTo
      */
-    public function unit()
+    public function unit(): BelongsTo
     {
         return $this->belongsTo(Unit::class);
     }
@@ -205,9 +208,9 @@ class Wealth extends Model
     /**
      * tags
      *
-     * @return Collection
+     * @return BelongsToMany
      */
-    public function tags()
+    public function tags(): BelongsToMany
     {
         return $this->belongsToMany(
             Tag::class,

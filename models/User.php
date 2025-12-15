@@ -4,6 +4,7 @@ namespace Models;
 
 use Orchid\Platform\Models\User as Authenticatable;
 use Admin\Orchid\Presenters\UserPresenter;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class User extends Authenticatable
 {
@@ -77,10 +78,10 @@ class User extends Authenticatable
     /**
      * unit
      *
-     * @return Collection
+     * @return BelongsToMany
      */
 
-    public function unit()
+    public function unit(): BelongsToMany
     {
         return $this->belongsToMany(
             Unit::class,

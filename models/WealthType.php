@@ -4,6 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Orchid\Filters\Filterable;
 use Orchid\Screen\AsSource;
 
@@ -32,9 +33,9 @@ class WealthType extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return HasMany
      */
-    public function wealths()
+    public function wealths(): HasMany
     {
         return $this->hasMany(Wealth::class);
     }
