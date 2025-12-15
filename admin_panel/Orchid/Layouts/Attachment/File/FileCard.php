@@ -27,6 +27,9 @@ class FileCard extends Legend
      */
     protected function columns(): array
     {
+        // On récupère le fichier une seule fois pour plus de clarté
+        $file = $this->query['wealth']->file;
+
         return  [
             Sight::make(__('attachement_actions_card'))->render(function () {
                 return Group::make(
@@ -57,20 +60,18 @@ class FileCard extends Legend
                     ]
                 );
             }),
-            Sight::make('original_name', __('original_name'))->render(function () {
-                return $this->query['wealth']->file->original_name;
+            Sight::make('original_name', __('original_name'))->render(function () use ($file) {
+                return $file ? $file->original_name : 'Aucun fichier';
             }),
-            Sight::make('mime_type', __('mime_type'))->render(function () {
-                return $this->query['wealth']->file->mime_type;
+            Sight::make('mime_type', __('mime_type'))->render(function () use ($file) {
+                return $file ? $file->mime_type : 'N/A';
             }),
-            Sight::make('gdrive_shared_link', __('gdrive_shared_link'))->render(function () {
-                $link = $this->query['wealth']->file->gdrive_shared_link;
-                return Link::make($link)
-                    ->href($link);
-                // ->class('my-link');
+            Sight::make('gdrive_shared_link', __('gdrive_shared_link'))->render(function () use ($file) {
+                $link = $file?->gdrive_shared_link;
+                return $file && $link ? Link::make($link)->href($link) : 'Aucun lien';
             }),
-            Sight::make('created_at', __('created_at'))->render(function () {
-                return $this->query['wealth']->file->created_at;
+            Sight::make('created_at', __('created_at'))->render(function () use ($file) {
+                return $file ? $file->created_at : 'N/A';
             }),
         ];
     }

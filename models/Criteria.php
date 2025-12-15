@@ -5,6 +5,8 @@ namespace Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Criteria extends Model
 {
@@ -31,9 +33,9 @@ class Criteria extends Model
     /**
      * Indicators
      * Un critère a plusieurs indicateurs
-     * @return Collection
+     * @return HasMany
      */
-    public function indicators()
+    public function indicators(): HasMany
     {
         return $this->hasMany(Indicator::class);
     }
@@ -41,9 +43,9 @@ class Criteria extends Model
     /**
      * qualityLabel
      *
-     * @return QualityLabel
+     * @return BelongsTo
      */
-    public function qualityLabel()
+    public function qualityLabel(): BelongsTo
     {
         return $this->belongsTo(QualityLabel::class);
     }

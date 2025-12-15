@@ -22,6 +22,7 @@ use Models\Wealth;
 use Models\Indicator;
 use Models\WealthType;
 use Models\File as FileModel;
+use Models\FileWealth;
 use App\Http\Traits\DriveManagement;
 use App\Http\Traits\WithAttachments;
 use App\Http\Requests\WealthRequest;
@@ -77,7 +78,7 @@ class EditScreen extends Screen
             if (is_null($duplicate)) {
                 // édition
                 $wealth->wealth_type = $wealth->wealthType->id;
-                $wealth->load(['files', 'actions', 'indicators.qualityLabel']);
+                $wealth->load(['file', 'actions', 'indicators.qualityLabel']);
 
                 $datas = [
                     'wealth' => $wealth,
@@ -404,7 +405,7 @@ class EditScreen extends Screen
                 $dataAttachment['file'] = ["type" => 'drive'];
                 $fileToUpload = $attachments['file'];
             } else {
-                if (count($wealth->files) > 0) {
+                if ($wealth->file) {
                     Toast::info('le fichier lié à cette preuve a été supprimé');
                 }
             }
@@ -481,8 +482,12 @@ class EditScreen extends Screen
         if (isset($fileToUpload)) {
             $fileId = $this->saveFile($fileToUpload, $wealth);
             if ($fileId) {
-                $wealth->files()->sync($fileId);
-            } else {
+                FileWealth::updateOrCreate(
+                    ['wealth_id' => $wealth->id],
+                    ['file_id' => $fileId]
+                );
+            }
+            else {
                 Toast::error(__('File_not_uploaded'));
             }
         }
@@ -509,7 +514,6 @@ class EditScreen extends Screen
         $wealth->tags()->detach();
         $wealth->indicators()->detach();
 
-        $wealth->delete();
         $wealth->delete();
 
         Toast::success(__('Wealth_was_removed'));
@@ -572,7 +576,9 @@ class EditScreen extends Screen
     {
         // DOC: Remove Files
         $action = $request->query("action");
-        foreach ($wealth->files as $file) {
+        $file = $wealth->file;
+
+        if($file) {
             switch ($action) {
 
                     //Archiving
@@ -584,7 +590,7 @@ class EditScreen extends Screen
                     Storage::cloud()->move($file->gdrive_path_id, $newFilePath);
 
                     //update wealth
-                    $wealth->files()->detach($file->id);
+                    FileWealth::where('wealth_id', $wealth->id)->delete();
                     $wealth->attachment = null;
                     $wealth->save();
 
@@ -603,7 +609,7 @@ class EditScreen extends Screen
                     Storage::cloud()->delete($file->gdrive_path_id);
 
                     //update wealth
-                    $wealth->files()->detach($file->id);
+                    FileWealth::where('wealth_id', $wealth->id)->delete();
                     $wealth->attachment = null;
                     $wealth->save();
 
@@ -619,7 +625,7 @@ class EditScreen extends Screen
                     Storage::cloud()->delete($file->gdrive_path_id);
 
                     //update wealth
-                    $wealth->files()->detach($file->id);
+                    FileWealth::where('wealth_id', $wealth->id)->delete();
                     $wealth->attachment = null;
                     $wealth->save();
 

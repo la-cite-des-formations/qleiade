@@ -3,15 +3,16 @@
 namespace Admin\Orchid\Layouts\Parts;
 
 use Models\Indicator;
+use Models\Unit;
+use Models\WealthType;
+use Models\QualityLabel;
 use Orchid\Screen\Field;
 use Orchid\Screen\Fields\Group;
 use Orchid\Screen\Fields\Relation;
-use Orchid\Screen\Layouts\Rows;
-use Models\Unit;
-use Models\WealthType;
-use Orchid\Screen\Actions\Link;
 use Orchid\Screen\Fields\Input;
 use Orchid\Screen\Fields\Select;
+use Orchid\Screen\Layouts\Rows;
+use Orchid\Screen\Actions\Link;
 
 class SearchLayout extends Rows
 {
@@ -29,62 +30,77 @@ class SearchLayout extends Rows
      */
     protected function fields(): iterable
     {
+        // Charge et tri des options
+
+        // Options pour les services associés
+        $unitOptions = Unit::all()
+            ->sortBy('name')
+            ->mapWithKeys(function ($unit) {
+                return [$unit->id => $unit->full];
+            });
+
+        // Options pour l'importance de la preuve
+        $conformityOptions = [
+            '' => __('Select...'),
+            'essentielle' => __('conformity_level_essential'),
+            'complémentaire' => __('conformity_level_complementary'),
+        ];
+
+        // Options pour le label qualité
+        $qualityLabelOptions = QualityLabel::all()
+            ->sortBy('name')
+            ->pluck('name', 'id');
+
         return [
             Group::make([
                 Input::make('search.keyword', __('search_input'))
                     ->type('search')
                     ->title(__('search_input'))
                     ->placeholder(__('Search...'))
-                    ->value(request('search.wealth_type'))
             ]),
 
             Group::make([
-                Relation::make('search.units', __('units'))
-                    ->fromModel(Unit::class, 'label', 'id')
-                    ->displayAppend('full')
+                Select::make('search.units', __('units'))
+                    ->options($unitOptions)
                     ->multiple()
-                    ->chunk(50)
                     ->title(__('units'))
-                    ->placeholder(__('Select...'))
-                    ->value(request('search.units') ? explode(',', request('search.units')[0]) : []),
+                    ->placeholder(__('Select...')),
+
+                Relation::make('search.quality_label', __('quality_label'))
+                    ->fromModel(QualityLabel::class, 'name', 'id') // <-- Définit le modèle et les champs
+                    ->title(__('quality_label'))
+                    ->placeholder(__('Select...')),
 
                 Relation::make('search.indicators', __('indicators'))
-                    ->fromModel(Indicator::class, 'label', 'id')
+                    ->fromModel(Indicator::class, 'indicator.label', 'id')
                     ->multiple()
-                    ->displayAppend('full')
-                    ->chunk(50)
                     ->title(__('indicators'))
                     ->placeholder(__('Select...'))
-                    ->value(request('search.indicators') ? explode(',', request('search.indicators')[0]) : []),
+                    ->displayAppend('full')
+                    ->dependsOn('search.quality_label')
+                    ->applyScope('byQualityLabelAndSort')
             ]),
 
             Group::make([
                 Relation::make('search.wealth_type', __('wealth_type'))
                     ->fromModel(WealthType::class, 'label', 'id')
-                    ->chunk(50)
                     ->title(__('wealth_type'))
-                    ->placeholder(__('Select...'))
-                    ->value(request('search.wealth_type')),
+                    ->placeholder(__('Select...')),
 
                 Select::make('search.conformity')
+                    ->options($conformityOptions)
                     ->title(__('conformity_level'))
-                    ->options([
-                        'essentielle' => __('conformity_level_essential'),
-                        'complémentaire' => __('conformity_level_complementary'),
-                    ])
-                    ->empty(__('Select...'), 0)
-                    ->value(request('search.conformity')),
+                    ->placeholder(__('Select...')),
 
                 Link::make('reinitialize', __('reinitialize'))
                     ->icon('reload')
-                    ->class('btn btn-outline-secondary')
                     ->route('platform.quality.wealths')
+                    ->class('btn btn-outline-secondary')
             ])->alignEnd(),
 
             // Champ caché pour le sort
             Input::make('sort')
-                ->type('hidden')
-                ->value(request('sort', '')),
+                ->type('hidden'),
         ];
     }
 }

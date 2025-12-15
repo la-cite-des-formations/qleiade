@@ -4,7 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Orchid\Screen\AsSource;
 
 class Tag extends Model
@@ -46,9 +46,9 @@ class Tag extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return BelongsToMany
      */
-    public function wealths()
+    public function wealths(): BelongsToMany
     {
         return $this->belongsToMany(
             Wealth::class,

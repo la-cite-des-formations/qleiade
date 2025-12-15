@@ -41,8 +41,7 @@ class LinkCard extends Legend
             Sight::make('attachment.link.url', __('link_url'))
                 ->render(function () {
                     $link = $this->query['attachment']['link']['url'];
-                    return Link::make($link)
-                        ->href($link);
+                    return isset($link) ? Link::make($link)->href($link) : 'Aucun lien';
                 })
         ];
     }

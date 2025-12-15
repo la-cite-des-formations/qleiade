@@ -17,6 +17,7 @@ class SearchListener extends Listener
         'search.archived',
         'search.units.',
         'search.indicators.',
+        'search.quality_label',
         'search.conformity',
         'search.wealth_type',
         'sort',

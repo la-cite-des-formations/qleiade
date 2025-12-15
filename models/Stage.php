@@ -4,7 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Orchid\Screen\AsSource;
 
 class Stage extends Model
@@ -32,9 +32,9 @@ class Stage extends Model
     /**
      * actions
      * Une étape a plusieurs actions
-     * @return void
+     * @return HasMany
      */
-    public function actions()
+    public function actions(): HasMany
     {
         return $this->hasMany(Action::class);
     }

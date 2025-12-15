@@ -4,15 +4,17 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Models\Audit;
 use Orchid\Attachment\Attachable;
 use Orchid\Attachment\AttachOne;
 
-use Orchid\Screen\AsSource;
+// use Orchid\Screen\AsSource;
 
 class QualityLabel extends Model
 {
-    use HasFactory, AsSource, Attachable;
+    use HasFactory, Attachable;
 
     /**
      * The table associated with the model.
@@ -47,9 +49,9 @@ class QualityLabel extends Model
     /**
      * indicators
      *
-     * @return Collection
+     * @return HasManyThrough
      */
-    public function indicators()
+    public function indicators(): HasManyThrough
     {
         return $this->hasManyThrough(Indicator::class, Criteria::class);
     }
@@ -57,18 +59,18 @@ class QualityLabel extends Model
     /**
      * Criterias
      * Un label qualité a plusieurs critère
-     * @return Collection
+     * @return HasMany
      */
-    public function criterias()
+    public function criterias(): HasMany
     {
         return $this->hasMany(Criteria::class);
     }
     /**
      * audits
      *
-     * @return void
+     * @return HasMany
      */
-    public function audits()
+    public function audits(): HasMany
     {
         return $this->hasMany(Audit::class);
     }
