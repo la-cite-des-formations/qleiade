@@ -13,10 +13,16 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Models\Criteria;
+use Models\QualityLabel;
 
 class IndicatorResource extends Resource
 {
@@ -38,37 +44,63 @@ class IndicatorResource extends Resource
     {
         return $schema
             ->components([
+                TextInput::make('number')
+                    ->numeric()
+                    ->required()
+                    ->label('Numéro'),
                 TextInput::make('label')
                     ->required()
                     ->maxLength(255)
                     ->label('Nom')
                     ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', \Illuminate\Support\Str::slug($state))),
+                    ->afterStateUpdated(fn($state, callable $set) => $set('name', \Illuminate\Support\Str::slug($state)))
+                    ->columnSpanFull(),
                 TextInput::make('name')
                     ->maxLength(255)
                     ->label('Identifiant')
                     ->hidden()
                     ->dehydrated()
                     ->required(),
-                TextInput::make('number')
-                    ->numeric()
-                    ->required()
-                    ->label('Numéro'),
                 Textarea::make('description')
-                    ->maxLength(500)
+                    ->maxLength(1500)
                     ->label('Description')
-                    ->rows(3),
+                    ->rows(5)
+                    ->columnSpanFull(),
+                Select::make('quality_label_filter')
+                    ->label('Filtrer par Label Qualité')
+                    ->options(QualityLabel::all()->pluck('label', 'id'))
+                    ->searchable()
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(fn (Set $set) => $set('criteria_id', null))
+                    ->dehydrated(false),
+                Select::make('criteria_id')
+                    ->label('Critère parent')
+                    ->options(function (Get $get) {
+                        $labelId = $get('quality_label_filter');
+                        if (! $labelId) {
+                            return Criteria::all()->pluck('label', 'id');
+                        }
+
+                        return Criteria::where('quality_label_id', $labelId)
+                            ->pluck('label', 'id');
+                    })
+                    ->searchable()
+                    ->required()
+                    ->live()
+                    ->afterStateUpdated(function (Set $set, ?string $state) {
+                        if ($state) {
+                            $lastNumber = Indicator::where('criteria_id', $state)->max('number');
+                            $next = $lastNumber ? intval($lastNumber) + 1 : 1;
+                            $set('number', str_pad($next, 2, '0', STR_PAD_LEFT));
+                        }
+                    }),
                 TextInput::make('conformity_level_expected')
                     ->numeric()
                     ->label('Niveau de conformité attendu')
                     ->default(100)
                     ->minValue(0)
                     ->maxValue(100),
-                Select::make('criteria_id')
-                    ->relationship('criteria', 'label')
-                    ->required()
-                    ->label('Critère')
-                    ->preload(),
             ]);
     }
 
@@ -94,9 +126,24 @@ class IndicatorResource extends Resource
                     ->label('Nom')
                     ->wrap(),
             ])
-            ->filters([
-                //
-            ])
+            ->filters(
+                [
+                    SelectFilter::make('quality_label_id')
+                        ->relationship('qualityLabel', 'label')
+                        ->label('Label Qualité')
+                        ->indicateUsing(fn ($state) => 
+                            $state['value'] ? "Label Qualité: " . QualityLabel::find($state['value'])?->label : null
+                        )
+                        ->searchable()
+                        ->preload(),
+                    SelectFilter::make('criteria_id')
+                        ->relationship('criteria', 'label')
+                        ->label('Critère')
+                        ->searchable()
+                        ->preload(),
+                ], layout: FiltersLayout::AboveContent
+            )
+            ->deferFilters(false)
             ->recordActions([
                 EditAction::make()
                     ->icon(Heroicon::OutlinedPencilSquare)

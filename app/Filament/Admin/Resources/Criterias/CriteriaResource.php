@@ -13,11 +13,17 @@ use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Textarea;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Enums\FiltersLayout;
+use Filament\Tables\Enums\FiltersResetActionPosition;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
+use Models\Indicator;
 
 class CriteriaResource extends Resource
 {
@@ -35,11 +41,32 @@ class CriteriaResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label';
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('description')
+                    ->hiddenLabel()
+                    ->columnSpanFull(),
+                TextEntry::make('indicators')
+                    ->label(fn(Criteria $criteria): string => "{$criteria->indicators->count()} indicateurs :")
+                    ->state(
+                        fn(Criteria $criteria): string => $criteria->indicators
+                            ->sortBy('number', SORT_NATURAL)
+                            ->map(fn(Indicator $indicator) => "{$indicator->number} - {$indicator->label}")
+                            ->join('<br>')
+                    )
+                    ->html()
+                    ->columnSpanFull(),
+            ]);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
                 Select::make('quality_label_id')
+                    ->required()
                     ->relationship('qualityLabel', 'label')
                     ->label('Label Qualité')
                     ->preload(),
@@ -48,20 +75,21 @@ class CriteriaResource extends Resource
                     ->maxLength(255)
                     ->label('Nom')
                     ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', \Illuminate\Support\Str::slug($state))),
+                    ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state))),
                 TextInput::make('name')
                     ->maxLength(255)
                     ->label('Identifiant')
                     ->hidden()
                     ->dehydrated()
                     ->required(),
+                Textarea::make('description')
+                    ->maxLength(1500)
+                    ->label('Description')
+                    ->rows(5)
+                    ->columnSpanFull(),
                 TextInput::make('order')
                     ->numeric()
                     ->label('Ordre'),
-                Textarea::make('description')
-                    ->maxLength(500)
-                    ->label('Description')
-                    ->rows(3),
             ]);
     }
 
@@ -70,29 +98,35 @@ class CriteriaResource extends Resource
         return $table
             ->recordTitleAttribute('label')
             ->columns([
+                TextColumn::make('qualityLabel.label')
+                    ->sortable()
+                    ->label('Label Qualité')
+                    ->verticalAlignment('start'),
                 TextColumn::make('label')
                     ->searchable()
                     ->sortable()
                     ->label('Critère')
-                    ->verticalAlignment('start'),
-                TextColumn::make('qualityLabel.label')
-                    ->sortable()
-                    ->label('Label Qualité')
                     ->verticalAlignment('start'),
                 TextColumn::make('description')
                     ->searchable()
                     ->label('Description')
                     ->wrap(),
             ])
-            ->filters([
-                //
-            ])
+            ->filters(
+                [
+                    SelectFilter::make('quality_label_id')
+                        ->relationship('qualityLabel', 'label')
+                        ->label('Label Qualité'),
+                ], layout: FiltersLayout::AboveContent
+            )
+            ->deferFilters(false)
             ->recordActions([
                 ViewAction::make()
                     ->icon(Heroicon::Eye)
                     ->iconButton()
                     ->hiddenLabel()
-                    ->tooltip(__('filament-actions::view.single.label')),
+                    ->tooltip(__('filament-actions::view.single.label'))
+                    ->modalHeading(fn(Criteria $criteria): string => "{$criteria->qualityLabel->label} - {$criteria->label}"),
                 EditAction::make()
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()

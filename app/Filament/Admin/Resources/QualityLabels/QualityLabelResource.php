@@ -23,6 +23,7 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class QualityLabelResource extends Resource
 {
@@ -75,7 +76,7 @@ class QualityLabelResource extends Resource
                     ->maxLength(255)
                     ->label('Nom')
                     ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', \Illuminate\Support\Str::slug($state))),
+                    ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state))),
                 TextInput::make('name')
                     ->maxLength(255)
                     ->label('Identifiant')
