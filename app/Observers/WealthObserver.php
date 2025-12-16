@@ -15,10 +15,6 @@ class WealthObserver
      */
     public function deleting(Wealth $wealth)
     {
-        $files = $wealth->files;
-        $wealth->files()->detach();
-        foreach ($files as $file) {
-            $file->delete();
-        }
+        $wealth->file?->delete();
     }
 }
