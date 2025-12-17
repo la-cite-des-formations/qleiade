@@ -3,6 +3,7 @@
 namespace App\Filament\Admin\Resources\Criterias;
 
 use App\Filament\Admin\Resources\Criterias\Pages\ManageCriterias;
+use App\Filament\Admin\Resources\Indicators\IndicatorResource;
 use Models\Criteria;
 use BackedEnum;
 use Filament\Actions\BulkActionGroup;
@@ -114,7 +115,15 @@ class CriteriaResource extends Resource
                 TextColumn::make('indicators_count')
                     ->label('Indicateurs')
                     ->alignRight()
-                    ->verticalAlignment('start'),
+                    ->verticalAlignment('start')
+                    ->url(fn(Criteria $record): string => IndicatorResource::getUrl('index', [
+                        'filters' => [
+                            'structure' => [
+                                'quality_label_id' => $record->quality_label_id,
+                                'criteria_id' => $record->id,
+                            ],
+                        ],
+                    ])),
             ])
             ->filters(
                 [

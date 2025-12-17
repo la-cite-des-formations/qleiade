@@ -3,6 +3,8 @@
 namespace App\Filament\Admin\Resources\QualityLabels;
 
 use App\Filament\Admin\Resources\QualityLabels\Pages\ManageQualityLabels;
+use App\Filament\Admin\Resources\Criterias\CriteriaResource;
+use App\Filament\Admin\Resources\Indicators\IndicatorResource;
 use Filament\Infolists\Components\RepeatableEntry;
 use Filament\Infolists\Components\TextEntry;
 use Models\QualityLabel;
@@ -104,7 +106,7 @@ class QualityLabelResource extends Resource
                 TextColumn::make('label')
                     ->searchable()
                     ->sortable()
-                    ->label('Label')
+                    ->label('Label Qualité')
                     ->verticalAlignment('start'),
                 TextColumn::make('description')
                     ->searchable()
@@ -113,11 +115,25 @@ class QualityLabelResource extends Resource
                 TextColumn::make('criterias_count')
                     ->label('Critères')
                     ->alignRight()
-                    ->verticalAlignment('start'),
+                    ->verticalAlignment('start')
+                    ->url(fn(QualityLabel $record): string => CriteriaResource::getUrl('index', [
+                        'filters' => [
+                            'quality_label_id' => [
+                                'value' => $record->id,
+                            ],
+                        ],
+                    ])),
                 TextColumn::make('indicators_count')
                     ->label('Indicateurs')
                     ->alignRight()
-                    ->verticalAlignment('start'),
+                    ->verticalAlignment('start')
+                    ->url(fn(QualityLabel $record): string => IndicatorResource::getUrl('index', [
+                        'filters' => [
+                            'structure' => [
+                                'quality_label_id' => $record->id,
+                            ],
+                        ],
+                    ])),
                 TextColumn::make('last_audit_date')
                     ->date('d/m/Y')
                     ->label('Dernier audit')
