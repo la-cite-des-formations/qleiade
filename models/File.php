@@ -5,6 +5,7 @@ namespace Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class File extends Model
 {
@@ -46,9 +47,9 @@ class File extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return Relation
      */
-    public function wealths()
+    public function wealths(): Relation
     {
         return $this->belongsToMany(
             Wealth::class,

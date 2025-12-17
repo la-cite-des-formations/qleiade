@@ -44,7 +44,7 @@ class QualityLabelResource extends Resource
         return $schema
             ->components([
                 TextEntry::make('description')
-                    ->disableLabel(),
+                    ->hiddenLabel(),
                 RepeatableEntry::make('criterias')
                     ->label(
                         fn(QualityLabel $qualityLabel): string =>

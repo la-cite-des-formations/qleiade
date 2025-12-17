@@ -4,6 +4,8 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Log;
 
 class Indicator extends Model
@@ -40,9 +42,10 @@ class Indicator extends Model
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  array  $dependency // Les valeurs des champs dont on dépend
+     * 
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeByQualityLabelAndSort($query, $dependency = [])
+    public function scopeByQualityLabelAndSort($query, $dependency = []): Builder
     {
         Log::info('--- DÉPENDANCE INDICATEUR REÇUE ---', $dependency);
         // 1. On récupère l'ID du label qualité depuis le champ dépendant
@@ -69,9 +72,9 @@ class Indicator extends Model
     /**
      * wealths
      *
-     * @return \Illuminate\Database\Eloquent\Relations\BelongsToMany
+     * @return Relation
      */
-    public function wealths()
+    public function wealths(): Relation
     {
         return $this->belongsToMany(
             Wealth::class,
@@ -86,9 +89,9 @@ class Indicator extends Model
     /**
      * qualityLabel
      *
-     * @return QualityLabel
+     * @return Relation
      */
-    public function qualityLabel()
+    public function qualityLabel(): Relation
     {
         return $this->hasOneThrough(
             QualityLabel::class,
@@ -101,11 +104,11 @@ class Indicator extends Model
     }
 
     /**
-     * qualityLabel
+     * criteria
      *
-     * @return Criteria
+     * @return Relation
      */
-    public function criteria()
+    public function criteria(): Relation
     {
         return $this->belongsTo(Criteria::class);
     }

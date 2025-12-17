@@ -5,6 +5,7 @@ namespace Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Unit extends Model
 {
@@ -32,9 +33,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return Relation
      */
-    public function wealths()
+    public function wealths(): Relation
     {
         return $this->hasMany(Wealth::class);
     }
@@ -42,9 +43,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return Collection
+     * @return Relation
      */
-    public function users()
+    public function users(): Relation
     {
         return $this->belongsToMany(
             User::class,
@@ -57,9 +58,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return Collection
+     * @return Relation
      */
-    public function actions()
+    public function actions(): Relation
     {
         return $this->belongsToMany(
             Action::class,
@@ -74,7 +75,7 @@ class Unit extends Model
      *
      * @return Builder
      */
-    public function scopeByAlphaSort(Builder $query)
+    public function scopeByAlphaSort(Builder $query): Builder
     {
         return $query->orderBy('name', 'asc');
     }

@@ -5,6 +5,7 @@ namespace Models;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Laravel\Sanctum\HasApiTokens;
 use Filament\Models\Contracts\FilamentUser;
 use Filament\Panel;
@@ -48,9 +49,9 @@ class User extends Authenticatable implements FilamentUser
     /**
      * unit
      *
-     * @return Collection
+     * @return Relation
      */
-    public function unit()
+    public function unit(): Relation
     {
         return $this->belongsToMany(
             Unit::class,

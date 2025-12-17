@@ -4,6 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class QualityLabel extends Model
 {
@@ -37,9 +38,9 @@ class QualityLabel extends Model
     /**
      * indicators
      *
-     * @return Collection
+     * @return Relation
      */
-    public function indicators()
+    public function indicators(): Relation
     {
         return $this->hasManyThrough(Indicator::class, Criteria::class);
     }
@@ -47,18 +48,18 @@ class QualityLabel extends Model
     /**
      * Criterias
      * Un label qualité a plusieurs critère
-     * @return Collection
+     * @return Relation
      */
-    public function criterias()
+    public function criterias(): Relation
     {
         return $this->hasMany(Criteria::class);
     }
     /**
      * audits
      *
-     * @return void
+     * @return Relation
      */
-    public function audits()
+    public function audits(): Relation
     {
         return $this->hasMany(Audit::class);
     }

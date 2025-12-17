@@ -95,3 +95,9 @@
     }
 }
 */
+
+/* Align checkbox and actions columns to top for resource tables */
+.resource-table .fi-ta-selection-cell,
+.resource-table td:has(.fi-ta-actions) {
+    vertical-align: top;
+}

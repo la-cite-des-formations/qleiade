@@ -2,9 +2,10 @@
 
 namespace Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Criteria extends Model
 {
@@ -32,9 +33,9 @@ class Criteria extends Model
     /**
      * Indicators
      * Un critère a plusieurs indicateurs
-     * @return Collection
+     * @return Relation
      */
-    public function indicators()
+    public function indicators(): Relation
     {
         return $this->hasMany(Indicator::class);
     }
@@ -42,9 +43,9 @@ class Criteria extends Model
     /**
      * qualityLabel
      *
-     * @return QualityLabel
+     * @return Relation
      */
-    public function qualityLabel()
+    public function qualityLabel(): Relation
     {
         return $this->belongsTo(QualityLabel::class);
     }
@@ -54,7 +55,7 @@ class Criteria extends Model
      *
      * @return Builder
      */
-    public function scopeLabel($query, $v)
+    public function scopeLabel(Builder $query, $v): Builder
     {
         return $query->where('quality_label_id', $v);
     }

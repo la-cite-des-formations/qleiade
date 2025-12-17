@@ -5,6 +5,7 @@ namespace Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\EngineManager;
 
@@ -105,9 +106,9 @@ class Wealth extends Model
     /**
      * actions
      *
-     * @return Collection
+     * @return Relation
      */
-    public function actions()
+    public function actions(): Relation
     {
         return $this->belongsToMany(
             Action::class,
@@ -120,9 +121,9 @@ class Wealth extends Model
     /**
      * wealthType
      *
-     * @return WealthType
+     * @return Relation
      */
-    public function wealthType()
+    public function wealthType(): Relation
     {
         return $this->belongsTo(WealthType::class);
     }
@@ -130,10 +131,10 @@ class Wealth extends Model
     /**
      * indicators
      *
-     * @return Collection
+     * @return Relation
      */
 
-    public function indicators()
+    public function indicators(): Relation
     {
         return $this->belongsToMany(
             Indicator::class,
@@ -148,9 +149,9 @@ class Wealth extends Model
     /**
      * files
      *
-     * @return Collection
+     * @return Relation
      */
-    public function file()
+    public function file(): Relation
     {
         return $this->hasOneThrough(
             File::class,
@@ -166,9 +167,9 @@ class Wealth extends Model
     /**
      * unit
      *
-     * @return Collection
+     * @return Relation
      */
-    public function unit()
+    public function unit(): Relation
     {
         return $this->belongsTo(Unit::class);
     }
@@ -176,9 +177,9 @@ class Wealth extends Model
     /**
      * tags
      *
-     * @return Collection
+     * @return Relation
      */
-    public function tags()
+    public function tags(): Relation
     {
         return $this->belongsToMany(
             Tag::class,
@@ -188,14 +189,22 @@ class Wealth extends Model
         );
     }
 
-    // return one level of child items
-    public function wealths()
+    /**
+     * wealths
+     *
+     * @return Relation
+     */
+    public function wealths(): Relation
     {
         return $this->hasMany(Wealth::class, 'parent_id');
     }
 
-    // recursive relationship
-    public function childWealths()
+    /**
+     * childWealths
+     *
+     * @return Relation
+     */
+    public function childWealths(): Relation
     {
         return $this->hasMany(Wealth::class, 'parent_id')->with('wealths');
     }

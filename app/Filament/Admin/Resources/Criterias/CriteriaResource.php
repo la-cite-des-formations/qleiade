@@ -19,10 +19,10 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Enums\FiltersResetActionPosition;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Illuminate\Support\Str;
+use Illuminate\Database\Eloquent\Builder;
 use Models\Indicator;
 
 class CriteriaResource extends Resource
@@ -111,6 +111,10 @@ class CriteriaResource extends Resource
                     ->searchable()
                     ->label('Description')
                     ->wrap(),
+                TextColumn::make('indicators_count')
+                    ->label('Indicateurs')
+                    ->alignRight()
+                    ->verticalAlignment('start'),
             ])
             ->filters(
                 [
@@ -137,11 +141,14 @@ class CriteriaResource extends Resource
                     ->iconButton()
                     ->hiddenLabel()
                     ->tooltip(__('filament-actions::delete.single.label')),
-            ])
+            ])            
             ->toolbarActions([
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->extraAttributes([
+                'class' => 'resource-table',
             ]);
     }
 
@@ -150,5 +157,11 @@ class CriteriaResource extends Resource
         return [
             'index' => ManageCriterias::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withCount('indicators');
     }
 }

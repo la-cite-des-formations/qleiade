@@ -160,6 +160,9 @@ class IndicatorResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->extraAttributes([
+                'class' => 'resource-table',
             ]);
     }
 
