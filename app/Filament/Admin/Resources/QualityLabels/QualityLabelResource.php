@@ -113,12 +113,10 @@ class QualityLabelResource extends Resource
                 TextColumn::make('criterias_count')
                     ->label('Critères')
                     ->alignRight()
-                    ->sortable()
                     ->verticalAlignment('start'),
                 TextColumn::make('indicators_count')
                     ->label('Indicateurs')
                     ->alignRight()
-                    ->sortable()
                     ->verticalAlignment('start'),
                 TextColumn::make('last_audit_date')
                     ->date('d/m/Y')

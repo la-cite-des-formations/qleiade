@@ -23,6 +23,8 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Models\Criteria;
 use Models\QualityLabel;
+use Filament\Tables\Filters\Filter;
+use Illuminate\Database\Eloquent\Builder;
 
 class IndicatorResource extends Resource
 {
@@ -128,19 +130,52 @@ class IndicatorResource extends Resource
             ])
             ->filters(
                 [
-                    SelectFilter::make('quality_label_id')
-                        ->relationship('qualityLabel', 'label')
-                        ->label('Label Qualité')
-                        ->indicateUsing(fn ($state) => 
-                            $state['value'] ? "Label Qualité: " . QualityLabel::find($state['value'])?->label : null
-                        )
-                        ->searchable()
-                        ->preload(),
-                    SelectFilter::make('criteria_id')
-                        ->relationship('criteria', 'label')
-                        ->label('Critère')
-                        ->searchable()
-                        ->preload(),
+                    Filter::make('structure')
+                        ->schema([
+                            Select::make('quality_label_id')
+                                ->relationship('qualityLabel', 'label')
+                                ->label('Label Qualité')
+                                ->searchable()
+                                ->preload()
+                                ->placeholder('Tout')
+                                ->live(),
+                            Select::make('criteria_id')
+                                ->relationship('criteria', 'label', function (Builder $query, Get $get) {
+                                    $qualityLabelId = $get('quality_label_id');
+                                    if (! $qualityLabelId) {
+                                        return $query->whereRaw('1 = 0'); // Liste vide si pas de label
+                                    }
+                                    return $query->where('quality_label_id', $qualityLabelId);
+                                })
+                                ->label('Critère')
+                                ->searchable()
+                                ->preload()
+                                ->placeholder('Tout')
+                                ->visible(fn (Get $get) => filled($get('quality_label_id'))),
+                        ])
+                        ->columns(2)
+                        ->columnSpan(2)
+                        ->query(function (Builder $query, array $data): Builder {
+                            return $query
+                                ->when(
+                                    $data['quality_label_id'],
+                                    fn (Builder $query, $value): Builder => $query->whereHas('criteria', fn (Builder $query) => $query->where('quality_label_id', $value)),
+                                )
+                                ->when(
+                                    $data['criteria_id'],
+                                    fn (Builder $query, $value): Builder => $query->where('criteria_id', $value),
+                                );
+                        })
+                        ->indicateUsing(function (array $data): array {
+                            $indicators = [];
+                            if ($data['quality_label_id'] ?? null) {
+                                $indicators[] = 'Label Qualité: ' . QualityLabel::find($data['quality_label_id'])?->label;
+                            }
+                            if ($data['criteria_id'] ?? null) {
+                                $indicators[] = 'Critère: ' . Criteria::find($data['criteria_id'])?->label;
+                            }
+                            return $indicators;
+                        }),
                 ], layout: FiltersLayout::AboveContent
             )
             ->deferFilters(false)
