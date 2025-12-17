@@ -70,26 +70,35 @@ class CriteriaResource extends Resource
                     ->required()
                     ->relationship('qualityLabel', 'label')
                     ->label('Label Qualité')
-                    ->preload(),
+                    ->preload()
+                    ->live()
+                    ->afterStateUpdated(function ($state, callable $set, string $operation) {
+                        if ($operation !== 'create' || ! $state) {
+                            return;
+                        }
+
+                        $maxOrder = Criteria::where('quality_label_id', $state)->max('order');
+                        $newOrder = $maxOrder + 1;
+
+                        $set('order', $newOrder);
+                        $set('label', "Critère $newOrder");
+                        $set('name', Str::slug("Critère $newOrder"));
+                    })
+                    ->placeholder('Choisir...'),
                 TextInput::make('label')
                     ->required()
                     ->maxLength(255)
                     ->label('Nom')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state))),
-                TextInput::make('name')
-                    ->maxLength(255)
-                    ->label('Identifiant')
-                    ->hidden()
-                    ->dehydrated()
-                    ->required(),
+                    ->columnStart(1),
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')
                     ->rows(5)
+                    ->autofocus(fn ($get, string $operation) => $operation === 'create' && filled($get('quality_label_id')))
                     ->columnSpanFull(),
                 TextInput::make('order')
                     ->numeric()
+                    ->minValue(1)
                     ->label('Ordre'),
             ]);
     }

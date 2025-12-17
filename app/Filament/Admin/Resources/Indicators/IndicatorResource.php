@@ -19,12 +19,12 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
-use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 use Models\Criteria;
 use Models\QualityLabel;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 
 class IndicatorResource extends Resource
 {
@@ -46,49 +46,28 @@ class IndicatorResource extends Resource
     {
         return $schema
             ->components([
-                TextInput::make('number')
-                    ->numeric()
+                Select::make('quality_label_id')
+                    ->label('Label Qualité')
+                    ->relationship('qualityLabel', 'label')
                     ->required()
-                    ->label('Numéro'),
-                TextInput::make('label')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Nom')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', \Illuminate\Support\Str::slug($state)))
-                    ->columnSpanFull(),
-                TextInput::make('name')
-                    ->maxLength(255)
-                    ->label('Identifiant')
-                    ->hidden()
-                    ->dehydrated()
-                    ->required(),
-                Textarea::make('description')
-                    ->maxLength(1500)
-                    ->label('Description')
-                    ->rows(5)
-                    ->columnSpanFull(),
-                Select::make('quality_label_filter')
-                    ->label('Filtrer par Label Qualité')
-                    ->options(QualityLabel::all()->pluck('label', 'id'))
-                    ->searchable()
-                    ->preload()
+                    ->placeholder('Choisir...')
                     ->live()
-                    ->afterStateUpdated(fn (Set $set) => $set('criteria_id', null))
-                    ->dehydrated(false),
+                    ->afterStateUpdated(function (Set $set, ?string $state) {
+                        $set('criteria_id', null);
+                        $set('number', null);
+                    }),
                 Select::make('criteria_id')
-                    ->label('Critère parent')
-                    ->options(function (Get $get) {
-                        $labelId = $get('quality_label_filter');
-                        if (! $labelId) {
-                            return Criteria::all()->pluck('label', 'id');
-                        }
-
-                        return Criteria::where('quality_label_id', $labelId)
-                            ->pluck('label', 'id');
-                    })
+                    ->label('Critère')
+                    ->relationship(
+                        'criteria',
+                        'label',
+                        fn (Builder $query, Get $get) =>
+                            $query->where('quality_label_id', $get('quality_label_id'))
+                    )
                     ->searchable()
                     ->required()
+                    ->placeholder('Choisir...')
+                    ->preload()
                     ->live()
                     ->afterStateUpdated(function (Set $set, ?string $state) {
                         if ($state) {
@@ -96,13 +75,25 @@ class IndicatorResource extends Resource
                             $next = $lastNumber ? intval($lastNumber) + 1 : 1;
                             $set('number', str_pad($next, 2, '0', STR_PAD_LEFT));
                         }
-                    }),
-                TextInput::make('conformity_level_expected')
-                    ->numeric()
-                    ->label('Niveau de conformité attendu')
-                    ->default(100)
-                    ->minValue(0)
-                    ->maxValue(100),
+                        else {
+                            $set('number', null);
+                        }
+                    })
+                    ->visible(fn (Get $get) => filled($get('quality_label_id'))),
+                TextInput::make('label')
+                    ->required()
+                    ->maxLength(191)
+                    ->label('Nom')
+                    ->autofocus(fn (Get $get, string $operation) => $operation === 'create' && filled($get('quality_label_id')) && filled($get('criteria_id')))
+                    ->columnSpanFull(),
+                Textarea::make('description')
+                    ->maxLength(1500)
+                    ->label('Description')
+                    ->rows(5)
+                    ->columnSpanFull(),
+                TextInput::make('number')
+                    ->required()
+                    ->label('Numéro'),
             ]);
     }
 
@@ -135,10 +126,10 @@ class IndicatorResource extends Resource
                             Select::make('quality_label_id')
                                 ->relationship('qualityLabel', 'label')
                                 ->label('Label Qualité')
-                                ->searchable()
                                 ->preload()
                                 ->placeholder('Tout')
-                                ->live(),
+                                ->live()
+                                ->afterStateUpdated(fn (Set $set, $state) => !$state ? $set('criteria_id', null) : null),
                             Select::make('criteria_id')
                                 ->relationship('criteria', 'label', function (Builder $query, Get $get) {
                                     $qualityLabelId = $get('quality_label_id');
@@ -148,7 +139,6 @@ class IndicatorResource extends Resource
                                     return $query->where('quality_label_id', $qualityLabelId);
                                 })
                                 ->label('Critère')
-                                ->searchable()
                                 ->preload()
                                 ->placeholder('Tout')
                                 ->visible(fn (Get $get) => filled($get('quality_label_id'))),
@@ -181,6 +171,11 @@ class IndicatorResource extends Resource
             ->deferFilters(false)
             ->recordActions([
                 EditAction::make()
+                    ->fillForm(function (Indicator $record): array {
+                        $record->quality_label_id = $record->criteria->quality_label_id;
+                        
+                        return $record->toArray();
+                    })
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
                     ->hiddenLabel()

@@ -77,14 +77,7 @@ class QualityLabelResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Nom')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', Str::slug($state))),
-                TextInput::make('name')
-                    ->maxLength(255)
-                    ->label('Identifiant')
-                    ->hidden()
-                    ->dehydrated()
-                    ->required(),
+                    ->live(onBlur: true),
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')
