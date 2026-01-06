@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Utilities\Get;
 use Filament\Schemas\Components\Utilities\Set;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Filters\Indicator as FilterIndicator;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Enums\FiltersLayout;
 use Filament\Tables\Table;
@@ -158,12 +159,16 @@ class IndicatorResource extends Resource
                         })
                         ->indicateUsing(function (array $data): array {
                             $indicators = [];
+                            
                             if ($data['quality_label_id'] ?? null) {
-                                $indicators[] = 'Label Qualité: ' . QualityLabel::find($data['quality_label_id'])?->label;
+                                $indicators[] = FilterIndicator::make('Label Qualité: ' . QualityLabel::find($data['quality_label_id'])?->label);
                             }
+                            
                             if ($data['criteria_id'] ?? null) {
-                                $indicators[] = 'Critère: ' . Criteria::find($data['criteria_id'])?->label;
+                                $indicators[] = FilterIndicator::make('Critère: ' . Criteria::find($data['criteria_id'])?->label)
+                                    ->removeField('criteria_id');
                             }
+                            
                             return $indicators;
                         }),
                 ], layout: FiltersLayout::AboveContent
@@ -179,7 +184,8 @@ class IndicatorResource extends Resource
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
                     ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label')),
+                    ->tooltip(__('filament-actions::edit.single.label'))
+                    ->modalHeading(fn(Indicator $indicator): string => "Modifier Indicateur {$indicator->number} ({$indicator->qualityLabel->label} - {$indicator->criteria->label})"),
                 DeleteAction::make()
                     ->icon(Heroicon::OutlinedTrash)
                     ->iconButton()

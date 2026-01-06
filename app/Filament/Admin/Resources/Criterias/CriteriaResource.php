@@ -148,12 +148,14 @@ class CriteriaResource extends Resource
                     ->iconButton()
                     ->hiddenLabel()
                     ->tooltip(__('filament-actions::view.single.label'))
-                    ->modalHeading(fn(Criteria $criteria): string => "{$criteria->qualityLabel->label} - {$criteria->label}"),
+                    ->modalHeading(fn(Criteria $criteria): string => "{$criteria->qualityLabel->label} - {$criteria->label}")
+                    ->modalAutofocus(false),
                 EditAction::make()
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
                     ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label')),
+                    ->tooltip(__('filament-actions::edit.single.label'))
+                    ->modalHeading(fn(Criteria $criteria): string => "Modifier {$criteria->label} ({$criteria->qualityLabel->label})"),
                 DeleteAction::make()
                     ->icon(Heroicon::OutlinedTrash)
                     ->iconButton()

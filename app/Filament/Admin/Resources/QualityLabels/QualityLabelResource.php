@@ -141,7 +141,8 @@ class QualityLabelResource extends Resource
                     ->iconButton()
                     ->hiddenLabel()
                     ->tooltip(__('filament-actions::view.single.label'))
-                    ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}"),
+                    ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}")
+                    ->modalAutofocus(false),
                 EditAction::make()
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
