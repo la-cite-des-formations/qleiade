@@ -9,6 +9,7 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
@@ -21,7 +22,7 @@ class TagResource extends Resource
     protected static ?string $model = Tag::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedTag;
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 40;
 
     protected static ?string $navigationLabel = 'Libellés';
 
@@ -47,9 +48,11 @@ class TagResource extends Resource
                     ->hidden()
                     ->dehydrated()
                     ->required(),
-                TextInput::make('description')
-                    ->maxLength(255)
-                    ->label('Description'),
+                Textarea::make('description')
+                    ->maxLength(1500)
+                    ->label('Description')
+                    ->rows(5)
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -61,17 +64,20 @@ class TagResource extends Resource
                 TextColumn::make('label')
                     ->searchable()
                     ->sortable()
-                    ->label('Nom'),
+                    ->label('Nom')
+                    ->verticalAlignment('start'),
                 TextColumn::make('description')
                     ->searchable()
                     ->label('Description')
-                    ->limit(50),
+                    ->verticalAlignment('start')
+                    ->wrap(),
             ])
             ->filters([
                 //
             ])
             ->recordActions([
                 EditAction::make()
+                    ->modalWidth('xl')
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
                     ->hiddenLabel()
@@ -86,6 +92,9 @@ class TagResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->extraAttributes([
+                'class' => 'resource-table',
             ]);
     }
 

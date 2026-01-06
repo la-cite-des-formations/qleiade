@@ -86,8 +86,7 @@ class QualityLabelResource extends Resource
                 FileUpload::make('image')
                     ->label('Logo')
                     ->image()
-                    ->directory('quality-labels')
-                    ->columnSpanFull(),
+                    ->directory('quality-labels'),
             ]);
     }
 
@@ -141,9 +140,11 @@ class QualityLabelResource extends Resource
                     ->iconButton()
                     ->hiddenLabel()
                     ->tooltip(__('filament-actions::view.single.label'))
+                    ->modalWidth('3xl')
                     ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}")
                     ->modalAutofocus(false),
                 EditAction::make()
+                    ->modalWidth('xl')
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
                     ->hiddenLabel()

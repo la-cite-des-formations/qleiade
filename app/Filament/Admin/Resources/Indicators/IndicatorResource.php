@@ -65,10 +65,8 @@ class IndicatorResource extends Resource
                         fn (Builder $query, Get $get) =>
                             $query->where('quality_label_id', $get('quality_label_id'))
                     )
-                    ->searchable()
                     ->required()
                     ->placeholder('Choisir...')
-                    ->preload()
                     ->live()
                     ->afterStateUpdated(function (Set $set, ?string $state) {
                         if ($state) {
@@ -81,10 +79,11 @@ class IndicatorResource extends Resource
                         }
                     })
                     ->visible(fn (Get $get) => filled($get('quality_label_id'))),
-                TextInput::make('label')
+                Textarea::make('label')
                     ->required()
                     ->maxLength(191)
                     ->label('Nom')
+                    ->rows(2)
                     ->autofocus(fn (Get $get, string $operation) => $operation === 'create' && filled($get('quality_label_id')) && filled($get('criteria_id')))
                     ->columnSpanFull(),
                 Textarea::make('description')
@@ -118,6 +117,7 @@ class IndicatorResource extends Resource
                     ->searchable()
                     ->sortable()
                     ->label('Nom')
+                    ->verticalAlignment('start')
                     ->wrap(),
             ])
             ->filters(
@@ -185,6 +185,7 @@ class IndicatorResource extends Resource
                     ->iconButton()
                     ->hiddenLabel()
                     ->tooltip(__('filament-actions::edit.single.label'))
+                    ->modalWidth('xl')
                     ->modalHeading(fn(Indicator $indicator): string => "Modifier Indicateur {$indicator->number} ({$indicator->qualityLabel->label} - {$indicator->criteria->label})"),
                 DeleteAction::make()
                     ->icon(Heroicon::OutlinedTrash)

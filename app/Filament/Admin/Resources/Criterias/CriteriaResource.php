@@ -70,7 +70,6 @@ class CriteriaResource extends Resource
                     ->required()
                     ->relationship('qualityLabel', 'label')
                     ->label('Label Qualité')
-                    ->preload()
                     ->live()
                     ->afterStateUpdated(function ($state, callable $set, string $operation) {
                         if ($operation !== 'create' || ! $state) {
@@ -148,6 +147,7 @@ class CriteriaResource extends Resource
                     ->iconButton()
                     ->hiddenLabel()
                     ->tooltip(__('filament-actions::view.single.label'))
+                    ->modalWidth('2xl')
                     ->modalHeading(fn(Criteria $criteria): string => "{$criteria->qualityLabel->label} - {$criteria->label}")
                     ->modalAutofocus(false),
                 EditAction::make()
@@ -155,6 +155,7 @@ class CriteriaResource extends Resource
                     ->iconButton()
                     ->hiddenLabel()
                     ->tooltip(__('filament-actions::edit.single.label'))
+                    ->modalWidth('xl')
                     ->modalHeading(fn(Criteria $criteria): string => "Modifier {$criteria->label} ({$criteria->qualityLabel->label})"),
                 DeleteAction::make()
                     ->icon(Heroicon::OutlinedTrash)
