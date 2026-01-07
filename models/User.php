@@ -47,11 +47,11 @@ class User extends Authenticatable implements FilamentUser
     ];
 
     /**
-     * unit
+     * units
      *
      * @return Relation
      */
-    public function unit(): Relation
+    public function units(): Relation
     {
         return $this->belongsToMany(
             Unit::class,

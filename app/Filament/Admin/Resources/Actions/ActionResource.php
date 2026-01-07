@@ -11,19 +11,22 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Actions\ViewAction;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
+use Illuminate\Support\Str;
 
 class ActionResource extends Resource
 {
     protected static ?string $model = Action::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquare3Stack3d;
-    protected static ?int $navigationSort = 60;
+    protected static ?int $navigationSort = 50;
 
     protected static ?string $navigationLabel = 'Activités';
 
@@ -33,6 +36,23 @@ class ActionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label';
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('description')
+                    ->hiddenLabel()
+                    ->placeholder("Description de l'activité non renseignée")
+                    ->columnSpanFull(),
+                TextEntry::make('order')
+                    ->label('Ordre')
+                    ->inlineLabel(),
+                TextEntry::make('stage.description')
+                    ->hiddenLabel()
+                    ->columnSpanFull(),
+            ]);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
@@ -41,24 +61,21 @@ class ActionResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Nom')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', \Illuminate\Support\Str::slug($state))),
-                TextInput::make('name')
-                    ->maxLength(255)
-                    ->label('Identifiant')
-                    ->hidden()
-                    ->dehydrated()
-                    ->required(),
-                TextInput::make('description')
-                    ->maxLength(255)
-                    ->label('Description'),
-                TextInput::make('order')
-                    ->numeric()
-                    ->label('Ordre'),
+                    ->columnStart(1),
+                Textarea::make('description')
+                    ->maxLength(1500)
+                    ->label('Description')
+                    ->rows(5)
+                    ->columnSpanFull(),
                 Select::make('stage_id')
                     ->relationship('stage', 'label')
                     ->label('Étape')
-                    ->preload(),
+                    ->columnStart(1),
+                TextInput::make('order')
+                    ->label('Ordre')
+                    ->numeric()
+                    ->minValue(1)
+                    ->columnStart(1),
             ]);
     }
 
@@ -69,18 +86,19 @@ class ActionResource extends Resource
             ->columns([
                 TextColumn::make('order')
                     ->sortable()
-                    ->label('Ordre'),
+                    ->label('Ordre')
+                    ->verticalAlignment('start'),
                 TextColumn::make('label')
                     ->searchable()
                     ->sortable()
-                    ->label('Nom'),
+                    ->label('Nom')
+                    ->wrap()
+                    ->verticalAlignment('start'),
                 TextColumn::make('stage.label')
-                    ->sortable()
-                    ->label('Étape'),
-                TextColumn::make('description')
                     ->searchable()
-                    ->label('Description')
-                    ->limit(40),
+                    ->sortable()
+                    ->label('Étape')
+                    ->verticalAlignment('start'),
             ])
             ->filters([
                 //
@@ -90,12 +108,15 @@ class ActionResource extends Resource
                     ->icon(Heroicon::Eye)
                     ->iconButton()
                     ->hiddenLabel()
-                    ->tooltip(__('filament-actions::view.single.label')),
+                    ->tooltip(__('filament-actions::view.single.label'))
+                    ->modalWidth('xl')
+                    ->modalHeading(fn(Action $action): string => "{$action->label}"),
                 EditAction::make()
                     ->icon(Heroicon::OutlinedPencilSquare)
                     ->iconButton()
                     ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label')),
+                    ->tooltip(__('filament-actions::edit.single.label'))
+                    ->modalWidth('2xl'),
                 DeleteAction::make()
                     ->icon(Heroicon::OutlinedTrash)
                     ->iconButton()
@@ -106,6 +127,9 @@ class ActionResource extends Resource
                 BulkActionGroup::make([
                     DeleteBulkAction::make(),
                 ]),
+            ])
+            ->extraAttributes([
+                'class' => 'resource-table',
             ]);
     }
 

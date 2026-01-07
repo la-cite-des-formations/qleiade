@@ -22,7 +22,7 @@ class User extends JsonResource
             return Str::startsWith($key, "public");
         });
 
-        $pr = new UnitCollection($this->unit);
+        $pr = new UnitCollection($this->units);
         $procs = json_decode($pr->toJson());
 
         $user = [

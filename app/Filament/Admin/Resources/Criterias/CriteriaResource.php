@@ -48,6 +48,7 @@ class CriteriaResource extends Resource
             ->components([
                 TextEntry::make('description')
                     ->hiddenLabel()
+                    ->placeholder("Description du critère non renseignée")
                     ->columnSpanFull(),
                 TextEntry::make('indicators')
                     ->label(fn(Criteria $criteria): string => "{$criteria->indicators->count()} indicateurs :")

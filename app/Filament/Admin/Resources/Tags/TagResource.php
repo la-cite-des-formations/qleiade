@@ -39,15 +39,7 @@ class TagResource extends Resource
                 TextInput::make('label')
                     ->required()
                     ->maxLength(255)
-                    ->label('Nom')
-                    ->live(onBlur: true)
-                    ->afterStateUpdated(fn($state, callable $set) => $set('name', \Illuminate\Support\Str::slug($state))),
-                TextInput::make('name')
-                    ->maxLength(255)
-                    ->label('Identifiant')
-                    ->hidden()
-                    ->dehydrated()
-                    ->required(),
+                    ->label('Nom'),
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')

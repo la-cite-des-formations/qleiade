@@ -4,7 +4,7 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Action extends Model
 {
@@ -33,9 +33,9 @@ class Action extends Model
     /**
      * wealths
      *
-     * @return void
+     * @return Relation
      */
-    public function wealths()
+    public function wealths(): Relation
     {
         return $this->belongsToMany(
             Wealth::class,
@@ -48,19 +48,19 @@ class Action extends Model
     /**
      * stage
      *
-     * @return Stage
+     * @return Relation
      */
-    public function stage(): BelongsTo
+    public function stage(): Relation
     {
         return $this->belongsTo(Stage::class);
     }
 
     /**
-     * unit
+     * units
      *
-     * @return Collection
+     * @return Relation
      */
-    public function unit()
+    public function units(): Relation
     {
         return $this->belongsToMany(
             Unit::class,

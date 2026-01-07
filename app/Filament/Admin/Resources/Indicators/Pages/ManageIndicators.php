@@ -18,6 +18,7 @@ class ManageIndicators extends ManageRecords
         return [
             CreateAction::make()
                 ->modalWidth('xl')
+                ->modalHeading('Nouvel Indicateur')
                 ->mountUsing(function ($form, ManageIndicators $livewire) {
                     $form->fill();
 

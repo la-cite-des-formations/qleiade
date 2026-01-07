@@ -46,11 +46,13 @@ class QualityLabelResource extends Resource
         return $schema
             ->components([
                 TextEntry::make('description')
-                    ->hiddenLabel(),
+                    ->hiddenLabel()
+                    ->placeholder("Description du label qualité non renseignée")
+                    ->columnSpanFull(),
                 RepeatableEntry::make('criterias')
                     ->label(
                         fn(QualityLabel $qualityLabel): string =>
-                        "{$qualityLabel->indicators_count} indicateurs répartis sur {$qualityLabel->criterias_count} critères :"
+                            "{$qualityLabel->indicators_count} indicateurs répartis sur {$qualityLabel->criterias_count} critères :"
                     )
                     ->schema([
                         TextEntry::make('indicators')
@@ -76,8 +78,8 @@ class QualityLabelResource extends Resource
                 TextInput::make('label')
                     ->required()
                     ->maxLength(255)
-                    ->label('Nom')
-                    ->live(onBlur: true),
+                    ->placeholder("Nom du label qualité non renseigné")
+                    ->label('Nom'),
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')

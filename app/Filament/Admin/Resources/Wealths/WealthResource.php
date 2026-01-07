@@ -25,7 +25,7 @@ class WealthResource extends Resource
     protected static ?string $model = Wealth::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedClipboardDocumentCheck;
-    protected static ?int $navigationSort = 50;
+    protected static ?int $navigationSort = 60;
 
     protected static ?string $navigationLabel = 'Preuves';
 

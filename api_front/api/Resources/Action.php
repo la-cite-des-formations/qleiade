@@ -21,7 +21,7 @@ class Action extends JsonResource
             'name' => $this->name,
             'label' => $this->label,
             'order' => $this->order,
-            'unit' => new UnitCollection($this->unit),
+            'unit' => new UnitCollection($this->units),
             'wealths' => new WealthCollection($this->wealths),
             'type' => 'Action'
         ];

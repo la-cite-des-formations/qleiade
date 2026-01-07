@@ -5,6 +5,7 @@ namespace App\Filament\Admin\Resources\Tags\Pages;
 use App\Filament\Admin\Resources\Tags\TagResource;
 use Filament\Actions\CreateAction;
 use Filament\Resources\Pages\ManageRecords;
+use Illuminate\Support\Str;
 
 class ManageTags extends ManageRecords
 {
@@ -14,7 +15,15 @@ class ManageTags extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->modalWidth('xl'),
+                ->modalHeading('Nouveau Libellé')
+                ->modalWidth('xl')
+                ->mutateDataUsing(function (array $data): array {
+                    // Ensure name is always set from label
+                    if (!empty($data['label'])) {
+                        $data['name'] = Str::slug($data['label']);
+                    }
+                    return $data;
+                }),
         ];
     }
 }

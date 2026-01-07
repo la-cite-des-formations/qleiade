@@ -16,6 +16,7 @@ class ManageQualityLabels extends ManageRecords
         return [
             CreateAction::make()
                 ->modalWidth('xl')
+                ->modalHeading('Nouveau Label Qualité')
                 ->mutateDataUsing(function (array $data): array {
                     // Ensure name is always set from label
                     if (!empty($data['label'])) {
