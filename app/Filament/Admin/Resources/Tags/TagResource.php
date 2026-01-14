@@ -48,49 +48,69 @@ class TagResource extends Resource
             ]);
     }
 
+    private static function getTableColumns(): array
+    {
+        return [
+            TextColumn::make('label')
+                ->searchable()
+                ->sortable()
+                ->label('Nom')
+                ->verticalAlignment('start'),
+            TextColumn::make('description')
+                ->searchable()
+                ->label('Description')
+                ->verticalAlignment('start')
+                ->wrap(),
+        ];
+    }
+
+    private static function getTableFilters(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    private static function getTableActions(): array
+    {
+        return [
+            EditAction::make()
+                ->modalWidth('xl')
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::edit.single.label')),
+            DeleteAction::make()
+                ->icon(Heroicon::OutlinedTrash)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::delete.single.label')),
+        ];
+    }
+
+    private static function getTableBulkActions(): array
+    {
+        return [
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('label')
-            ->columns([
-                TextColumn::make('label')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Nom')
-                    ->verticalAlignment('start'),
-                TextColumn::make('description')
-                    ->searchable()
-                    ->label('Description')
-                    ->verticalAlignment('start')
-                    ->wrap(),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                EditAction::make()
-                    ->modalWidth('xl')
-                    ->icon(Heroicon::OutlinedPencilSquare)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label')),
-                DeleteAction::make()
-                    ->icon(Heroicon::OutlinedTrash)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::delete.single.label')),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ])
-            ->extraAttributes([
-                'class' => 'resource-table',
-            ]);
+            ->columns(self::getTableColumns())
+            ->extraAttributes(['class' => 'resource-table'])
+            ->extremePaginationLinks(true)
+            ->filters(self::getTableFilters())
+            ->deferFilters(false)
+            ->recordActions(self::getTableActions())
+            ->toolbarActions(self::getTableBulkActions());
     }
 
-    public static function getPages(): array
+   public static function getPages(): array
     {
         return [
             'index' => ManageTags::route('/'),

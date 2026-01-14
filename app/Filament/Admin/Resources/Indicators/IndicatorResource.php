@@ -25,7 +25,6 @@ use Models\Criteria;
 use Models\QualityLabel;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 
 class IndicatorResource extends Resource
 {
@@ -97,110 +96,135 @@ class IndicatorResource extends Resource
             ]);
     }
 
+    private static function getTableColumns(): array
+    {
+        return [
+            TextColumn::make('qualityLabel.label')
+                ->label('Label Qualité')
+                ->verticalAlignment('start'),
+            TextColumn::make('criteria.label')
+                ->sortable()
+                ->label('Critère')
+                ->verticalAlignment('start'),
+            TextColumn::make('number')
+                ->sortable()
+                ->label('N°')
+                ->verticalAlignment('start'),
+            TextColumn::make('label')
+                ->searchable()
+                ->sortable()
+                ->label('Nom')
+                ->verticalAlignment('start')
+                ->wrap(),
+        ];
+    }
+
+    private static function getTableFilters(): array
+    {
+        return [
+            Filter::make('quality_classification')
+                ->schema([
+                    Select::make('quality_label_id')
+                        ->relationship('qualityLabel', 'label')
+                        ->label('Label Qualité')
+                        ->placeholder('Tout')
+                        ->live()
+                        ->afterStateUpdated(fn (Set $set) =>
+                            $set('criteria_id', null)
+                        )
+                        ->native(false),
+                    Select::make('criteria_id')
+                        ->relationship(
+                            name: 'criteria',
+                            titleAttribute: 'label',
+                            modifyQueryUsing: fn (Builder $query, Get $get) =>
+                                $query->where('quality_label_id', $get('quality_label_id'))
+                        )
+                        ->preload()
+                        ->label('Critère')
+                        ->placeholder('Tout')
+                        ->disabled(fn (Get $get): bool => ! filled($get('quality_label_id')))
+                        ->native(false),
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            value: $data['quality_label_id'],
+                            callback: fn (Builder $query, $value): Builder =>
+                                $query->whereHas(
+                                    relation: 'criteria',
+                                    callback: fn (Builder $query) =>
+                                        $query->where('quality_label_id', $value)
+                                ),
+                        )
+                        ->when(
+                            value: $data['criteria_id'],
+                            callback: fn (Builder $query, $value): Builder =>
+                                $query->where('criteria_id', $value),
+                        );
+                })
+                ->indicateUsing(function (array $data): array {
+                    $indicators = [];
+                    
+                    if ($data['quality_label_id'] ?? null) {
+                        $indicators[] = FilterIndicator::make('quality_label')
+                            ->label('Label Qualité: ' . QualityLabel::find($data['quality_label_id'])?->label);
+                    }
+                    
+                    if ($data['criteria_id'] ?? null) {
+                        $indicators[] = FilterIndicator::make('criteria')
+                            ->label('Critère: ' . Criteria::find($data['criteria_id'])?->label)
+                            ->removeField('criteria_id');
+                    }
+                    
+                    return $indicators;
+                }),
+        ];
+    }
+
+    private static function getTableActions(): array
+    {
+        return [
+            EditAction::make()
+                ->fillForm(function (Indicator $record): array {
+                    $record->quality_label_id = $record->criteria->quality_label_id;
+                    
+                    return $record->toArray();
+                })
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::edit.single.label'))
+                ->modalWidth('xl')
+                ->modalHeading(fn(Indicator $indicator): string => "Modifier Indicateur {$indicator->number} ({$indicator->qualityLabel->label} - {$indicator->criteria->label})"),
+            DeleteAction::make()
+                ->icon(Heroicon::OutlinedTrash)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::delete.single.label')),
+        ];
+    }
+
+    private static function getTableBulkActions(): array
+    {
+        return [
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('label')
-            ->columns([
-                TextColumn::make('qualityLabel.label')
-                    ->label('Label Qualité')
-                    ->verticalAlignment('start'),
-                TextColumn::make('criteria.label')
-                    ->sortable()
-                    ->label('Critère')
-                    ->verticalAlignment('start'),
-                TextColumn::make('number')
-                    ->sortable()
-                    ->label('N°')
-                    ->verticalAlignment('start'),
-                TextColumn::make('label')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Nom')
-                    ->verticalAlignment('start')
-                    ->wrap(),
-            ])
-            ->filters(
-                [
-                    Filter::make('structure')
-                        ->schema([
-                            Select::make('quality_label_id')
-                                ->relationship('qualityLabel', 'label')
-                                ->label('Label Qualité')
-                                ->preload()
-                                ->placeholder('Tout')
-                                ->live()
-                                ->afterStateUpdated(fn (Set $set, $state) => !$state ? $set('criteria_id', null) : null),
-                            Select::make('criteria_id')
-                                ->relationship('criteria', 'label', function (Builder $query, Get $get) {
-                                    $qualityLabelId = $get('quality_label_id');
-                                    if (! $qualityLabelId) {
-                                        return $query->whereRaw('1 = 0'); // Liste vide si pas de label
-                                    }
-                                    return $query->where('quality_label_id', $qualityLabelId);
-                                })
-                                ->label('Critère')
-                                ->preload()
-                                ->placeholder('Tout')
-                                ->visible(fn (Get $get) => filled($get('quality_label_id'))),
-                        ])
-                        ->columns(2)
-                        ->columnSpan(2)
-                        ->query(function (Builder $query, array $data): Builder {
-                            return $query
-                                ->when(
-                                    $data['quality_label_id'],
-                                    fn (Builder $query, $value): Builder => $query->whereHas('criteria', fn (Builder $query) => $query->where('quality_label_id', $value)),
-                                )
-                                ->when(
-                                    $data['criteria_id'],
-                                    fn (Builder $query, $value): Builder => $query->where('criteria_id', $value),
-                                );
-                        })
-                        ->indicateUsing(function (array $data): array {
-                            $indicators = [];
-                            
-                            if ($data['quality_label_id'] ?? null) {
-                                $indicators[] = FilterIndicator::make('Label Qualité: ' . QualityLabel::find($data['quality_label_id'])?->label);
-                            }
-                            
-                            if ($data['criteria_id'] ?? null) {
-                                $indicators[] = FilterIndicator::make('Critère: ' . Criteria::find($data['criteria_id'])?->label)
-                                    ->removeField('criteria_id');
-                            }
-                            
-                            return $indicators;
-                        }),
-                ], layout: FiltersLayout::AboveContent
-            )
+            ->columns(self::getTableColumns())
+            ->extraAttributes(['class' => 'resource-table'])
+            ->extremePaginationLinks(true)
+            ->filters(self::getTableFilters(), layout: FiltersLayout::Dropdown)
             ->deferFilters(false)
-            ->recordActions([
-                EditAction::make()
-                    ->fillForm(function (Indicator $record): array {
-                        $record->quality_label_id = $record->criteria->quality_label_id;
-                        
-                        return $record->toArray();
-                    })
-                    ->icon(Heroicon::OutlinedPencilSquare)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label'))
-                    ->modalWidth('xl')
-                    ->modalHeading(fn(Indicator $indicator): string => "Modifier Indicateur {$indicator->number} ({$indicator->qualityLabel->label} - {$indicator->criteria->label})"),
-                DeleteAction::make()
-                    ->icon(Heroicon::OutlinedTrash)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::delete.single.label')),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ])
-            ->extraAttributes([
-                'class' => 'resource-table',
-            ]);
+            ->recordActions(self::getTableActions())
+            ->toolbarActions(self::getTableBulkActions());
     }
 
     public static function getPages(): array

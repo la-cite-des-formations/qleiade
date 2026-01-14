@@ -101,3 +101,16 @@
 .resource-table td:has(.fi-ta-actions) {
     vertical-align: top;
 }
+
+/* Force numbered pagination (desktop style) ONLY on larger screens */
+@media (min-width: 768px) {
+    .fi-pagination-items {
+        display: flex !important;
+    }
+
+    /* Hide the mobile-only simple navigation buttons to avoid duplication */
+    .fi-pagination-previous-btn,
+    .fi-pagination-next-btn {
+        display: none !important;
+    }
+}

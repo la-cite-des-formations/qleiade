@@ -5,10 +5,11 @@ namespace Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class QualityLabel extends Model
 {
-    use HasFactory;
+    use HasFactory, HasRelationships;
 
     /**
      * The table associated with the model.
@@ -36,6 +37,16 @@ class QualityLabel extends Model
     ];
 
     /**
+     * Criterias
+     * Un label qualité a plusieurs critère
+     * @return Relation
+     */
+    public function criterias(): Relation
+    {
+        return $this->hasMany(Criteria::class);
+    }
+
+    /**
      * indicators
      *
      * @return Relation
@@ -46,14 +57,30 @@ class QualityLabel extends Model
     }
 
     /**
-     * Criterias
-     * Un label qualité a plusieurs critère
+     * wealths
+     *
      * @return Relation
      */
-    public function criterias(): Relation
+    public function wealths(): Relation
     {
-        return $this->hasMany(Criteria::class);
+        return $this->hasManyDeep(
+            Wealth::class,
+            [Criteria::class, Indicator::class, 'wealths_indicators'],
+            [
+                'quality_label_id',
+                'criteria_id',
+                'indicator_id',
+                'id'
+            ],
+            [
+                'id',
+                'id',
+                'id',
+                'wealth_id'
+            ]
+        );
     }
+
     /**
      * audits
      *

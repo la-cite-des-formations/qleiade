@@ -25,7 +25,6 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Str;
 
 class QualityLabelResource extends Resource
 {
@@ -92,76 +91,105 @@ class QualityLabelResource extends Resource
             ]);
     }
 
+    private static function getTableColumns(): array
+    {
+        return [
+            TextColumn::make('label')
+                ->searchable()
+                ->sortable()
+                ->label('Nom')
+                ->verticalAlignment('start'),
+            TextColumn::make('description')
+                ->searchable()
+                ->label('Description')
+                ->wrap(),
+            TextColumn::make('criterias_count')
+                ->label('Critères')
+                ->alignRight()
+                ->verticalAlignment('start')
+                ->url(fn(QualityLabel $record): string => CriteriaResource::getUrl('index', [
+                    'filters' => [
+                        'quality_label_id' => [
+                            'value' => $record->id,
+                        ],
+                    ],
+                ])),
+            TextColumn::make('indicators_count')
+                ->label('Indicateurs')
+                ->alignRight()
+                ->verticalAlignment('start')
+                ->url(fn(QualityLabel $record): string => IndicatorResource::getUrl('index', [
+                    'filters' => [
+                        'structure' => [
+                            'quality_label_id' => $record->id,
+                        ],
+                    ],
+                ])),
+            TextColumn::make('last_audit_date')
+                ->date('d/m/Y')
+                ->label('Dernier audit')
+                ->verticalAlignment('start'),
+        ];
+    }
+
+    private static function getTableFilters(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    private static function getTableActions(): array
+    {
+        return [
+            ViewAction::make()
+                ->icon(Heroicon::Eye)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::view.single.label'))
+                ->modalWidth('3xl')
+                ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}")
+                ->modalAutofocus(false),
+            EditAction::make()
+                ->modalWidth('xl')
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::edit.single.label')),
+            DeleteAction::make()
+                ->icon(Heroicon::OutlinedTrash)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::delete.single.label')),
+        ];
+    }
+
+    private static function getTableBulkActions(): array
+    {
+        return [
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('label')
-            ->columns([
-                TextColumn::make('label')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Label Qualité')
-                    ->verticalAlignment('start'),
-                TextColumn::make('description')
-                    ->searchable()
-                    ->label('Description')
-                    ->wrap(),
-                TextColumn::make('criterias_count')
-                    ->label('Critères')
-                    ->alignRight()
-                    ->verticalAlignment('start')
-                    ->url(fn(QualityLabel $record): string => CriteriaResource::getUrl('index', [
-                        'filters' => [
-                            'quality_label_id' => [
-                                'value' => $record->id,
-                            ],
-                        ],
-                    ])),
-                TextColumn::make('indicators_count')
-                    ->label('Indicateurs')
-                    ->alignRight()
-                    ->verticalAlignment('start')
-                    ->url(fn(QualityLabel $record): string => IndicatorResource::getUrl('index', [
-                        'filters' => [
-                            'structure' => [
-                                'quality_label_id' => $record->id,
-                            ],
-                        ],
-                    ])),
-                TextColumn::make('last_audit_date')
-                    ->date('d/m/Y')
-                    ->label('Dernier audit')
-                    ->verticalAlignment('start'),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->icon(Heroicon::Eye)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::view.single.label'))
-                    ->modalWidth('3xl')
-                    ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}")
-                    ->modalAutofocus(false),
-                EditAction::make()
-                    ->modalWidth('xl')
-                    ->icon(Heroicon::OutlinedPencilSquare)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label')),
-                DeleteAction::make()
-                    ->icon(Heroicon::OutlinedTrash)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::delete.single.label')),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->columns(self::getTableColumns())
+            ->extraAttributes(['class' => 'resource-table'])
+            ->extremePaginationLinks(true)
+            ->filters(self::getTableFilters())
+            ->deferFilters(false)
+            ->recordActions(self::getTableActions())
+            ->toolbarActions(self::getTableBulkActions());
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withCount(['criterias', 'indicators']);
     }
 
     public static function getPages(): array
@@ -169,11 +197,5 @@ class QualityLabelResource extends Resource
         return [
             'index' => ManageQualityLabels::route('/'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withCount(['criterias', 'indicators']);
     }
 }

@@ -19,7 +19,6 @@ use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 
 class ActionResource extends Resource
 {
@@ -79,58 +78,78 @@ class ActionResource extends Resource
             ]);
     }
 
+    private static function getTableColumns(): array
+    {
+        return [
+            TextColumn::make('order')
+                ->sortable()
+                ->label('Ordre')
+                ->verticalAlignment('start'),
+            TextColumn::make('label')
+                ->searchable()
+                ->sortable()
+                ->label('Nom')
+                ->wrap()
+                ->verticalAlignment('start'),
+            TextColumn::make('stage.label')
+                ->searchable()
+                ->sortable()
+                ->label('Étape')
+                ->verticalAlignment('start'),
+        ];
+    }
+
+    private static function getTableFilters(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    private static function getTableActions(): array
+    {
+        return [
+            ViewAction::make()
+                ->icon(Heroicon::Eye)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::view.single.label'))
+                ->modalWidth('xl')
+                ->modalHeading(fn(Action $action): string => "{$action->label}"),
+            EditAction::make()
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::edit.single.label'))
+                ->modalWidth('2xl'),
+            DeleteAction::make()
+                ->icon(Heroicon::OutlinedTrash)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::delete.single.label')),
+        ];
+    }
+
+    private static function getTableBulkActions(): array
+    {
+        return [
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('label')
-            ->columns([
-                TextColumn::make('order')
-                    ->sortable()
-                    ->label('Ordre')
-                    ->verticalAlignment('start'),
-                TextColumn::make('label')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Nom')
-                    ->wrap()
-                    ->verticalAlignment('start'),
-                TextColumn::make('stage.label')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Étape')
-                    ->verticalAlignment('start'),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                ViewAction::make()
-                    ->icon(Heroicon::Eye)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::view.single.label'))
-                    ->modalWidth('xl')
-                    ->modalHeading(fn(Action $action): string => "{$action->label}"),
-                EditAction::make()
-                    ->icon(Heroicon::OutlinedPencilSquare)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label'))
-                    ->modalWidth('2xl'),
-                DeleteAction::make()
-                    ->icon(Heroicon::OutlinedTrash)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::delete.single.label')),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ])
-            ->extraAttributes([
-                'class' => 'resource-table',
-            ]);
+            ->columns(self::getTableColumns())
+            ->extraAttributes(['class' => 'resource-table'])
+            ->extremePaginationLinks(true)
+            ->filters(self::getTableFilters())
+            ->deferFilters(false)
+            ->recordActions(self::getTableActions())
+            ->toolbarActions(self::getTableBulkActions());
     }
 
     public static function getPages(): array

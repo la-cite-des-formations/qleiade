@@ -19,6 +19,7 @@
         "laravel/ui": "^4.5",
         "masbug/flysystem-google-drive-ext": "^2.3",
         "meilisearch/meilisearch-php": "^1.0",
+        "staudenmeir/eloquent-has-many-deep": "1.20",
         "voku/stop-words": "^2.0"
     },
     "require-dev": {

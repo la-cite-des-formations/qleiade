@@ -60,47 +60,70 @@ class UserResource extends Resource
             ]);
     }
 
+    private static function getTableColumns(): array
+    {
+        return [
+            TextColumn::make('name')
+                ->searchable()
+                ->sortable()
+                ->label('Nom'),
+            TextColumn::make('email')
+                ->searchable()
+                ->sortable()
+                ->label('Email'),
+            TextColumn::make('unit.label')
+                ->badge()
+                ->label('Services'),
+            TextColumn::make('created_at')
+                ->dateTime('d/m/Y H:i')
+                ->sortable()
+                ->label('Créé le'),
+        ];
+    }
+
+    private static function getTableFilters(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    private static function getTableActions(): array
+    {
+        return [
+            EditAction::make()
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::edit.single.label')),
+            DeleteAction::make()
+                ->icon(Heroicon::OutlinedTrash)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::delete.single.label')),
+        ];
+    }
+
+    private static function getTableBulkActions(): array
+    {
+        return [
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('name')
-            ->columns([
-                TextColumn::make('name')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Nom'),
-                TextColumn::make('email')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Email'),
-                TextColumn::make('unit.label')
-                    ->badge()
-                    ->label('Services'),
-                TextColumn::make('created_at')
-                    ->dateTime('d/m/Y H:i')
-                    ->sortable()
-                    ->label('Créé le'),
-            ])
-            ->filters([
-                //
-            ])
-            ->recordActions([
-                EditAction::make()
-                    ->icon(Heroicon::OutlinedPencilSquare)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label')),
-                DeleteAction::make()
-                    ->icon(Heroicon::OutlinedTrash)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::delete.single.label')),
-            ])
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ]);
+            ->columns(self::getTableColumns())
+            ->extraAttributes(['class' => 'resource-table'])
+            ->extremePaginationLinks(true)
+            ->filters(self::getTableFilters())
+            ->deferFilters(false)
+            ->recordActions(self::getTableActions())
+            ->toolbarActions(self::getTableBulkActions());
     }
 
     public static function getPages(): array

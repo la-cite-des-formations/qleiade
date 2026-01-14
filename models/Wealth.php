@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\EngineManager;
 
@@ -13,7 +14,7 @@ use Database\Factories\WealthFactory;
 
 class Wealth extends Model
 {
-    use HasFactory, Searchable;
+    use HasFactory, Searchable, HasRelationships;
 
     /**
      * The table associated with the model.
@@ -144,6 +145,32 @@ class Wealth extends Model
         )
         ->withPivot('is_essential')
         ->withTimestamps();
+    }
+
+    /**
+     * qualityLabels
+     *
+     * @return Relation
+     */
+    public function qualityLabels(): Relation
+    {
+        return $this->hasManyDeep(
+            QualityLabel::class,
+            ['wealths_indicators', Indicator::class, Criteria::class],
+            [
+                'wealth_id',
+                'id',
+                'id',
+                'id'
+            ],
+            [
+                'id',
+                'indicator_id',
+                'criteria_id',
+                'quality_label_id'
+            ]
+        )
+        ->distinct();
     }
 
     /**

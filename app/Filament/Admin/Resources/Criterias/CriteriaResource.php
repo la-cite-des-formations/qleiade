@@ -103,75 +103,99 @@ class CriteriaResource extends Resource
             ]);
     }
 
+    private static function getTableColumns(): array
+    {
+        return [
+            TextColumn::make('qualityLabel.label')
+                ->sortable()
+                ->label('Label Qualité')
+                ->verticalAlignment('start'),
+            TextColumn::make('label')
+                ->searchable()
+                ->sortable()
+                ->label('Nom')
+                ->verticalAlignment('start'),
+            TextColumn::make('description')
+                ->searchable()
+                ->label('Description')
+                ->wrap(),
+            TextColumn::make('indicators_count')
+                ->label('Indicateurs')
+                ->alignRight()
+                ->verticalAlignment('start')
+                ->url(fn(Criteria $record): string => IndicatorResource::getUrl('index', [
+                    'filters' => [
+                        'quality_classification' => [
+                            'quality_label_id' => $record->quality_label_id,
+                            'criteria_id' => $record->id,
+                        ],
+                    ],
+                ])),
+        ];
+    }
+
+    private static function getTableFilters(): array
+    {
+        return [
+            SelectFilter::make('quality_label_id')
+                ->relationship('qualityLabel', 'label')
+                ->label('Label Qualité')
+                ->native(false),
+        ];
+    }
+
+    private static function getTableActions(): array
+    {
+        return [
+            ViewAction::make()
+                ->icon(Heroicon::Eye)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::view.single.label'))
+                ->modalWidth('2xl')
+                ->modalHeading(fn(Criteria $criteria): string => "{$criteria->qualityLabel->label} - {$criteria->label}")
+                ->modalAutofocus(false),
+            EditAction::make()
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::edit.single.label'))
+                ->modalWidth('xl')
+                ->modalHeading(fn(Criteria $criteria): string => "Modifier {$criteria->label} ({$criteria->qualityLabel->label})"),
+            DeleteAction::make()
+                ->icon(Heroicon::OutlinedTrash)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::delete.single.label')),
+        ];
+    }
+
+    private static function getTableBulkActions(): array
+    {
+        return [
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ];
+    }
+
     public static function table(Table $table): Table
     {
         return $table
             ->recordTitleAttribute('label')
-            ->columns([
-                TextColumn::make('qualityLabel.label')
-                    ->sortable()
-                    ->label('Label Qualité')
-                    ->verticalAlignment('start'),
-                TextColumn::make('label')
-                    ->searchable()
-                    ->sortable()
-                    ->label('Critère')
-                    ->verticalAlignment('start'),
-                TextColumn::make('description')
-                    ->searchable()
-                    ->label('Description')
-                    ->wrap(),
-                TextColumn::make('indicators_count')
-                    ->label('Indicateurs')
-                    ->alignRight()
-                    ->verticalAlignment('start')
-                    ->url(fn(Criteria $record): string => IndicatorResource::getUrl('index', [
-                        'filters' => [
-                            'structure' => [
-                                'quality_label_id' => $record->quality_label_id,
-                                'criteria_id' => $record->id,
-                            ],
-                        ],
-                    ])),
-            ])
-            ->filters(
-                [
-                    SelectFilter::make('quality_label_id')
-                        ->relationship('qualityLabel', 'label')
-                        ->label('Label Qualité'),
-                ], layout: FiltersLayout::AboveContent
-            )
+            ->columns(self::getTableColumns())
+            ->extraAttributes(['class' => 'resource-table'])
+            ->extremePaginationLinks(true)
+            ->filters(self::getTableFilters(), layout: FiltersLayout::Dropdown)
             ->deferFilters(false)
-            ->recordActions([
-                ViewAction::make()
-                    ->icon(Heroicon::Eye)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::view.single.label'))
-                    ->modalWidth('2xl')
-                    ->modalHeading(fn(Criteria $criteria): string => "{$criteria->qualityLabel->label} - {$criteria->label}")
-                    ->modalAutofocus(false),
-                EditAction::make()
-                    ->icon(Heroicon::OutlinedPencilSquare)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::edit.single.label'))
-                    ->modalWidth('xl')
-                    ->modalHeading(fn(Criteria $criteria): string => "Modifier {$criteria->label} ({$criteria->qualityLabel->label})"),
-                DeleteAction::make()
-                    ->icon(Heroicon::OutlinedTrash)
-                    ->iconButton()
-                    ->hiddenLabel()
-                    ->tooltip(__('filament-actions::delete.single.label')),
-            ])            
-            ->toolbarActions([
-                BulkActionGroup::make([
-                    DeleteBulkAction::make(),
-                ]),
-            ])
-            ->extraAttributes([
-                'class' => 'resource-table',
-            ]);
+            ->recordActions(self::getTableActions())
+            ->toolbarActions(self::getTableBulkActions());
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withCount('indicators');
     }
 
     public static function getPages(): array
@@ -179,11 +203,5 @@ class CriteriaResource extends Resource
         return [
             'index' => ManageCriterias::route('/'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()
-            ->withCount('indicators');
     }
 }
