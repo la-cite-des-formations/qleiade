@@ -13,6 +13,7 @@ use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
+use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -43,7 +44,7 @@ class TagResource extends Resource
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')
-                    ->rows(5)
+                    ->rows(3)
                     ->columnSpanFull(),
             ]);
     }
@@ -55,10 +56,13 @@ class TagResource extends Resource
                 ->searchable()
                 ->sortable()
                 ->label('Nom')
-                ->verticalAlignment('start'),
+                ->verticalAlignment('start')
+                ->wrap()
+                ->width('25%'),
             TextColumn::make('description')
                 ->searchable()
                 ->label('Description')
+                ->html()
                 ->verticalAlignment('start')
                 ->wrap(),
         ];
@@ -75,7 +79,7 @@ class TagResource extends Resource
     {
         return [
             EditAction::make()
-                ->modalWidth('xl')
+                ->slideOver()
                 ->icon(Heroicon::OutlinedPencilSquare)
                 ->iconButton()
                 ->hiddenLabel()
@@ -103,7 +107,6 @@ class TagResource extends Resource
             ->recordTitleAttribute('label')
             ->columns(self::getTableColumns())
             ->extraAttributes(['class' => 'resource-table'])
-            ->extremePaginationLinks(true)
             ->filters(self::getTableFilters())
             ->deferFilters(false)
             ->recordActions(self::getTableActions())

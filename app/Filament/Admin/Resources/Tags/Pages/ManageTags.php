@@ -16,7 +16,7 @@ class ManageTags extends ManageRecords
         return [
             CreateAction::make()
                 ->modalHeading('Nouveau Libellé')
-                ->modalWidth('xl')
+                ->slideOver()
                 ->mutateDataUsing(function (array $data): array {
                     // Ensure name is always set from label
                     if (!empty($data['label'])) {

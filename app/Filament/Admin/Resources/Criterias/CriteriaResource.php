@@ -25,6 +25,7 @@ use Filament\Tables\Table;
 use Illuminate\Support\Str;
 use Illuminate\Database\Eloquent\Builder;
 use Models\Indicator;
+use Models\QualityLabel;
 
 class CriteriaResource extends Resource
 {
@@ -84,7 +85,8 @@ class CriteriaResource extends Resource
                         $set('label', "Critère $newOrder");
                         $set('name', Str::slug("Critère $newOrder"));
                     })
-                    ->placeholder('Choisir...'),
+                    ->placeholder('Choisir...')
+                    ->native(false),
                 TextInput::make('label')
                     ->required()
                     ->maxLength(255)
@@ -93,7 +95,7 @@ class CriteriaResource extends Resource
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')
-                    ->rows(5)
+                    ->rows(3)
                     ->autofocus(fn ($get, string $operation) => $operation === 'create' && filled($get('quality_label_id')))
                     ->columnSpanFull(),
                 TextInput::make('order')
@@ -140,6 +142,7 @@ class CriteriaResource extends Resource
             SelectFilter::make('quality_label_id')
                 ->relationship('qualityLabel', 'label')
                 ->label('Label Qualité')
+                ->default(QualityLabel::count() === 1 ? QualityLabel::first()->id : null)
                 ->native(false),
         ];
     }
@@ -152,7 +155,7 @@ class CriteriaResource extends Resource
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::view.single.label'))
-                ->modalWidth('2xl')
+                ->slideOver()
                 ->modalHeading(fn(Criteria $criteria): string => "{$criteria->qualityLabel->label} - {$criteria->label}")
                 ->modalAutofocus(false),
             EditAction::make()
@@ -160,7 +163,7 @@ class CriteriaResource extends Resource
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::edit.single.label'))
-                ->modalWidth('xl')
+                ->slideOver()
                 ->modalHeading(fn(Criteria $criteria): string => "Modifier {$criteria->label} ({$criteria->qualityLabel->label})"),
             DeleteAction::make()
                 ->icon(Heroicon::OutlinedTrash)
@@ -185,7 +188,6 @@ class CriteriaResource extends Resource
             ->recordTitleAttribute('label')
             ->columns(self::getTableColumns())
             ->extraAttributes(['class' => 'resource-table'])
-            ->extremePaginationLinks(true)
             ->filters(self::getTableFilters(), layout: FiltersLayout::Dropdown)
             ->deferFilters(false)
             ->recordActions(self::getTableActions())

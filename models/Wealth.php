@@ -82,19 +82,25 @@ class Wealth extends Model
         'archived_at',
         // json les visuelles de la preuve file, link, ypareo
         'attachment',
+        // foreign keys
+        'wealth_type_id',
+        'unit_id',
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'validity_date' => 'datetime',
-        'archived_at' => 'datetime',
-        'attachment' => 'array',
-        'granularity' => 'array',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'validity_date' => 'datetime',
+            'archived_at' => 'datetime',
+            'attachment' => 'array',
+            'granularity' => 'array',
+        ];
+    }
 
     /**
      * Create a new factory instance for the model.

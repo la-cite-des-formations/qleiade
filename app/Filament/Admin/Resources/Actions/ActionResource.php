@@ -64,11 +64,13 @@ class ActionResource extends Resource
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')
-                    ->rows(5)
+                    ->rows(3)
                     ->columnSpanFull(),
                 Select::make('stage_id')
                     ->relationship('stage', 'label')
                     ->label('Étape')
+                    ->placeholder('Choisir...')
+                    ->native(false)
                     ->columnStart(1),
                 TextInput::make('order')
                     ->label('Ordre')
@@ -114,14 +116,14 @@ class ActionResource extends Resource
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::view.single.label'))
-                ->modalWidth('xl')
+                ->slideOver()
                 ->modalHeading(fn(Action $action): string => "{$action->label}"),
             EditAction::make()
                 ->icon(Heroicon::OutlinedPencilSquare)
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::edit.single.label'))
-                ->modalWidth('2xl'),
+                ->slideOver(),
             DeleteAction::make()
                 ->icon(Heroicon::OutlinedTrash)
                 ->iconButton()
@@ -145,7 +147,6 @@ class ActionResource extends Resource
             ->recordTitleAttribute('label')
             ->columns(self::getTableColumns())
             ->extraAttributes(['class' => 'resource-table'])
-            ->extremePaginationLinks(true)
             ->filters(self::getTableFilters())
             ->deferFilters(false)
             ->recordActions(self::getTableActions())

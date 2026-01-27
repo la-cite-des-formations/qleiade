@@ -16,7 +16,7 @@ class ManageCriterias extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->modalWidth('xl')
+                ->slideOver()
                 ->modalHeading('Nouveau Critère')
                 ->mountUsing(function ($form, ManageCriterias $livewire) {
                     $form->fill();

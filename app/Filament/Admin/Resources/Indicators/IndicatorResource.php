@@ -88,7 +88,7 @@ class IndicatorResource extends Resource
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')
-                    ->rows(5)
+                    ->rows(2)
                     ->columnSpanFull(),
                 TextInput::make('number')
                     ->required()
@@ -128,6 +128,7 @@ class IndicatorResource extends Resource
                         ->relationship('qualityLabel', 'label')
                         ->label('Label Qualité')
                         ->placeholder('Tout')
+                        ->default(QualityLabel::count() === 1 ? QualityLabel::first()->id : null)
                         ->live()
                         ->afterStateUpdated(fn (Set $set) =>
                             $set('criteria_id', null)
@@ -195,7 +196,7 @@ class IndicatorResource extends Resource
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::edit.single.label'))
-                ->modalWidth('xl')
+                ->slideOver()
                 ->modalHeading(fn(Indicator $indicator): string => "Modifier Indicateur {$indicator->number} ({$indicator->qualityLabel->label} - {$indicator->criteria->label})"),
             DeleteAction::make()
                 ->icon(Heroicon::OutlinedTrash)
@@ -220,7 +221,6 @@ class IndicatorResource extends Resource
             ->recordTitleAttribute('label')
             ->columns(self::getTableColumns())
             ->extraAttributes(['class' => 'resource-table'])
-            ->extremePaginationLinks(true)
             ->filters(self::getTableFilters(), layout: FiltersLayout::Dropdown)
             ->deferFilters(false)
             ->recordActions(self::getTableActions())

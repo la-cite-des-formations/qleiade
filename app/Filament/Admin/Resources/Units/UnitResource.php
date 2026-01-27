@@ -82,7 +82,8 @@ class UnitResource extends Resource
                 ->icon(Heroicon::OutlinedPencilSquare)
                 ->iconButton()
                 ->hiddenLabel()
-                ->tooltip(__('filament-actions::edit.single.label')),
+                ->tooltip(__('filament-actions::edit.single.label'))
+                ->slideOver(),
             DeleteAction::make()
                 ->icon(Heroicon::OutlinedTrash)
                 ->iconButton()
@@ -106,7 +107,6 @@ class UnitResource extends Resource
             ->recordTitleAttribute('label')
             ->columns(self::getTableColumns())
             ->extraAttributes(['class' => 'resource-table'])
-            ->extremePaginationLinks(true)
             ->filters(self::getTableFilters())
             ->deferFilters(false)
             ->recordActions(self::getTableActions())

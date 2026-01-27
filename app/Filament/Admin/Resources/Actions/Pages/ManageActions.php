@@ -16,7 +16,7 @@ class ManageActions extends ManageRecords
     {
         return [
             CreateAction::make()
-                ->modalWidth('2xl')
+                ->slideOver()
                 ->modalHeading('Nouvelle Activité')
                 ->mountUsing(function ($form, ManageActions $livewire) {
                     $maxOrder = Action::max('order');

@@ -13,7 +13,10 @@ class ManageWealths extends ManageRecords
     protected function getHeaderActions(): array
     {
         return [
-            CreateAction::make(),
+            CreateAction::make()
+                ->modalHeading('Nouvelle Preuve')
+                ->slideOver()
+                ->using(fn (array $data, string $model) => WealthResource::saveRelationships(new $model, $data)),
         ];
     }
 }

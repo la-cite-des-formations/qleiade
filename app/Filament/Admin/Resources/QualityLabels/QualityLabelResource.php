@@ -82,7 +82,7 @@ class QualityLabelResource extends Resource
                 Textarea::make('description')
                     ->maxLength(1500)
                     ->label('Description')
-                    ->rows(5)
+                    ->rows(3)
                     ->columnSpanFull(),
                 FileUpload::make('image')
                     ->label('Logo')
@@ -120,7 +120,7 @@ class QualityLabelResource extends Resource
                 ->verticalAlignment('start')
                 ->url(fn(QualityLabel $record): string => IndicatorResource::getUrl('index', [
                     'filters' => [
-                        'structure' => [
+                        'quality_classification' => [
                             'quality_label_id' => $record->id,
                         ],
                     ],
@@ -147,11 +147,11 @@ class QualityLabelResource extends Resource
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::view.single.label'))
-                ->modalWidth('3xl')
+                ->slideOver()
                 ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}")
                 ->modalAutofocus(false),
             EditAction::make()
-                ->modalWidth('xl')
+                ->slideOver()
                 ->icon(Heroicon::OutlinedPencilSquare)
                 ->iconButton()
                 ->hiddenLabel()
@@ -179,7 +179,6 @@ class QualityLabelResource extends Resource
             ->recordTitleAttribute('label')
             ->columns(self::getTableColumns())
             ->extraAttributes(['class' => 'resource-table'])
-            ->extremePaginationLinks(true)
             ->filters(self::getTableFilters())
             ->deferFilters(false)
             ->recordActions(self::getTableActions())
