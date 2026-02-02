@@ -45,6 +45,7 @@ use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
 use Filament\Support\Enums\IconSize;
 use Models\WealthType;
+use School\Manager\SchoolManager;
 
 class WealthResource extends Resource
 {
@@ -112,7 +113,6 @@ class WealthResource extends Resource
                         'file' => [
                             FileUpload::make('attachment_file')
                                 ->label('Fichier')
-                                ->multiple()
                                 ->directory('wealths')
                                 ->required()
                                 ->columnSpan(2),
@@ -132,6 +132,7 @@ class WealthResource extends Resource
                             TextInput::make('url')
                                 ->url()
                                 ->required()
+                                ->placeholder('Url complet du lien (Ex. https://www.example.com)')
                                 ->columnSpan(3),
                         ],
                         'ypareo' => [
@@ -154,25 +155,16 @@ class WealthResource extends Resource
     {
         return [
             Select::make('unit_id')
+                ->label('Service')
                 ->relationship('unit', 'label')
                 ->required()
-                ->label('Service')
-                ->preload()
-                ->searchable(),
-            Select::make('actions')
-                ->relationship('actions', 'label')
-                ->multiple()
-                ->preload()
-                ->label('Activités'),
-            Select::make('tags')
-                ->relationship('tags', 'label')
-                ->multiple()
-                ->preload()
-                ->label('Libellés'),
+                ->placeholder('Choisir...')
+                ->native(false),
             Fieldset::make('Granularité')
                 ->schema([
                     Select::make('granularity.type')
                         ->label('Type')
+                        ->placeholder('Choisir...')
                         ->options([
                             'global' => 'Global',
                             'formation' => 'Formation',
@@ -180,12 +172,13 @@ class WealthResource extends Resource
                         ])
                         ->default('global')
                         ->required()
-                        ->live(),
+                        ->live()
+                        ->native(false),
                     Select::make('granularity.id')
                         ->label('Formation')
                         ->options(function() {
                             try {
-                                $schoolManager = app(\School\Manager\SchoolManager::class);
+                                $schoolManager = app(SchoolManager::class);
                                 $formations = $schoolManager->getFormations();
                                 
                                 $resolved = $formations->resolve();
@@ -203,13 +196,84 @@ class WealthResource extends Resource
                                 return [];
                             }
                         })
+                        ->optionsLimit(1000)
+                        ->required(fn (Get $get) => $get('granularity.type') === 'formation')
+                        ->placeholder('Choisir...')
                         ->searchable()
                         ->preload()
-                        ->visible(fn (Get $get) => $get('granularity.type') === 'formation'),
-                    TextInput::make('granularity.id')
-                        ->label('ID Apprenant')
-                        ->visible(fn (Get $get) => $get('granularity.type') === 'student'),
-                ]),
+                        ->visible(fn (Get $get) => $get('granularity.type') === 'formation')
+                        ->columnSpan(2),
+                    Select::make('granularity.id')
+                        ->label('Apprenant')
+                        ->options(function() {
+                            try {
+                                $schoolManager = app(SchoolManager::class);
+                                
+                                // On récupère les périodes en cours
+                                $periods = collect($schoolManager->getPeriods(null, null, true));
+                                $periodIds = $periods->pluck('codePeriode')->toArray();
+                                
+                                if (empty($periodIds)) {
+                                    return [];
+                                }
+                                
+                                $connecter = $schoolManager->connecter('ypareo');
+                                $allStudents = collect();
+                                
+                                foreach ($periodIds as $periodId) {
+                                    $rawResponse = $connecter->apprenants('FI', $periodId);
+                                    
+                                    // Utiliser le casting en string car getContents() peut être vidé après une première lecture
+                                    $content = (string) $rawResponse;
+                                    $data = json_decode($content, true);
+                                    
+                                    $students = $data['data'] ?? $data;
+
+                                    if ($students && is_array($students)) {
+                                        $allStudents = $allStudents->concat($students);
+                                    }
+                                }
+                                
+                                $options = $allStudents
+                                    ->unique('codeApprenant')
+                                    ->mapWithKeys(function ($item) {
+                                        $fullName = ($item['nomApprenant'] ?? '') . " " . ($item['prenomApprenant'] ?? '');
+                                        return [$item['codeApprenant'] => trim($fullName)];
+                                    })
+                                    ->filter()
+                                    ->sort()
+                                    ->toArray();
+
+                                return $options;
+                            }
+                            catch (\Exception $e) {
+                                return [];
+                            }
+                        })
+                        ->optionsLimit(1000)
+                        ->required(fn (Get $get) => $get('granularity.type') === 'student')
+                        ->placeholder('Choisir...')
+                        ->searchable()
+                        ->preload()
+                        ->visible(fn (Get $get) => $get('granularity.type') === 'student')
+                        ->columnSpan(2),
+                ])
+                ->columns(4)
+                ->columnSpanFull(),
+            Select::make('actions')
+                ->label('Activités')
+                ->relationship('actions', 'label')
+                ->multiple()
+                ->placeholder('Choisir...')
+                ->searchable(false)
+                ->native(false),
+            Select::make('tags')
+                ->label('Libellés')
+                ->relationship('tags', 'label')
+                ->multiple()
+                ->placeholder('Choisir...')
+                ->searchable(false)
+                ->native(false),
         ];
     }
 
@@ -217,13 +281,10 @@ class WealthResource extends Resource
     {
         return [
             Tabs::make('Qualite')
-                ->contained(false)
                 ->tabs(fn () => QualityLabel::with('criterias.indicators')->get()->map(function ($qualityLabel) {
                     return Tab::make($qualityLabel->label)
                         ->schema([
                             Tabs::make('Criteres')
-                                ->contained(false)
-                                ->extraAttributes(['style' => 'margin-top: -20px;'])
                                 ->tabs($qualityLabel->criterias->map(function ($criteria) {
                                     return Tab::make($criteria->label)
                                         ->schema([
@@ -236,7 +297,6 @@ class WealthResource extends Resource
                                                 ->hidden(fn() => empty($criteria->description)),
                                             
                                             Grid::make(12)
-                                                ->extraAttributes(['class' => 'gap-y-0'])
                                                 ->schema($criteria->indicators->flatMap(function ($indicator) {
                                                     return [
                                                         Checkbox::make("indicators_matrix.{$indicator->id}.checked")
@@ -256,9 +316,15 @@ class WealthResource extends Resource
                                                     ];
                                                 })->all()),
                                         ]);
-                                })->all()),
+                                })->all())
+                                ->extraAttributes([
+                                    'class' => 'flat-tabs',
+                                    'style' => 'min-height: 75vh;',
+                                ]),
                         ]);
-                })->all()),
+                })->all())
+                ->vertical()
+                ->extraAttributes(['class' => 'nested-tabs flat-tabs']),
         ];
     }
 
@@ -267,6 +333,7 @@ class WealthResource extends Resource
         return $schema
             ->components([
                 Tabs::make('Tabs')
+                    ->extraAttributes(['class' => 'flat-tabs'])
                     ->tabs([
                         Tab::make('Identité')
                             ->schema(self::getIdentityTabSchema())
@@ -278,11 +345,12 @@ class WealthResource extends Resource
                             ->schema(self::getQualificationTabSchema())
                             ->columns(2),
                         Tab::make('Indicateurs')
-                            ->schema(self::getIndicatorsTabSchema()),
+                            ->schema(self::getIndicatorsTabSchema())
+                            ->extraAttributes(['class' => 'nested-tabs']),
                     ])
-                    ->columnSpanFull()
-                    ->extraAttributes(['style' => 'min-height: 75vh;']),
-            ]);
+                    ->columnSpanFull(),
+            ])
+            ->extraAttributes(['class' => 'modal-no-padding']);
     }
 
     private static function getTableColumns(): array
@@ -470,8 +538,20 @@ class WealthResource extends Resource
 
     public static function prepareDataForForm(array $data, Wealth $record): array
     {
-        if ($record->wealthType) {
-            $data['attachment_' . $record->wealthType->name] = $record->attachment;
+        $attachment = $record->attachment;
+        if ($record->wealthType && !empty($attachment[$record->wealthType->name])) {
+            $typeData = $attachment[$record->wealthType->name];
+            
+            if ($record->wealthType->name === 'link') {
+                $data['attachment_link'] = $typeData['type'] ?? null;
+                $data['url'] = $typeData['url'] ?? null;
+            }
+            elseif ($record->wealthType->name === 'ypareo') {
+                $data['attachment_ypareo'] = $typeData['process'] ?? null;
+            }
+            elseif ($record->wealthType->name === 'file') {
+                $data['attachment_file'] = $typeData; // FileUpload handles array/null
+            }
         }
 
         $data['indicators_matrix'] = [];
@@ -480,6 +560,10 @@ class WealthResource extends Resource
                 'checked' => true,
                 'is_essential' => (bool) $indicator->pivot->is_essential,
             ];
+        }
+
+        if (isset($data['granularity']['id']) && is_array($data['granularity']['id'])) {
+            $data['granularity']['id'] = head($data['granularity']['id']);
         }
 
         return $data;
@@ -494,9 +578,29 @@ class WealthResource extends Resource
         // 2. Gérer l'attachement (pièce jointe) spécifique
         $type = WealthType::find($data['wealth_type_id'] ?? null, ['*']);
         if ($type) {
-            $key = 'attachment_' . $type->name;
-            if (isset($data[$key])) {
-                $record->attachment = $data[$key];
+            $attachmentData = [];
+            
+            if ($type->name === 'link') {
+                $attachmentData = [
+                    'link' => [
+                        'type' => $data['attachment_link'] ?? null,
+                        'url' => $data['url'] ?? null,
+                    ]
+                ];
+            } elseif ($type->name === 'ypareo') {
+                $attachmentData = [
+                    'ypareo' => [
+                        'process' => $data['attachment_ypareo'] ?? null,
+                    ]
+                ];
+            } elseif ($type->name === 'file') {
+                $attachmentData = [
+                    'file' => $data['attachment_file'] ?? [],
+                ];
+            }
+            
+            if (!empty($attachmentData)) {
+                $record->attachment = $attachmentData;
             }
         }
 

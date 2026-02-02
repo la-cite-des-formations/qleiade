@@ -1,7 +1,5 @@
 /*
  * Classes utilitaires pour les fonds de listes basées sur les couleurs du thème Filament.
- * Pattern: .bg-[color]-list
- * Syntax V4: Direct var usage & color-mix for transparency
  */
 
 /* Primary */
@@ -59,43 +57,6 @@
     --tw-ring-color: color-mix(in oklab, var(--danger-900), transparent)
 }
 
-/* style d'origine de filament (pour référence) */
-/*
-.fi-in-repeatable .fi-in-repeatable-item {
-    display:block
-}
-
-.fi-in-repeatable.fi-contained .fi-in-repeatable-item {
-    border-radius: var(--radius-xl);
-    background-color: var(--color-white);
-    padding: calc(var(--spacing) * 4);
-    --tw-shadow: 0 1px 2px 0 var(--tw-shadow-color, #0000000d);
-    --tw-ring-shadow: var(--tw-ring-inset,) 0 0 0 calc(1px + var(--tw-ring-offset-width)) var(--tw-ring-color, currentcolor);
-    box-shadow: var(--tw-inset-shadow), var(--tw-inset-ring-shadow), var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow);
-    --tw-ring-color: color-mix(in oklab, var(--gray-950) 5%, transparent)
-}
-
-.fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
-    background-color: #ffffff0d
-}
-
-@supports (color:color-mix(in lab, red, red)) {
-    .fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
-        background-color: color-mix(in oklab, var(--color-white) 5%, transparent)
-    }
-}
-
-.fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
-    --tw-ring-color: #ffffff1a
-}
-
-@supports (color:color-mix(in lab, red, red)) {
-    .fi-in-repeatable.fi-contained .fi-in-repeatable-item:where(.dark, .dark *) {
-        --tw-ring-color: color-mix(in oklab, var(--color-white) 10%, transparent)
-    }
-}
-*/
-
 /* Align checkbox and actions columns to top for resource tables */
 .resource-table .fi-ta-selection-cell,
 .resource-table td:has(.fi-ta-actions) {
@@ -108,9 +69,41 @@
         display: flex !important;
     }
 
-    /* Hide the mobile-only simple navigation buttons to avoid duplication */
     .fi-pagination-previous-btn,
     .fi-pagination-next-btn {
         display: none !important;
     }
+}
+
+/* 1. Padding fix specifically for Quality Labels (vertical tabs) */
+.nested-tabs.fi-sc-tabs-tab,
+.nested-tabs .fi-sc-tabs-tab {
+    margin-inline-start: 0 !important;
+}
+
+.nested-tabs.fi-sc-tabs-tab,
+.nested-tabs>.fi-sc-tabs-tab {
+    padding: 0 !important;
+}
+
+/* 2. Border/Shadow removal for both Quality and Criteria tabs */
+.flat-tabs.fi-contained {
+    box-shadow: none !important;
+    --tw-ring-offset-shadow: 0 0 #0000 !important;
+    --tw-ring-shadow: 0 0 #0000 !important;
+    background-color: transparent !important;
+}
+
+/* 3. Re-introduce the separator border ONLY for vertical flat-tabs */
+.flat-tabs.fi-vertical>.fi-tabs {
+    border-inline-end: 1px solid color-mix(in oklab, var(--gray-950) 10%, transparent);
+}
+
+:where(.dark) .flat-tabs.fi-vertical>.fi-tabs {
+    border-inline-end: 1px solid color-mix(in oklab, var(--color-white) 10%, transparent);
+}
+
+/* 4. Remove modal padding for specific actions */
+.fi-modal-content:has(.modal-no-padding) {
+    padding: 0 !important;
 }
