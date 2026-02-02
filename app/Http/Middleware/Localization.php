@@ -20,7 +20,12 @@ class Localization
     public function handle(Request $request, Closure $next)
     {
         if (Session::has('locale')) {
-            App::setLocale(Session::get('locale'));
+            $locale = Session::get('locale');
+            if (is_array($locale)) {
+                \Illuminate\Support\Facades\Log::warning('Locale in session is an array', ['locale' => $locale]);
+                $locale = is_string(head($locale)) ? head($locale) : config('app.locale');
+            }
+            App::setLocale($locale);
         }
         return $next($request);
     }
