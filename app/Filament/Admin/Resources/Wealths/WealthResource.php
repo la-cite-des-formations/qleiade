@@ -28,8 +28,6 @@ use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Indicator as FilterIndicator;
 use Filament\Tables\Enums\FiltersLayout;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Blade;
-use Illuminate\Support\HtmlString;
 use Models\QualityLabel;
 use Models\Indicator;
 use Models\Unit;
@@ -39,7 +37,6 @@ use Filament\Schemas\Components\Group;
 use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
-use Filament\Forms\Components\Repeater;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\DatePicker;
@@ -94,9 +91,9 @@ class WealthResource extends Resource
                 ->label('Type de preuve')
                 ->placeholder('Choisir...')
                 ->required()
+                ->default(WealthType::firstWhere('name', 'link')->id)
                 ->live()
                 ->native(false)
-                ->default(WealthType::firstWhere('name', 'link')->id)
                 ->columnSpan(1),
             Group::make()
                 ->schema(function (Get $get) {
@@ -132,7 +129,7 @@ class WealthResource extends Resource
                             TextInput::make('url')
                                 ->url()
                                 ->required()
-                                ->placeholder('Url complet du lien (Ex. https://www.example.com)')
+                                ->placeholder('Url complet du lien (Ex. https://www.lapreuve.com)')
                                 ->columnSpan(3),
                         ],
                         'ypareo' => [
