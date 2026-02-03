@@ -104,6 +104,7 @@
 }
 
 /* 4. Remove modal padding for specific actions */
-.fi-modal-content:has(.modal-no-padding) {
+.fi-modal-content:has(.modal-no-padding),
+.modal-no-padding .fi-modal-content {
     padding: 0 !important;
 }

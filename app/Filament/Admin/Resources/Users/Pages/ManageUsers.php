@@ -14,6 +14,8 @@ class ManageUsers extends ManageRecords
     {
         return [
             CreateAction::make()
+                ->modalHeading('Nouvel utilisateur')
+                ->extraModalWindowAttributes(['class' => 'modal-no-padding'])
                 ->slideOver(),
         ];
     }

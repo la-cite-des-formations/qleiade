@@ -31,6 +31,7 @@ class IndicatorResource extends Resource
     protected static ?string $model = Indicator::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedChartBarSquare;
+    protected static string|\UnitEnum|null $navigationGroup = 'RÉFÉRENTIEL';
     protected static ?string $navigationParentItem = 'Labels Qualité';
     protected static ?int $navigationSort = 30;
 

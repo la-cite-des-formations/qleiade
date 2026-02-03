@@ -14,6 +14,8 @@ class ManageUnits extends ManageRecords
     {
         return [
             CreateAction::make()
+                ->modalHeading('Nouveau service')
+                ->extraModalWindowAttributes(['class' => 'modal-no-padding'])
                 ->slideOver(),
         ];
     }

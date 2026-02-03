@@ -31,7 +31,7 @@ class QualityLabelResource extends Resource
     protected static ?string $model = QualityLabel::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCheckBadge;
-
+    protected static string|\UnitEnum|null $navigationGroup = 'RÉFÉRENTIEL';
     protected static ?int $navigationSort = 10;
 
     protected static ?string $navigationLabel = 'Labels Qualité';

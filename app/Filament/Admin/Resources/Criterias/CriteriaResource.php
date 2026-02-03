@@ -32,6 +32,7 @@ class CriteriaResource extends Resource
     protected static ?string $model = Criteria::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedListBullet;
+    protected static string|\UnitEnum|null $navigationGroup = 'RÉFÉRENTIEL';
     protected static ?string $navigationParentItem = 'Labels Qualité';
     protected static ?int $navigationSort = 20;
 

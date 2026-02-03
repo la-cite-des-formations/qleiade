@@ -25,7 +25,8 @@ class ActionResource extends Resource
     protected static ?string $model = Action::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedSquare3Stack3d;
-    protected static ?int $navigationSort = 50;
+    protected static string|\UnitEnum|null $navigationGroup = 'RÉFÉRENTIEL';
+    protected static ?int $navigationSort = 20;
 
     protected static ?string $navigationLabel = 'Activités';
 

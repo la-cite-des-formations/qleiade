@@ -12,9 +12,15 @@ use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
 use Filament\Resources\Resource;
+use Filament\Schemas\Components\Tabs;
+use App\Filament\Components\Tab;
+use Filament\Actions\ViewAction;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Table;
 
 class UserResource extends Resource
@@ -22,7 +28,8 @@ class UserResource extends Resource
     protected static ?string $model = User::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedUsers;
-    protected static ?int $navigationSort = 80;
+    protected static string|\UnitEnum|null $navigationGroup = 'GESTION';
+    protected static ?int $navigationSort = 60;
 
     protected static ?string $navigationLabel = 'Utilisateurs';
 
@@ -32,31 +39,65 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('name')
+                    ->label('Nom')
+                    ->columnSpan(2),
+                TextEntry::make('email')
+                    ->label('Email')
+                    ->columnSpan(2),
+                RepeatableEntry::make('units')
+                    ->label('Services affectés')
+                    ->schema([
+                        TextEntry::make('label')
+                            ->hiddenLabel()
+                    ])
+                    ->visible(fn($record) => $record->units->isNotEmpty())
+                    ->columnSpanFull(),
+            ]);
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema
             ->components([
-                TextInput::make('name')
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Nom'),
-                TextInput::make('email')
-                    ->email()
-                    ->required()
-                    ->maxLength(255)
-                    ->label('Email')
-                    ->unique(ignoreRecord: true),
-                TextInput::make('password')
-                    ->password()
-                    ->required(fn(string $context): bool => $context === 'create')
-                    ->dehydrated(fn($state) => filled($state))
-                    ->label('Mot de passe')
-                    ->maxLength(255),
-                Select::make('unit')
-                    ->relationship('unit', 'label')
-                    ->multiple()
-                    ->preload()
-                    ->label('Services'),
+                Tabs::make('Tabs')
+                    ->extraAttributes(['class' => 'flat-tabs'])
+                    ->tabs([
+                        Tab::make('Identité')
+                            ->schema([
+                                TextInput::make('name')
+                                    ->required()
+                                    ->maxLength(191)
+                                    ->label('Nom'),
+                                TextInput::make('email')
+                                    ->email()
+                                    ->required()
+                                    ->maxLength(191)
+                                    ->label('Email')
+                                    ->unique(ignoreRecord: true)
+                                    ->columnStart(1),
+                                TextInput::make('password')
+                                    ->password()
+                                    ->required(fn(string $context): bool => $context === 'create')
+                                    ->dehydrated(fn($state) => filled($state))
+                                    ->label('Mot de passe')
+                                    ->maxLength(191),
+                            ])
+                            ->columns(2),
+                        Tab::make('Services')
+                            ->schema([
+                                Select::make('units')
+                                    ->relationship('units', 'label')
+                                    ->multiple()
+                                    ->preload()
+                                    ->label('Services affectés'),
+                            ]),
+                    ])
+                    ->columnSpanFull(),
             ]);
     }
 
@@ -71,7 +112,7 @@ class UserResource extends Resource
                 ->searchable()
                 ->sortable()
                 ->label('Email'),
-            TextColumn::make('unit.label')
+            TextColumn::make('units.label')
                 ->badge()
                 ->label('Services'),
             TextColumn::make('created_at')
@@ -84,18 +125,28 @@ class UserResource extends Resource
     private static function getTableFilters(): array
     {
         return [
-            //
+            SelectFilter::make('units')
+                ->relationship('units', 'label')
+                ->label('Services affectés')
+                ->multiple(),
         ];
     }
 
     private static function getTableActions(): array
     {
         return [
+            ViewAction::make()
+                ->icon(Heroicon::OutlinedEye)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::view.single.label'))
+                ->slideOver(),
             EditAction::make()
                 ->icon(Heroicon::OutlinedPencilSquare)
                 ->iconButton()
                 ->hiddenLabel()
-                ->tooltip(__('filament-actions::edit.single.label'))
+                ->tooltip(__('filament-actions::view.single.label'))
+                ->extraModalWindowAttributes(['class' => 'modal-no-padding'])
                 ->slideOver(),
             DeleteAction::make()
                 ->icon(Heroicon::OutlinedTrash)

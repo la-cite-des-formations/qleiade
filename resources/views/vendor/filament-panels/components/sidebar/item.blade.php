@@ -19,23 +19,21 @@
 
 @php
     $sidebarCollapsible = $sidebarCollapsible && filament()->isSidebarCollapsibleOnDesktop();
+    $paddingStart = $subGrouped ? '2.5rem' : ($grouped ? '1.5rem' : null);
+    $iconAttributes = new \Illuminate\View\ComponentAttributeBag([]);
+    $iconAttributes = $iconAttributes->class(['fi-sidebar-item-icon']);
 @endphp
 
 <li
-    {{
-        $attributes->class([
-            'fi-sidebar-item',
-            'fi-active' => $active,
-            'fi-sidebar-item-has-active-child-items' => $activeChildItems,
-            'fi-sidebar-item-has-url' => filled($url),
-        ])
-    }}
->
-    <a
-        {{ \Filament\Support\generate_href_html($url, $shouldOpenUrlInNewTab) }}
+    {{ $attributes->class([
+        'fi-sidebar-item',
+        'fi-active' => $active,
+        'fi-sidebar-item-has-active-child-items' => $activeChildItems,
+        'fi-sidebar-item-has-url' => filled($url),
+    ]) }}>
+    <a {{ \Filament\Support\generate_href_html($url, $shouldOpenUrlInNewTab) }}
         x-on:click="window.matchMedia(`(max-width: 1024px)`).matches && $store.sidebar.close()"
-        @if ($sidebarCollapsible && (! $subNavigation))
-            x-data="{ tooltip: false }"
+        @if ($sidebarCollapsible && !$subNavigation) x-data="{ tooltip: false }"
             x-effect="
                 tooltip = $store.sidebar.isOpen
                     ? false
@@ -45,45 +43,34 @@
                           theme: $store.theme,
                       }
             "
-            x-tooltip.html="tooltip"
-        @endif
+            x-tooltip.html="tooltip" @endif
         class="fi-sidebar-item-btn"
-        style="{{ ($grouped || $subGrouped) ? 'padding-inline-start: 1.5rem' : '' }}"
-    >
+        @if ($paddingStart) style="padding-inline-start: {{ $paddingStart }}" @endif>
         @if (filled($icon))
-            {{
-                \Filament\Support\generate_icon_html(($active && $activeIcon) ? $activeIcon : $icon, attributes: (new \Illuminate\View\ComponentAttributeBag([
-                    'x-show' => ($subGrouped && $sidebarCollapsible) ? '! $store.sidebar.isOpen' : false,
-                ]))->class(['fi-sidebar-item-icon']), size: \Filament\Support\Enums\IconSize::Large)
-            }}
+            {{ \Filament\Support\generate_icon_html(
+                $active && $activeIcon ? $activeIcon : $icon,
+                attributes: $iconAttributes,
+                size: \Filament\Support\Enums\IconSize::Large,
+            ) }}
         @endif
 
         <span
-            @if ($sidebarCollapsible && (! $subNavigation))
-                x-show="$store.sidebar.isOpen"
+            @if ($sidebarCollapsible && !$subNavigation) x-show="$store.sidebar.isOpen"
                 x-transition:enter="fi-transition-enter"
                 x-transition:enter-start="fi-transition-enter-start"
-                x-transition:enter-end="fi-transition-enter-end"
-            @endif
-            class="fi-sidebar-item-label"
-        >
+                x-transition:enter-end="fi-transition-enter-end" @endif
+            class="fi-sidebar-item-label">
             {{ $slot }}
         </span>
 
         @if (filled($badge))
             <span
-                @if ($sidebarCollapsible && (! $subNavigation))
-                    x-show="$store.sidebar.isOpen"
+                @if ($sidebarCollapsible && !$subNavigation) x-show="$store.sidebar.isOpen"
                     x-transition:enter="fi-transition-enter"
                     x-transition:enter-start="fi-transition-enter-start"
-                    x-transition:enter-end="fi-transition-enter-end"
-                @endif
-                class="fi-sidebar-item-badge-ctn"
-            >
-                <x-filament::badge
-                    :color="$badgeColor"
-                    :tooltip="$badgeTooltip"
-                >
+                    x-transition:enter-end="fi-transition-enter-end" @endif
+                class="fi-sidebar-item-badge-ctn">
+                <x-filament::badge :color="$badgeColor" :tooltip="$badgeTooltip">
                     {{ $badge }}
                 </x-filament::badge>
             </span>
@@ -95,7 +82,7 @@
             @foreach ($childItems as $childItem)
                 @php
                     $isChildItemChildItemsActive = $childItem->isChildItemsActive();
-                    $isChildActive = (! $isChildItemChildItemsActive) && $childItem->isActive();
+                    $isChildActive = !$isChildItemChildItemsActive && $childItem->isActive();
                     $childItemActiveIcon = $childItem->getActiveIcon();
                     $childItemBadge = $childItem->getBadge();
                     $childItemBadgeColor = $childItem->getBadgeColor();
@@ -105,22 +92,9 @@
                     $childItemUrl = $childItem->getUrl();
                 @endphp
 
-                <x-filament-panels::sidebar.item
-                    :active="$isChildActive"
-                    :active-child-items="$isChildItemChildItemsActive"
-                    :active-icon="$childItemActiveIcon"
-                    :badge="$childItemBadge"
-                    :badge-color="$childItemBadgeColor"
-                    :badge-tooltip="$childItemBadgeTooltip"
-                    :first="$loop->first"
-                    grouped
-                    :icon="$childItemIcon"
-                    :last="$loop->last"
-                    :should-open-url-in-new-tab="$shouldChildItemOpenUrlInNewTab"
-                    sub-grouped
-                    :sub-navigation="$subNavigation"
-                    :url="$childItemUrl"
-                >
+                <x-filament-panels::sidebar.item :active="$isChildActive" :active-child-items="$isChildItemChildItemsActive" :active-icon="$childItemActiveIcon" :badge="$childItemBadge"
+                    :badge-color="$childItemBadgeColor" :badge-tooltip="$childItemBadgeTooltip" :first="$loop->first" grouped :icon="$childItemIcon" :last="$loop->last"
+                    :should-open-url-in-new-tab="$shouldChildItemOpenUrlInNewTab" sub-grouped :sub-navigation="$subNavigation" :url="$childItemUrl">
                     {{ $childItem->getLabel() }}
                 </x-filament-panels::sidebar.item>
             @endforeach

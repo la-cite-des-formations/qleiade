@@ -22,8 +22,9 @@ class StageResource extends Resource
     protected static ?string $model = Stage::class;
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedQueueList;
+    protected static string|\UnitEnum|null $navigationGroup = 'RÉFÉRENTIEL';
     protected static ?string $navigationParentItem = 'Activités';
-    protected static ?int $navigationSort = 10;
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $navigationLabel = 'Étapes';
 
