@@ -57,11 +57,10 @@ class UnitResource extends Resource
                 RepeatableEntry::make('users')
                     ->hiddenLabel()
                     ->table([
-                        TableColumn::make('Utilisateurs affectés au service')
+                        TableColumn::make('Utilisateurs affectés au service'),
                     ])
                     ->schema([
-                        TextEntry::make('name')
-                            ->hiddenLabel()
+                        TextEntry::make('name'),
                     ])
                     ->visible(fn($record) => $record->users->isNotEmpty())
                     ->columnSpanFull(),

@@ -16,6 +16,7 @@ use Filament\Schemas\Components\Tabs;
 use App\Filament\Components\Tab;
 use Filament\Actions\ViewAction;
 use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
 use Filament\Infolists\Components\TextEntry;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
@@ -43,17 +44,15 @@ class UserResource extends Resource
     {
         return $schema
             ->components([
-                TextEntry::make('name')
-                    ->label('Nom')
-                    ->columnSpan(2),
                 TextEntry::make('email')
-                    ->label('Email')
-                    ->columnSpan(2),
+                    ->hiddenLabel(),
                 RepeatableEntry::make('units')
-                    ->label('Services affectés')
+                    ->hiddenLabel()
+                    ->table([
+                        TableColumn::make("Services affectés à l'utilisateur"),
+                    ])
                     ->schema([
-                        TextEntry::make('label')
-                            ->hiddenLabel()
+                        TextEntry::make('full'),
                     ])
                     ->visible(fn($record) => $record->units->isNotEmpty())
                     ->columnSpanFull(),
@@ -107,18 +106,13 @@ class UserResource extends Resource
             TextColumn::make('name')
                 ->searchable()
                 ->sortable()
-                ->label('Nom'),
-            TextColumn::make('email')
-                ->searchable()
-                ->sortable()
-                ->label('Email'),
-            TextColumn::make('units.label')
-                ->badge()
-                ->label('Services'),
-            TextColumn::make('created_at')
-                ->dateTime('d/m/Y H:i')
-                ->sortable()
-                ->label('Créé le'),
+                ->label('Nom')
+                ->verticalAlignment('start')
+                ->width('25%'),
+            TextColumn::make('units.name')
+                ->label('Services')
+                ->wrap()
+                ->verticalAlignment('start'),
         ];
     }
 
@@ -140,6 +134,7 @@ class UserResource extends Resource
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::view.single.label'))
+                ->modalHeading(fn($record) => $record->name)
                 ->slideOver(),
             EditAction::make()
                 ->icon(Heroicon::OutlinedPencilSquare)
