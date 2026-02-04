@@ -11,6 +11,7 @@ use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\CheckboxList;
 use Filament\Resources\Resource;
 use Filament\Schemas\Components\Tabs;
 use App\Filament\Components\Tab;
@@ -81,8 +82,10 @@ class UserResource extends Resource
                                     ->columnStart(1),
                                 TextInput::make('password')
                                     ->password()
+                                    ->revealable()
                                     ->required(fn(string $context): bool => $context === 'create')
                                     ->dehydrated(fn($state) => filled($state))
+                                    ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
                                     ->label('Mot de passe')
                                     ->maxLength(191),
                             ])
@@ -94,6 +97,16 @@ class UserResource extends Resource
                                     ->multiple()
                                     ->preload()
                                     ->label('Services affectés'),
+                            ]),
+                        Tab::make('Permissions')
+                            ->schema([
+                                CheckboxList::make('permissions')
+                                    ->relationship('permissions', 'name')
+                                    ->columns(2)
+                                    ->gridDirection('row')
+                                    ->bulkToggleable()
+                                    ->searchable()
+                                    ->label('Droits d\'accès'),
                             ]),
                     ])
                     ->columnSpanFull(),
@@ -112,6 +125,11 @@ class UserResource extends Resource
             TextColumn::make('units.name')
                 ->label('Services')
                 ->wrap()
+                ->verticalAlignment('start'),
+            TextColumn::make('permissions.name')
+                ->badge()
+                ->label('Permissions')
+                ->limitList(2)
                 ->verticalAlignment('start'),
         ];
     }
