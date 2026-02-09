@@ -25,7 +25,7 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
-        'permissions',
+        'permissions_legacy',
     ];
 
     /**
@@ -45,6 +45,7 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $casts = [
         'email_verified_at'    => 'datetime',
+        'permissions_legacy'   => 'array',
     ];
 
     /**

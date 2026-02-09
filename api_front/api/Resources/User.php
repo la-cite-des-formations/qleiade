@@ -18,22 +18,18 @@ class User extends JsonResource
      */
     public function toArray($request)
     {
-        // Récupérer les permissions via Spatie (permissions directes et via rôles)
-        $spatiePermissions = $this->getAllPermissions()->pluck('name')->toArray();
-        $perms = [];
-        foreach ($spatiePermissions as $perm) {
-            if (Str::startsWith($perm, 'public')) {
-                $perms[$perm] = true;
-            }
-        }
+        // Liste des permissions attendues par React
+        $features = [
+            'public_home',
+            'public_admin',
+            'public_quality_labels_audit',
+            'public_quality_labels_dashboard',
+        ];
 
-        // Garder la compatibilité avec d'éventuelles permissions legacy si nécessaire
-        if (is_array($this->permissions)) {
-            foreach ($this->permissions as $key => $value) {
-                if (Str::startsWith($key, "public")) {
-                    $perms[$key] = $value;
-                }
-            }
+        $perms = [];
+        foreach ($features as $feature) {
+            // Laravel vérifie automatiquement via Gates/Spatie/Fallback
+            $perms[$feature] = \Illuminate\Support\Facades\Gate::allows($feature);
         }
 
         $pr = new UnitCollection($this->units);
