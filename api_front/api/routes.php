@@ -67,7 +67,7 @@ Route::middleware(['api'])->group(function () {
 
         $request->session()->regenerateToken();
 
-        return redirect("/login");
+        return redirect()->route('login');
     });
 
     #region gets

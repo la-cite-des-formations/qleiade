@@ -22,7 +22,7 @@ const Auth = ({ user }) => {
                     }
                 })
                 .catch(() => {
-                    setPage(<Navigate to={'/login'} />);
+                    window.location.href = "/login";
                 });
         } else {
             setPage(

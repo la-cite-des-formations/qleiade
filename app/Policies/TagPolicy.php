@@ -37,7 +37,7 @@ class TagPolicy
      */
     public function update(User $user, Tag $tag): bool
     {
-        return $user->can('platform.quality.wealth.edit');
+        return $user->can('platform.quality.tags.edit');
     }
 
     /**
@@ -61,6 +61,6 @@ class TagPolicy
      */
     public function forceDelete(User $user, Tag $tag): bool
     {
-        return $user->can('platform.quality.wealth.edit');
+        return $user->can('platform.quality.tags.edit');
     }
 }

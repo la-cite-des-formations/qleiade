@@ -18,9 +18,23 @@ class User extends JsonResource
      */
     public function toArray($request)
     {
-        $perms = Arr::where($this->permissions, function ($value, $key) {
-            return Str::startsWith($key, "public");
-        });
+        // Récupérer les permissions via Spatie (permissions directes et via rôles)
+        $spatiePermissions = $this->getAllPermissions()->pluck('name')->toArray();
+        $perms = [];
+        foreach ($spatiePermissions as $perm) {
+            if (Str::startsWith($perm, 'public')) {
+                $perms[$perm] = true;
+            }
+        }
+
+        // Garder la compatibilité avec d'éventuelles permissions legacy si nécessaire
+        if (is_array($this->permissions)) {
+            foreach ($this->permissions as $key => $value) {
+                if (Str::startsWith($key, "public")) {
+                    $perms[$key] = $value;
+                }
+            }
+        }
 
         $pr = new UnitCollection($this->units);
         $procs = json_decode($pr->toJson());

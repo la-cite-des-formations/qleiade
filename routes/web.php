@@ -9,9 +9,13 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
+// Redirection vers home par défaut
 Route::get('/', function () {
     return redirect("/home");
 });
+
+// Route pivot pour l'authentification
+Route::get('/login', \App\Filament\Admin\Pages\Auth\Login::class)->name('login');
 
 Route::get('language/{locale}', function ($locale) {
     app()->setLocale($locale);
@@ -23,7 +27,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
 });
 
-// On ajoute ->where(...) pour interdire à cette route de capturer les URLs commençant par 'admin' ou 'console'
+// Le catch-all de React doit EXCLURE expressément /login, /admin, /fortify et /livewire
 Route::view('/{path?}/{label?}/{action?}/{action2?}{params?}', "app")
-    ->where('path', '^(?!admin).*$')
+    ->where('path', '^(?!(admin|login|fortify|livewire)).*$')
     ->name('react.app');

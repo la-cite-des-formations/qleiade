@@ -13,8 +13,7 @@ class IndicatorPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('platform.quality.quality_label.indicator.create') 
-            || $user->can('platform.quality.quality_label.indicator.edit');
+        return $user->can('platform.quality.quality_label.indicators');
     }
 
     /**
@@ -22,8 +21,7 @@ class IndicatorPolicy
      */
     public function view(User $user, Indicator $indicator): bool
     {
-        return $user->can('platform.quality.quality_label.indicator.create') 
-            || $user->can('platform.quality.quality_label.indicator.edit');
+        return $user->can('platform.quality.quality_label.indicators');
     }
 
     /**

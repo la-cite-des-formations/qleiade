@@ -13,8 +13,7 @@ class CriteriaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('platform.quality.quality_label.create') 
-            || $user->can('platform.quality.quality_label.edit');
+        return $user->can('platform.quality.quality_labels');
     }
 
     /**
@@ -22,8 +21,7 @@ class CriteriaPolicy
      */
     public function view(User $user, Criteria $criteria): bool
     {
-        return $user->can('platform.quality.quality_label.create') 
-            || $user->can('platform.quality.quality_label.edit');
+        return $user->can('platform.quality.quality_labels');
     }
 
     /**

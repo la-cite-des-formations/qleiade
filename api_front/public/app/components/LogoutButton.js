@@ -12,7 +12,7 @@ const LogoutButton = ({ authenticated, user, signOut }) => {
         signOut()
             .then(() => {
                 window.alert("Signed out!");
-                nav("/login");
+                window.location.href = "/login";
             }
             )
             .catch(() => window.alert("not signed out"));

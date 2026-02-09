@@ -43,7 +43,11 @@ let ImageminPlugin = require('imagemin-webpack-plugin').default;
 
 mix.js('resources/js/app.jsx', 'public/js')
     .react()
-    .sass('resources/sass/app.scss', 'public/css')
+    .sass('resources/sass/app.scss', 'public/css', {
+        sassOptions: {
+            quietDeps: true,
+        }
+    })
     .copyDirectory('resources/images', 'public/images');
 
 mix.webpackConfig({
