@@ -46,6 +46,7 @@ mix.js('resources/js/app.jsx', 'public/js')
     .sass('resources/sass/app.scss', 'public/css', {
         sassOptions: {
             quietDeps: true,
+            silenceDeprecations: ['import', 'legacy-js-api', 'color-functions', 'global-builtin'],
         }
     })
     .copyDirectory('resources/images', 'public/images');
