@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Navigate } from "react-router-dom";
 
 import API from '@services/axios';
 import { AuthContext } from '@services/middleWear/auth/context';
@@ -77,6 +77,10 @@ export default function Board(props) {
                 action: actionId,
             });
         }
+    }
+
+    if (!canSee('public_quality_labels_dashboard')) {
+        return <Navigate to="/home" />;
     }
 
     return (

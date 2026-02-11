@@ -27,13 +27,8 @@ class QualityLabel extends JsonResource
         // linkLabel : "Administration",
         // type : "menu"
 
-        // Load images with attachment relationship
-        $this->load('attachment');
-        $url = "";
-        if ($this->attachment()->first()) {
-            $url = $this->attachment()->first()->url();
-            // dd($url);
-        }
+        // Load image from column
+        $url = $this->image;
 
         $qualityLabel = [
             'id' => $this->id,

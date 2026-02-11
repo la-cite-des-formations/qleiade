@@ -25,7 +25,6 @@ class User extends Authenticatable implements FilamentUser
         'name',
         'email',
         'password',
-        'permissions_legacy',
     ];
 
     /**
@@ -45,7 +44,6 @@ class User extends Authenticatable implements FilamentUser
      */
     protected $casts = [
         'email_verified_at'    => 'datetime',
-        'permissions_legacy'   => 'array',
     ];
 
     /**
@@ -65,6 +63,10 @@ class User extends Authenticatable implements FilamentUser
 
     public function canAccessPanel(Panel $panel): bool
     {
+        if ($panel->getId() === 'admin') {
+            return $this->can('public_admin');
+        }
+
         return true;
     }
 }

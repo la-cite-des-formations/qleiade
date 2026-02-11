@@ -28,8 +28,8 @@ class User extends JsonResource
 
         $perms = [];
         foreach ($features as $feature) {
-            // Laravel vérifie automatiquement via Gates/Spatie/Fallback
-            $perms[$feature] = \Illuminate\Support\Facades\Gate::allows($feature);
+            // Utilisation directe de can() sur le modèle pour plus de fiabilité
+            $perms[$feature] = $this->resource->can($feature);
         }
 
         $pr = new UnitCollection($this->units);
@@ -43,6 +43,15 @@ class User extends JsonResource
             "permissions" => $perms,
             "unit" => $procs,
         ];
+
         return $user;
+    }
+
+    /**
+     * S'assure que la réponse n'est pas mise en cache par le navigateur.
+     */
+    public function withResponse($request, $response)
+    {
+        $response->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 }

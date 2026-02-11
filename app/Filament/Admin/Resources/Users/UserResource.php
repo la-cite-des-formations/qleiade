@@ -83,10 +83,12 @@ class UserResource extends Resource
                                 TextInput::make('password')
                                     ->password()
                                     ->revealable()
+                                    ->autocomplete('new-password')
                                     ->required(fn(string $context): bool => $context === 'create')
-                                    ->dehydrated(fn($state) => filled($state))
-                                    ->dehydrateStateUsing(fn($state) => filled($state) ? bcrypt($state) : null)
+                                    ->dehydrated(fn($state, $record) => filled($state) && ($record === null || !\Illuminate\Support\Facades\Hash::check($state, $record->password)))
+                                    ->dehydrateStateUsing(fn($state) => \Illuminate\Support\Facades\Hash::make($state))
                                     ->label('Mot de passe')
+                                    ->placeholder('••••••')
                                     ->maxLength(191),
                             ])
                             ->columns(2),

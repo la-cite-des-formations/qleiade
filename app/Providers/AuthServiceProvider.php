@@ -33,23 +33,5 @@ class AuthServiceProvider extends ServiceProvider
     public function boot()
     {
         $this->registerPolicies();
-
-        // SuperAdmin : accès total
-        Gate::before(function ($user, $ability) {
-            return $user->hasRole('Super-Admin') ? true : null;
-        });
-
-        // Bridge pour les permissions React (public_)
-        // On vérifie Spatie d'abord (via le système natif de Laravel car Spatie s'y branche)
-        // puis on fallback sur la colonne JSON permissions (Orchid Legacy)
-        Gate::after(function ($user, $ability, $result) {
-            if ($result) return true;
-
-            if (str_starts_with($ability, 'public_')) {
-                return $user->permissions_legacy && isset($user->permissions_legacy[$ability]) && $user->permissions_legacy[$ability];
-            }
-
-            return $result;
-        });
     }
 }

@@ -13,6 +13,17 @@ class LoginResponse implements Responsable
      */
     public function toResponse($request): RedirectResponse | Redirector
     {
-        return redirect()->to('/home');
+        $user = $request->user();
+
+        if ($user->can('public_home')) {
+            return redirect()->to('/home');
+        }
+
+        if ($user->can('public_admin')) {
+            return redirect()->to('/admin');
+        }
+
+        // Cas 3: Ni home ni admin, on redirige vers l'erreur 403
+        return redirect()->to('/access-denied');
     }
 }

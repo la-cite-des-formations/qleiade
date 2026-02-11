@@ -73,6 +73,7 @@ export default function QualityLabel(props) {
                     variant="contained"
                     sx={{ mt: 3, ml: 1 }}
                     color="primary"
+                    onMouseDown={(e) => e.stopPropagation()}
                 >
                     {t('quality_label.button.audit')}
                 </Button>

@@ -21,7 +21,7 @@ class MigrateOrchidPermissionsCommand extends Command
         $bar->start();
 
         foreach ($users as $user) {
-            $permissionsData = json_decode($user->getAttributes()['permissions'] ?? '[]', true);
+            $permissionsData = json_decode($user->getAttributes()['permissions_legacy'] ?? '[]', true);
 
             if (empty($permissionsData)) {
                 $bar->advance();

@@ -27,6 +27,11 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
 });
 
+// Route publique pour afficher la 403
+Route::get('/access-denied', function () {
+    abort(403);
+});
+
 // Le catch-all de React doit EXCLURE expressément /login, /admin, /fortify et /livewire
 Route::view('/{path?}/{label?}/{action?}/{action2?}{params?}', "app")
     ->where('path', '^(?!(admin|login|fortify|livewire)).*$')
