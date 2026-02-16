@@ -154,10 +154,9 @@ class UserResource extends Resource
                 ->label('Services')
                 ->wrap()
                 ->verticalAlignment('start'),
-            TextColumn::make('permissions.name')
+            TextColumn::make('roles.name')
                 ->badge()
-                ->label('Permissions')
-                ->limitList(2)
+                ->label('Rôles')
                 ->verticalAlignment('start'),
         ];
     }
