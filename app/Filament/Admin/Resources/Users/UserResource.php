@@ -50,12 +50,32 @@ class UserResource extends Resource
                 RepeatableEntry::make('units')
                     ->hiddenLabel()
                     ->table([
-                        TableColumn::make("Services affectés à l'utilisateur"),
+                        TableColumn::make("Services affectés"),
                     ])
                     ->schema([
                         TextEntry::make('full'),
                     ])
                     ->visible(fn($record) => $record->units->isNotEmpty())
+                    ->columnSpanFull(),
+                RepeatableEntry::make('roles')
+                    ->hiddenLabel()
+                    ->table([
+                        TableColumn::make("Rôles affectés"),
+                    ])
+                    ->schema([
+                        TextEntry::make('name'),
+                    ])
+                    ->visible(fn($record) => $record->roles->isNotEmpty())
+                    ->columnSpanFull(),
+                RepeatableEntry::make('permissions')
+                    ->hiddenLabel()
+                    ->table([
+                        TableColumn::make("Permissions directement associées"),
+                    ])
+                    ->schema([
+                        TextEntry::make('name'),
+                    ])
+                    ->visible(fn($record) => $record->permissions->isNotEmpty())
                     ->columnSpanFull(),
             ]);
     }
@@ -100,8 +120,14 @@ class UserResource extends Resource
                                     ->preload()
                                     ->label('Services affectés'),
                             ]),
-                        Tab::make('Permissions')
+                        Tab::make('Roles et permissions')
                             ->schema([
+                                Select::make('roles')
+                                    ->relationship('roles', 'name')
+                                    ->multiple()
+                                    ->preload()
+                                    ->searchable()
+                                    ->label('Rôles'),
                                 CheckboxList::make('permissions')
                                     ->relationship('permissions', 'name')
                                     ->columns(2)

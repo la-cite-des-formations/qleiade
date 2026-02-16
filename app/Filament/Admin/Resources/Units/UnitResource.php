@@ -57,7 +57,7 @@ class UnitResource extends Resource
                 RepeatableEntry::make('users')
                     ->hiddenLabel()
                     ->table([
-                        TableColumn::make('Utilisateurs affectés au service'),
+                        TableColumn::make('Utilisateurs affectés'),
                     ])
                     ->schema([
                         TextEntry::make('name'),

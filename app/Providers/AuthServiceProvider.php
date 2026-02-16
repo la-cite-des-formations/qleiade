@@ -23,6 +23,7 @@ class AuthServiceProvider extends ServiceProvider
         \Models\Stage::class => \App\Policies\StagePolicy::class,
         \Models\Tag::class => \App\Policies\TagPolicy::class,
         \Models\WealthType::class => \App\Policies\WealthTypePolicy::class,
+        \Models\Role::class => \App\Policies\RolePolicy::class,
     ];
 
     /**
