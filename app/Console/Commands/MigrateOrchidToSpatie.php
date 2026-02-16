@@ -65,6 +65,12 @@ class MigrateOrchidToSpatie extends Command
             return Command::FAILURE;
         }
 
+        // Renommer les tables Orchid pour éviter les conflits avec Spatie
+        if (!$this->renameOrchidTables($isDryRun)) {
+            $this->error('❌ Impossible de renommer les tables Orchid');
+            return Command::FAILURE;
+        }
+
         // Vérification et création des tables Spatie si nécessaire
         if (!$this->ensureSpatieTablesExist($isDryRun)) {
             $this->error('❌ Impossible de créer les tables Spatie');
@@ -132,11 +138,59 @@ class MigrateOrchidToSpatie extends Command
     }
 
     /**
-     * Vérifie la présence des tables Orchid
+     * Vérifie la présence des tables Orchid (soit l'originale, soit déjà renommée)
      */
     private function checkOrchidTables(): bool
     {
-        return DB::getSchemaBuilder()->hasTable('role_users');
+        $schema = DB::getSchemaBuilder();
+        return $schema->hasTable('role_users') || $schema->hasTable('orchid_role_users');
+    }
+
+    /**
+     * Renomme les tables Orchid pour éviter les conflits avec Spatie
+     */
+    private function renameOrchidTables(bool $isDryRun): bool
+    {
+        $this->info('🔄 Vérification des tables Orchid...');
+        
+        $schema = DB::getSchemaBuilder();
+        $tablesToRename = [
+            'roles' => 'orchid_roles',
+            'role_users' => 'orchid_role_users',
+        ];
+
+        foreach ($tablesToRename as $oldName => $newName) {
+            if ($schema->hasTable($oldName)) {
+                if ($schema->hasTable($newName)) {
+                    $this->info("  ℹ️  La table {$newName} existe déjà, suppression de l'ancienne table {$oldName}...");
+                    if (!$isDryRun) {
+                        $schema->drop($oldName);
+                    }
+                    continue;
+                }
+
+                if ($isDryRun) {
+                    $this->warn("  ⚠️  En mode réel, la table \"{$oldName}\" sera renommée en \"{$newName}\"");
+                    continue;
+                }
+
+                try {
+                    $this->info("  ⏳ Renommage de la table {$oldName} → {$newName}...");
+                    $schema->rename($oldName, $newName);
+                    $this->info("  ✅ Table {$oldName} renommée");
+                } catch (\Exception $e) {
+                    $this->error("  ❌ Erreur lors du renommage de {$oldName} : " . $e->getMessage());
+                    return false;
+                }
+            } elseif ($schema->hasTable($newName)) {
+                $this->info("  ✅ La table {$newName} est déjà présente");
+            } else {
+                $this->warn("  ⚠️  La table {$oldName} ou {$newName} est manquante");
+            }
+        }
+
+        $this->newLine();
+        return true;
     }
 
     /**
@@ -425,15 +479,15 @@ class MigrateOrchidToSpatie extends Command
     {
         $this->info('📋 Migration des rôles...');
         
-        // Vérifier si la table roles existe (structure Orchid standard)
-        if (!DB::getSchemaBuilder()->hasTable('roles')) {
-            $this->warn('  ⚠️  Table "roles" non trouvée. Aucun rôle à migrer.');
+        // Vérifier si la table orchid_roles existe
+        if (!DB::getSchemaBuilder()->hasTable('orchid_roles')) {
+            $this->warn('  ⚠️  Table "orchid_roles" non trouvée. Aucun rôle à migrer.');
             $this->newLine();
             return;
         }
 
-        // Récupérer tous les rôles depuis la table roles d'Orchid
-        $orchidRoles = DB::table('roles')->get();
+        // Récupérer tous les rôles depuis la table orchid_roles d'Orchid
+        $orchidRoles = DB::table('orchid_roles')->get();
 
         if ($orchidRoles->isEmpty()) {
             $this->warn('  ⚠️  Aucun rôle trouvé dans la table "roles".');
@@ -507,8 +561,8 @@ class MigrateOrchidToSpatie extends Command
         }
 
         // Ajouter aussi les permissions des rôles
-        if (DB::getSchemaBuilder()->hasTable('roles')) {
-            $roles = DB::table('roles')->get();
+        if (DB::getSchemaBuilder()->hasTable('orchid_roles')) {
+            $roles = DB::table('orchid_roles')->get();
             foreach ($roles as $role) {
                 if ($role->permissions) {
                     $rolePermissions = json_decode($role->permissions, true);
@@ -640,15 +694,15 @@ class MigrateOrchidToSpatie extends Command
 
         foreach ($users as $user) {
             try {
-                // Migration des rôles depuis role_users (avec role_id)
-                $userRoleIds = DB::table('role_users')
+                // Migration des rôles depuis orchid_role_users (avec role_id)
+                $userRoleIds = DB::table('orchid_role_users')
                     ->where('user_id', $user->id)
                     ->pluck('role_id')
                     ->toArray();
 
                 if (!empty($userRoleIds)) {
-                    // Récupérer les noms des rôles depuis la table roles d'Orchid
-                    $orchidRoles = DB::table('roles')
+                    // Récupérer les noms des rôles depuis la table orchid_roles d'Orchid
+                    $orchidRoles = DB::table('orchid_roles')
                         ->whereIn('id', $userRoleIds)
                         ->get();
                     
@@ -758,37 +812,37 @@ class MigrateOrchidToSpatie extends Command
                 }
             }
 
-            // 2. Gestion de la table role_users
-            if ($schema->hasTable('role_users')) {
+            // 2. Gestion de la table orchid_role_users
+            if ($schema->hasTable('orchid_role_users')) {
                 if ($keepBackup) {
-                    $this->info('  ⏳ Sauvegarde de la table role_users → role_users_backup...');
+                    $this->info('  ⏳ Sauvegarde de la table orchid_role_users → orchid_role_users_backup...');
                     // Supprimer l'ancienne backup si elle existe
-                    if ($schema->hasTable('role_users_backup')) {
-                        DB::statement('DROP TABLE role_users_backup');
+                    if ($schema->hasTable('orchid_role_users_backup')) {
+                        DB::statement('DROP TABLE orchid_role_users_backup');
                     }
-                    DB::statement('RENAME TABLE role_users TO role_users_backup');
-                    $this->info('  ✅ Table role_users sauvegardée');
+                    DB::statement('RENAME TABLE orchid_role_users TO orchid_role_users_backup');
+                    $this->info('  ✅ Table orchid_role_users sauvegardée');
                 } else {
-                    $this->info('  ⏳ Suppression de la table role_users...');
-                    DB::statement('DROP TABLE role_users');
-                    $this->info('  ✅ Table role_users supprimée');
+                    $this->info('  ⏳ Suppression de la table orchid_role_users...');
+                    DB::statement('DROP TABLE orchid_role_users');
+                    $this->info('  ✅ Table orchid_role_users supprimée');
                 }
             }
 
-            // 3. Gestion de la table roles
-            if ($schema->hasTable('roles')) {
+            // 3. Gestion de la table orchid_roles
+            if ($schema->hasTable('orchid_roles')) {
                 if ($keepBackup) {
-                    $this->info('  ⏳ Sauvegarde de la table roles → roles_orchid_backup...');
+                    $this->info('  ⏳ Sauvegarde de la table orchid_roles → roles_orchid_backup...');
                     // Supprimer l'ancienne backup si elle existe
                     if ($schema->hasTable('roles_orchid_backup')) {
                         DB::statement('DROP TABLE roles_orchid_backup');
                     }
-                    DB::statement('RENAME TABLE roles TO roles_orchid_backup');
-                    $this->info('  ✅ Table roles sauvegardée');
+                    DB::statement('RENAME TABLE orchid_roles TO roles_orchid_backup');
+                    $this->info('  ✅ Table orchid_roles sauvegardée');
                 } else {
-                    $this->info('  ⏳ Suppression de la table roles...');
-                    DB::statement('DROP TABLE roles');
-                    $this->info('  ✅ Table roles supprimée');
+                    $this->info('  ⏳ Suppression de la table orchid_roles...');
+                    DB::statement('DROP TABLE orchid_roles');
+                    $this->info('  ✅ Table orchid_roles supprimée');
                 }
             }
 
@@ -797,8 +851,8 @@ class MigrateOrchidToSpatie extends Command
             if ($keepBackup) {
                 $this->info('💾 Les données Orchid ont été conservées en backup :');
                 $this->info('   • users.orchid_permissions (colonne conservée)');
-                if ($schema->hasTable('role_users_backup')) {
-                    $this->info('   • role_users_backup (table)');
+                if ($schema->hasTable('orchid_role_users_backup')) {
+                    $this->info('   • orchid_role_users_backup (table)');
                 }
                 if ($schema->hasTable('roles_orchid_backup')) {
                     $this->info('   • roles_orchid_backup (table)');
