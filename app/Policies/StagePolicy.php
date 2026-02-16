@@ -13,7 +13,7 @@ class StagePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('platform.quality.actions');
+        return $user->can('platform.quality.stages');
     }
 
     /**
@@ -21,7 +21,7 @@ class StagePolicy
      */
     public function view(User $user, Stage $stage): bool
     {
-        return $user->can('platform.quality.actions');
+        return $user->can('platform.quality.stages');
     }
 
     /**
@@ -29,7 +29,7 @@ class StagePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('platform.quality.actions.create');
+        return $user->can('platform.quality.stage.create');
     }
 
     /**
@@ -37,7 +37,7 @@ class StagePolicy
      */
     public function update(User $user, Stage $stage): bool
     {
-        return $user->can('platform.quality.actions.edit');
+        return $user->can('platform.quality.stage.edit');
     }
 
     /**
@@ -45,7 +45,7 @@ class StagePolicy
      */
     public function delete(User $user, Stage $stage): bool
     {
-        return $user->can('platform.quality.actions.edit');
+        return $user->can('platform.quality.stage.edit');
     }
 
     /**
@@ -53,7 +53,7 @@ class StagePolicy
      */
     public function restore(User $user, Stage $stage): bool
     {
-        return $user->can('platform.quality.actions.edit');
+        return $user->can('platform.quality.stage.edit');
     }
 
     /**
@@ -61,6 +61,6 @@ class StagePolicy
      */
     public function forceDelete(User $user, Stage $stage): bool
     {
-        return $user->can('platform.quality.actions.edit');
+        return $user->can('platform.quality.stage.edit');
     }
 }

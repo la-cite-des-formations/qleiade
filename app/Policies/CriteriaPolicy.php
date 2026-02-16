@@ -13,7 +13,7 @@ class CriteriaPolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('platform.quality.quality_labels');
+        return $user->can('platform.quality.criterias');
     }
 
     /**
@@ -21,7 +21,7 @@ class CriteriaPolicy
      */
     public function view(User $user, Criteria $criteria): bool
     {
-        return $user->can('platform.quality.quality_labels');
+        return $user->can('platform.quality.criterias');
     }
 
     /**
@@ -29,7 +29,7 @@ class CriteriaPolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('platform.quality.quality_label.create');
+        return $user->can('platform.quality.criteria.create');
     }
 
     /**
@@ -37,7 +37,7 @@ class CriteriaPolicy
      */
     public function update(User $user, Criteria $criteria): bool
     {
-        return $user->can('platform.quality.quality_label.edit');
+        return $user->can('platform.quality.criteria.edit');
     }
 
     /**
@@ -45,7 +45,7 @@ class CriteriaPolicy
      */
     public function delete(User $user, Criteria $criteria): bool
     {
-        return $user->can('platform.quality.quality_label.edit');
+        return $user->can('platform.quality.criteria.edit');
     }
 
     /**
@@ -53,7 +53,7 @@ class CriteriaPolicy
      */
     public function restore(User $user, Criteria $criteria): bool
     {
-        return $user->can('platform.quality.quality_label.edit');
+        return $user->can('platform.quality.criteria.edit');
     }
 
     /**
@@ -61,6 +61,6 @@ class CriteriaPolicy
      */
     public function forceDelete(User $user, Criteria $criteria): bool
     {
-        return $user->can('platform.quality.quality_label.edit');
+        return $user->can('platform.quality.criteria.edit');
     }
 }

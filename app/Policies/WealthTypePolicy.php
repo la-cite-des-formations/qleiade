@@ -13,7 +13,7 @@ class WealthTypePolicy
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('platform.quality.wealths');
+        return $user->can('platform.quality.wealth_types');
     }
 
     /**
@@ -21,7 +21,7 @@ class WealthTypePolicy
      */
     public function view(User $user, WealthType $wealthType): bool
     {
-        return $user->can('platform.quality.wealths');
+        return $user->can('platform.quality.wealth_types');
     }
 
     /**
@@ -29,7 +29,7 @@ class WealthTypePolicy
      */
     public function create(User $user): bool
     {
-        return $user->can('platform.quality.wealth.create');
+        return $user->can('platform.quality.wealth_type.create');
     }
 
     /**
@@ -37,7 +37,7 @@ class WealthTypePolicy
      */
     public function update(User $user, WealthType $wealthType): bool
     {
-        return $user->can('platform.quality.wealth.edit');
+        return $user->can('platform.quality.wealth_type.edit');
     }
 
     /**
@@ -45,7 +45,7 @@ class WealthTypePolicy
      */
     public function delete(User $user, WealthType $wealthType): bool
     {
-        return $user->can('platform.quality.wealth.edit');
+        return $user->can('platform.quality.wealth_type.edit');
     }
 
     /**
@@ -53,7 +53,7 @@ class WealthTypePolicy
      */
     public function restore(User $user, WealthType $wealthType): bool
     {
-        return $user->can('platform.quality.wealth.edit');
+        return $user->can('platform.quality.wealth_type.edit');
     }
 
     /**
@@ -61,6 +61,6 @@ class WealthTypePolicy
      */
     public function forceDelete(User $user, WealthType $wealthType): bool
     {
-        return $user->can('platform.quality.wealth.edit');
+        return $user->can('platform.quality.wealth_type.edit');
     }
 }
