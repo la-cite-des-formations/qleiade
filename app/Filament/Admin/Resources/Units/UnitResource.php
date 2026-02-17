@@ -32,6 +32,7 @@ class UnitResource extends Resource
 
     protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedBuildingOffice2;
     protected static string|UnitEnum|null $navigationGroup = 'GESTION';
+    protected static ?string $navigationParentItem = 'Utilisateurs';
     protected static ?int $navigationSort = 50;
 
     protected static ?string $navigationLabel = 'Services';

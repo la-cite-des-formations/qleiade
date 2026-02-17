@@ -32,6 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Amber,
             ])
+            ->homeUrl('/home')
             ->discoverResources(in: app_path('Filament/Admin/Resources'), for: 'App\Filament\Admin\Resources')
             ->navigationGroups([
                 NavigationGroup::make()
@@ -50,8 +51,11 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Admin/Widgets'), for: 'App\Filament\Admin\Widgets')
             ->widgets([
-                AccountWidget::class,
-                FilamentInfoWidget::class,
+                // AccountWidget::class,
+                // FilamentInfoWidget::class,
+                \App\Filament\Admin\Widgets\RepositoryOverviewWidget::class,
+                \App\Filament\Admin\Widgets\DataOverviewWidget::class,
+                \App\Filament\Admin\Widgets\ManagementOverviewWidget::class,
             ])
             ->middleware([
                 EncryptCookies::class,

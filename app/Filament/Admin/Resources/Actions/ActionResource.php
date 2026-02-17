@@ -36,6 +36,11 @@ class ActionResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label';
 
+    public static function getWidgetDescription(): string
+    {
+        return 'Suivre et organiser les activités du référentiel.';
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema

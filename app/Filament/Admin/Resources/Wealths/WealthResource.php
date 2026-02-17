@@ -60,6 +60,11 @@ class WealthResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getWidgetDescription(): string
+    {
+        return 'Centraliser les preuves et documents justificatifs.';
+    }
+
     private static function getIdentityTabSchema(): array
     {
         return [

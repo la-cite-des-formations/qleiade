@@ -34,6 +34,11 @@ class TagResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label';
 
+    public static function getWidgetDescription(): string
+    {
+        return 'Catégoriser les éléments avec des libellés personnalisés.';
+    }
+
     public static function form(Schema $schema): Schema
     {
         return $schema

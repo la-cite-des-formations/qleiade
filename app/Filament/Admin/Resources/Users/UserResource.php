@@ -41,6 +41,11 @@ class UserResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getWidgetDescription(): string
+    {
+        return 'Gérer les comptes utilisateurs et leurs accès aux services.';
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema

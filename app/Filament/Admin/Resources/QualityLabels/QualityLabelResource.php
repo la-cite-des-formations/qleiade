@@ -40,6 +40,11 @@ class QualityLabelResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'label';
 
+    public static function getWidgetDescription(): string
+    {
+        return 'Gérer les labels qualité et leurs critères associés.';
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema

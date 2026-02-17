@@ -39,6 +39,11 @@ class RoleResource extends Resource
 
     protected static ?string $recordTitleAttribute = 'name';
 
+    public static function getWidgetDescription(): string
+    {
+        return 'Définir les rôles et les permissions associées.';
+    }
+
     public static function infolist(Schema $schema): Schema
     {
         return $schema
