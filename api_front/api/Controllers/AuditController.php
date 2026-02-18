@@ -130,7 +130,7 @@ class AuditController extends Controller
                 return $meilisearch->search($query, $options);
             })
                 ->query(function ($builder) {
-                    $builder->with('indicators.criteria.qualityLabel', 'wealthType', 'actions.stage', 'file', 'units', 'tags');
+                    $builder->with('indicators.criteria.qualityLabel', 'wealthType', 'actions.stage', 'file', 'unit', 'tags');
                 })
                 ->get();
             $collection = new WealthCollection($wealths);
