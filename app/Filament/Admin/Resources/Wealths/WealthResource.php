@@ -19,10 +19,15 @@ use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
-use Filament\Schemas\Components\Utilities\Get;
-use Filament\Schemas\Components\Utilities\Set;
 use Filament\Support\Enums\Width;
 use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
+use Filament\Schemas\Components\Grid;
+use Filament\Schemas\Components\Utilities\Get;
+use Filament\Schemas\Components\Utilities\Set;
+use Illuminate\Support\HtmlString;
+use Illuminate\Support\Facades\Blade;
 use Filament\Tables\Filters\Filter;
 use Filament\Tables\Filters\SelectFilter;
 use Filament\Tables\Filters\Indicator as FilterIndicator;
@@ -34,7 +39,6 @@ use Models\Unit;
 use Filament\Schemas\Components\Tabs;
 use App\Filament\Components\Tab;
 use Filament\Schemas\Components\Group;
-use Filament\Schemas\Components\Grid;
 use Filament\Schemas\Components\Fieldset;
 use Filament\Forms\Components\FileUpload;
 use Filament\Forms\Components\Toggle;
@@ -63,6 +67,143 @@ class WealthResource extends Resource
     public static function getWidgetDescription(): string
     {
         return 'Centraliser les preuves et documents justificatifs.';
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('description')
+                    ->label('Description')
+                    ->hiddenLabel()
+                    ->html()
+                    ->columnSpanFull(),
+
+                Grid::make(2)
+                    ->schema([
+                        TextEntry::make('unit.label')
+                            ->label('Service'),
+                        TextEntry::make('status')
+                            ->label('État')
+                            ->getStateUsing(fn (Wealth $record): string => match (true) {
+                                ! is_null($record->archived_at) => 'Archivée',
+                                ! is_null($record->validity_date) => 'Temporaire',
+                                default => 'Active',
+                            })
+                            ->badge()
+                            ->color(fn (Wealth $record) => match (true) {
+                                ! is_null($record->archived_at) => 'danger',
+                                ! is_null($record->validity_date) => 'warning',
+                                default => 'success',
+                            })
+                            ->icon(fn (Wealth $record) => match (true) {
+                                ! is_null($record->archived_at) => Heroicon::OutlinedArchiveBox,
+                                ! is_null($record->validity_date) => Heroicon::OutlinedClock,
+                                default => Heroicon::OutlinedCheckCircle,
+                            })
+                            ->tooltip(fn (Wealth $record) => match (true) {
+                                ! is_null($record->archived_at) => 'Archivée le ' . \Carbon\Carbon::parse($record->archived_at)->format('d/m/Y'),
+                                ! is_null($record->validity_date) => 'Valide jusqu\'au ' . \Carbon\Carbon::parse($record->validity_date)->format('d/m/Y'),
+                                default => null,
+                            }),
+                    ])
+                    ->columnSpanFull(),
+
+                Group::make([
+                    TextEntry::make('wealthType.label')
+                        ->label('Type')
+                        ->formatStateUsing(fn ($state) => "$state :")
+                        ->columnSpanFull(),
+
+                    TextEntry::make('attachment_detail')
+                        ->hiddenLabel()
+                        ->html()
+                        ->state(function (Wealth $record) {
+                            $type = $record->wealthType?->name;
+                            $attachment = $record->attachment;
+
+                            if (! $type || empty($attachment[$type])) {
+                                return null;
+                            }
+
+                            $data = $attachment[$type];
+
+                            return match ($type) {
+                                'link' => $data['url'] 
+                                    ? new HtmlString(
+                                        Blade::render(
+                                            '<x-filament::link :href="$url" target="_blank" color="primary">{{ $url }}</x-filament::link>',
+                                            [
+                                                'url' => $data['url'],
+                                            ]
+                                        )
+                                    ) 
+                                    : null,
+                                'ypareo' => new HtmlString($data['process'] ?? ''),
+                                default => null,
+                            };
+                        })
+                        ->visible(fn (Wealth $record) => in_array($record->wealthType?->name, ['link', 'ypareo']))
+                        ->columnSpanFull()
+                        ->extraAttributes(['style' => 'margin-top: -1rem;']),
+                ])
+                ->columnSpanFull()
+                ->extraAttributes(['class' => 'space-y-0']),
+
+                TextEntry::make('granularity_unified')
+                    ->label('Granularité')
+                    ->state(function (Wealth $record) {
+                        $granularity = $record->granularity;
+                        $type = $granularity['type'] ?? 'global';
+                        $id = $granularity['id'] ?? null;
+
+                        $typeLabel = match ($type) {
+                            'global' => 'Global',
+                            'formation' => 'Formation',
+                            'student' => 'Apprenant',
+                            default => ucfirst($type),
+                        };
+
+                        if ($type === 'global' || ! $id) {
+                            return $typeLabel;
+                        }
+
+                        return "{$typeLabel} ({$id})";
+                    })
+                    ->columnSpanFull(),
+
+                RepeatableEntry::make('indicators')
+                    ->label('Indicateurs certifiés')
+                    ->table([
+                        TableColumn::make('Label Qualité'),
+                        TableColumn::make('Indicateurs'),
+                        TableColumn::make('Importance'),
+                    ])
+                    ->schema([
+                        TextEntry::make('qualityLabel.label'),
+                        TextEntry::make('full'),
+                        TextEntry::make('pivot.is_essential')
+                            ->state(fn ($record) => $record->pivot->is_essential ? 'Essentielle' : 'Complémentaire')
+                            ->badge()
+                            ->color(fn ($state) => $state === 'Essentielle' ? 'success' : 'gray'),
+                    ])
+                    ->columnSpanFull()
+                    ->visible(fn($record) => $record->indicators->isNotEmpty()),
+
+                TextEntry::make('actions.label')
+                    ->label('Activités associées')
+                    ->badge()
+                    ->color('info')
+                    ->visible(fn($record) => $record->actions->isNotEmpty())
+                    ->columnSpanFull(),
+
+                TextEntry::make('tags.label')
+                    ->label('Libellés associés')
+                    ->badge()
+                    ->color('gray')
+                    ->visible(fn($record) => $record->tags->isNotEmpty())
+                    ->columnSpanFull(),
+            ]);
     }
 
     private static function getIdentityTabSchema(): array
@@ -352,8 +493,7 @@ class WealthResource extends Resource
                             ->extraAttributes(['class' => 'nested-tabs']),
                     ])
                     ->columnSpanFull(),
-            ])
-            ->extraAttributes(['class' => 'modal-no-padding']);
+            ]);
     }
 
     private static function getTableColumns(): array
@@ -631,12 +771,14 @@ class WealthResource extends Resource
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::view.single.label'))
+                ->modalHeading(fn (Wealth $record) => $record->name)
                 ->slideOver(),
             EditAction::make()
                 ->icon(Heroicon::OutlinedPencilSquare)
                 ->iconButton()
                 ->hiddenLabel()
                 ->tooltip(__('filament-actions::edit.single.label'))
+                ->extraModalWindowAttributes(['class' => 'modal-no-padding'])
                 ->slideOver()
                 ->mutateRecordDataUsing(fn (array $data, Wealth $record): array => self::prepareDataForForm($data, $record))
                 ->using(fn (Wealth $record, array $data): Wealth => self::saveRelationships($record, $data)),

@@ -15,6 +15,7 @@ class ManageWealths extends ManageRecords
         return [
             CreateAction::make()
                 ->modalHeading('Nouvelle Preuve')
+                ->extraModalWindowAttributes(['class' => 'modal-no-padding'])
                 ->slideOver()
                 ->using(fn (array $data, string $model) => WealthResource::saveRelationships(new $model, $data)),
         ];

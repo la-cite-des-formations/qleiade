@@ -22,8 +22,8 @@ class ManageIndicators extends ManageRecords
                 ->mountUsing(function ($form, ManageIndicators $livewire) {
                     $form->fill();
 
-                    // Get filter state from the 'structure' filter
-                    $filterState = $livewire->getTableFilterState('structure');
+                    // Get filter state from the 'quality_classification' filter
+                    $filterState = $livewire->getTableFilterState('quality_classification');
                     $qualityLabelId = $filterState['quality_label_id'] ?? null;
                     $criteriaId = $filterState['criteria_id'] ?? null;
 

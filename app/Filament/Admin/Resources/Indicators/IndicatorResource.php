@@ -25,6 +25,13 @@ use Models\Criteria;
 use Models\QualityLabel;
 use Filament\Tables\Filters\Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
+use Filament\Infolists\Components\RepeatableEntry\TableColumn;
+use Filament\Infolists\Components\IconEntry;
+use Filament\Support\Enums\IconSize;
+use Models\Wealth;
+use Filament\Actions\ViewAction;
 
 class IndicatorResource extends Resource
 {
@@ -42,6 +49,52 @@ class IndicatorResource extends Resource
     protected static ?string $pluralModelLabel = 'Indicateurs';
 
     protected static ?string $recordTitleAttribute = 'label';
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('qualityLabel.label')
+                    ->label('Label Qualité'),
+                RepeatableEntry::make('wealths')
+                    ->state(fn (Indicator $record) => $record->wealths->sortBy([
+                        ['pivot.is_essential', 'desc'],
+                        [fn ($w) => $w->archived_at ? 2 : ($w->validity_date ? 1 : 0), 'asc'],
+                    ]))
+                    ->label('Preuves associées')
+                    ->table([
+                        TableColumn::make('Preuve'),
+                        TableColumn::make('Importance'),
+                        TableColumn::make('État'),
+                    ])
+                    ->schema([
+                        TextEntry::make('name'),
+                        TextEntry::make('pivot.is_essential')
+                            ->state(fn ($record) => $record->pivot->is_essential ? 'Essentielle' : 'Complémentaire')
+                            ->badge()
+                            ->color(fn ($state) => $state === 'Essentielle' ? 'success' : 'gray'),
+                        IconEntry::make('status')
+                            ->getStateUsing(fn (Wealth $record): Wealth => $record)
+                            ->icon(fn (Wealth $state) => match (true) {
+                                ! is_null($state->archived_at) => Heroicon::OutlinedArchiveBox,
+                                ! is_null($state->validity_date) => Heroicon::OutlinedClock,
+                                default => Heroicon::OutlinedMinus,
+                            })
+                            ->color(fn (Wealth $state) => match (true) {
+                                ! is_null($state->archived_at) => 'danger',
+                                ! is_null($state->validity_date) => 'warning',
+                                default => 'gray',
+                            })
+                            ->tooltip(fn (Wealth $state) => match (true) {
+                                ! is_null($state->archived_at) => 'Archivée le ' . $state->archived_at->format('d/m/Y'),
+                                ! is_null($state->validity_date) => 'Valide jusqu\'au ' . $state->validity_date->format('d/m/Y'),
+                                default => null
+                            }),
+                    ])
+                    ->visible(fn(Indicator $record) => $record->wealths->isNotEmpty())
+                    ->columnSpanFull(),
+            ]);
+    }
 
     public static function form(Schema $schema): Schema
     {
@@ -102,7 +155,8 @@ class IndicatorResource extends Resource
         return [
             TextColumn::make('qualityLabel.label')
                 ->label('Label Qualité')
-                ->verticalAlignment('start'),
+                ->verticalAlignment('start')
+                ->hidden(fn ($livewire) => filled($livewire->getTableFilterState('quality_classification')['quality_label_id'] ?? null)),
             TextColumn::make('criteria.label')
                 ->sortable()
                 ->label('Critère')
@@ -187,6 +241,13 @@ class IndicatorResource extends Resource
     private static function getTableActions(): array
     {
         return [
+            ViewAction::make()
+                ->icon(Heroicon::Eye)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::view.single.label'))
+                ->slideOver()
+                ->modalHeading(fn(Indicator $record): string => $record->full),
             EditAction::make()
                 ->fillForm(function (Indicator $record): array {
                     $record->quality_label_id = $record->criteria->quality_label_id;
