@@ -5,14 +5,11 @@ namespace Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Orchid\Filters\Filterable;
-use Orchid\Screen\AsSource;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Unit extends Model
 {
-    use HasFactory, AsSource, Filterable;
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -36,9 +33,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return HasMany
+     * @return Relation
      */
-    public function wealths(): HasMany
+    public function wealths(): Relation
     {
         return $this->hasMany(Wealth::class);
     }
@@ -46,9 +43,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-    public function users(): BelongsToMany
+    public function users(): Relation
     {
         return $this->belongsToMany(
             User::class,
@@ -61,9 +58,9 @@ class Unit extends Model
     /**
      * wealths
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-    public function actions(): BelongsToMany
+    public function actions(): Relation
     {
         return $this->belongsToMany(
             Action::class,

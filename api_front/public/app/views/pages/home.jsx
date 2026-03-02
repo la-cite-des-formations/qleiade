@@ -10,6 +10,8 @@ import MyLink from '@components/MyLink';
 
 function QuickMenu() {
     const { t } = useTranslation('common');
+    const { canSee } = React.useContext(AuthContext);
+
     return (
         <>
             <Typography variant="h5" component="div" sx={{ margin: '2rem' }}>
@@ -17,37 +19,30 @@ function QuickMenu() {
                 {/* {t("home.menu.title")} */}
             </Typography>
             <List key={"quickMenulist"} disablePadding>
-                <ListItem >
-                    <Tooltip title={t('home.administer.description')} placement="top-end" enterDelay={2000}>
-                        <ListItemButton sx={{ boxShadow: '0px 0px 0.5px 0.5px grey' }}>
-                            <MyLink href='/admin'>
-                                {t("home.administer.title")}
-                            </MyLink>
-                        </ListItemButton>
-                    </Tooltip>
-                </ListItem>
-                <ListItem>
-                    <Tooltip title={t("home.overview.description")} placement='top-end' enterDelay={2000}>
-                        <ListItemButton sx={{ boxShadow: '0px 0px 0.5px 0.5px grey' }}>
-                            <MyLink href='/labels'>
-                                {t("home.overview.title")}
-                            </MyLink>
-                        </ListItemButton>
-                    </Tooltip>
-                </ListItem>
-                <ListItem>
-                    {/* <Tooltip title={t("home.dashboard.description")} placement='top-end' enterDelay='2000'>
-                        <ListItemButton sx={{ boxShadow: '0px 0px 0.5px 0.5px grey' }}>
-                            <MyLink href='/dashboards'>
-                                {t("home.dashboard.title")}
-                            </MyLink>
-                        </ListItemButton>
-                    </Tooltip> */}
-                </ListItem>
+                {canSee('public_admin') && (
+                    <ListItem >
+                        <Tooltip title={t('home.administer.description')} placement="top-end" enterDelay={2000}>
+                            <ListItemButton sx={{ boxShadow: '0px 0px 0.5px 0.5px grey' }}>
+                                <MyLink href='/admin'>
+                                    {t("home.administer.title")}
+                                </MyLink>
+                            </ListItemButton>
+                        </Tooltip>
+                    </ListItem>
+                )}
+                {canSee('public_quality_labels_dashboard') && (
+                    <ListItem>
+                        <Tooltip title={t("home.overview.description")} placement='top-end' enterDelay={2000}>
+                            <ListItemButton sx={{ boxShadow: '0px 0px 0.5px 0.5px grey' }}>
+                                <MyLink href='/labels'>
+                                    {t("home.overview.title")}
+                                </MyLink>
+                            </ListItemButton>
+                        </Tooltip>
+                    </ListItem>
+                )}
             </List>
-
         </>
-
     );
 }
 

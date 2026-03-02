@@ -4,17 +4,12 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasManyThrough;
-use Models\Audit;
-use Orchid\Attachment\Attachable;
-use Orchid\Attachment\AttachOne;
-
-// use Orchid\Screen\AsSource;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
 
 class QualityLabel extends Model
 {
-    use HasFactory, Attachable;
+    use HasFactory, HasRelationships;
 
     /**
      * The table associated with the model.
@@ -22,11 +17,6 @@ class QualityLabel extends Model
      * @var string
      */
     protected $table = 'quality_label';
-
-    /**
-     * @AttachOne("image")
-     */
-    public $attachment;
 
     protected $primaryKey = 'id';
 
@@ -47,30 +37,56 @@ class QualityLabel extends Model
     ];
 
     /**
+     * Criterias
+     * Un label qualité a plusieurs critère
+     * @return Relation
+     */
+    public function criterias(): Relation
+    {
+        return $this->hasMany(Criteria::class);
+    }
+
+    /**
      * indicators
      *
-     * @return HasManyThrough
+     * @return Relation
      */
-    public function indicators(): HasManyThrough
+    public function indicators(): Relation
     {
         return $this->hasManyThrough(Indicator::class, Criteria::class);
     }
 
     /**
-     * Criterias
-     * Un label qualité a plusieurs critère
-     * @return HasMany
+     * wealths
+     *
+     * @return Relation
      */
-    public function criterias(): HasMany
+    public function wealths(): Relation
     {
-        return $this->hasMany(Criteria::class);
+        return $this->hasManyDeep(
+            Wealth::class,
+            [Criteria::class, Indicator::class, 'wealths_indicators'],
+            [
+                'quality_label_id',
+                'criteria_id',
+                'indicator_id',
+                'id'
+            ],
+            [
+                'id',
+                'id',
+                'id',
+                'wealth_id'
+            ]
+        );
     }
+
     /**
      * audits
      *
-     * @return HasMany
+     * @return Relation
      */
-    public function audits(): HasMany
+    public function audits(): Relation
     {
         return $this->hasMany(Audit::class);
     }

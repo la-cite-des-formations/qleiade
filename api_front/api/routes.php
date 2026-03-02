@@ -54,7 +54,7 @@ Route::middleware(['api'])->group(function () {
 
     #region auth
     Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
-        $user = new UserResource($request->user()->load(['unit']));
+        $user = new UserResource($request->user()->load(['units']));
         // dd($user);
         return $user->toJson();
     });
@@ -67,7 +67,7 @@ Route::middleware(['api'])->group(function () {
 
         $request->session()->regenerateToken();
 
-        return redirect("/login");
+        return redirect()->route('login');
     });
 
     #region gets

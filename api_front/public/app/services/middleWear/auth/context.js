@@ -9,11 +9,7 @@ export function AuthProvider({ children, user }) {
     const authValue = React.useMemo(
         () => ({
             canSee: (key) => {
-                let can = false;
-                if (user.permissions) {
-                    user.permissions.hasOwnProperty(key) ? can = Boolean(Number(user.permissions[key])) : can = false;
-                }
-                return can;
+                return user && user.permissions && Boolean(user.permissions[key]);
             },
             getUnit: (key) => {
                 if (user) {

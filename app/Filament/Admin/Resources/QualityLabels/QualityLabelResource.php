@@ -1,0 +1,205 @@
+<?php
+
+namespace App\Filament\Admin\Resources\QualityLabels;
+
+use App\Filament\Admin\Resources\QualityLabels\Pages\ManageQualityLabels;
+use App\Filament\Admin\Resources\Criterias\CriteriaResource;
+use App\Filament\Admin\Resources\Indicators\IndicatorResource;
+use Filament\Infolists\Components\RepeatableEntry;
+use Filament\Infolists\Components\TextEntry;
+use Models\QualityLabel;
+use Models\Criteria;
+use Models\Indicator;
+use BackedEnum;
+use Filament\Actions\BulkActionGroup;
+use Filament\Actions\DeleteAction;
+use Filament\Actions\DeleteBulkAction;
+use Filament\Actions\EditAction;
+use Filament\Actions\ViewAction;
+use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\FileUpload;
+use Filament\Resources\Resource;
+use Filament\Schemas\Schema;
+use Filament\Support\Icons\Heroicon;
+use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Table;
+use Illuminate\Database\Eloquent\Builder;
+
+class QualityLabelResource extends Resource
+{
+    protected static ?string $model = QualityLabel::class;
+
+    protected static string|BackedEnum|null $navigationIcon = Heroicon::OutlinedCheckBadge;
+    protected static string|\UnitEnum|null $navigationGroup = 'RÉFÉRENTIEL';
+    protected static ?int $navigationSort = 10;
+
+    protected static ?string $navigationLabel = 'Labels Qualité';
+    protected static ?string $modelLabel = 'Label Qualité';
+    protected static ?string $pluralModelLabel = 'Labels Qualité';
+
+    protected static ?string $recordTitleAttribute = 'label';
+
+    public static function getWidgetDescription(): string
+    {
+        return 'Gérer les labels qualité et leurs critères associés.';
+    }
+
+    public static function infolist(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextEntry::make('description')
+                    ->hiddenLabel()
+                    ->placeholder("Description du label qualité non renseignée")
+                    ->columnSpanFull(),
+                RepeatableEntry::make('criterias')
+                    ->label(
+                        fn(QualityLabel $qualityLabel): string =>
+                            "{$qualityLabel->indicators_count} indicateurs répartis sur {$qualityLabel->criterias_count} critères :"
+                    )
+                    ->schema([
+                        TextEntry::make('indicators')
+                            ->label(fn(Criteria $criteria): string => "{$criteria->label} - {$criteria->description} :")
+                            ->state(
+                                fn(Criteria $criteria): string => $criteria->indicators
+                                    ->sortBy('number', SORT_NATURAL)
+                                    ->map(fn(Indicator $indicator) => "{$indicator->number} - {$indicator->label}")
+                                    ->join('<br>')
+                            )
+                            ->html()
+                            ->columnSpanFull(),
+                    ])
+                    ->extraAttributes(['class' => 'bg-info-list'])
+                    ->columnSpanFull(),
+            ]);
+    }
+
+    public static function form(Schema $schema): Schema
+    {
+        return $schema
+            ->components([
+                TextInput::make('label')
+                    ->required()
+                    ->maxLength(255)
+                    ->placeholder("Nom du label qualité non renseigné")
+                    ->label('Nom'),
+                Textarea::make('description')
+                    ->maxLength(1500)
+                    ->label('Description')
+                    ->rows(3)
+                    ->columnSpanFull(),
+                FileUpload::make('image')
+                    ->label('Logo')
+                    ->image()
+                    ->directory('quality-labels'),
+            ]);
+    }
+
+    private static function getTableColumns(): array
+    {
+        return [
+            TextColumn::make('label')
+                ->searchable()
+                ->sortable()
+                ->label('Nom')
+                ->verticalAlignment('start'),
+            TextColumn::make('description')
+                ->searchable()
+                ->label('Description')
+                ->wrap(),
+            TextColumn::make('criterias_count')
+                ->label('Critères')
+                ->alignRight()
+                ->verticalAlignment('start')
+                ->url(fn(QualityLabel $record): string => CriteriaResource::getUrl('index', [
+                    'filters' => [
+                        'quality_label_id' => [
+                            'value' => $record->id,
+                        ],
+                    ],
+                ])),
+            TextColumn::make('indicators_count')
+                ->label('Indicateurs')
+                ->alignRight()
+                ->verticalAlignment('start')
+                ->url(fn(QualityLabel $record): string => IndicatorResource::getUrl('index', [
+                    'filters' => [
+                        'quality_classification' => [
+                            'quality_label_id' => $record->id,
+                        ],
+                    ],
+                ])),
+            TextColumn::make('last_audit_date')
+                ->date('d/m/Y')
+                ->label('Dernier audit')
+                ->verticalAlignment('start'),
+        ];
+    }
+
+    private static function getTableFilters(): array
+    {
+        return [
+            //
+        ];
+    }
+
+    private static function getTableActions(): array
+    {
+        return [
+            ViewAction::make()
+                ->icon(Heroicon::Eye)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::view.single.label'))
+                ->slideOver()
+                ->modalHeading(fn(QualityLabel $qualityLabel): string => "{$qualityLabel->label}")
+                ->modalAutofocus(false),
+            EditAction::make()
+                ->slideOver()
+                ->icon(Heroicon::OutlinedPencilSquare)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::edit.single.label')),
+            DeleteAction::make()
+                ->icon(Heroicon::OutlinedTrash)
+                ->iconButton()
+                ->hiddenLabel()
+                ->tooltip(__('filament-actions::delete.single.label')),
+        ];
+    }
+
+    private static function getTableBulkActions(): array
+    {
+        return [
+            BulkActionGroup::make([
+                DeleteBulkAction::make(),
+            ]),
+        ];
+    }
+
+    public static function table(Table $table): Table
+    {
+        return $table
+            ->recordTitleAttribute('label')
+            ->columns(self::getTableColumns())
+            ->extraAttributes(['class' => 'resource-table'])
+            ->filters(self::getTableFilters())
+            ->deferFilters(false)
+            ->recordActions(self::getTableActions())
+            ->toolbarActions(self::getTableBulkActions());
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()
+            ->withCount(['criterias', 'indicators']);
+    }
+
+    public static function getPages(): array
+    {
+        return [
+            'index' => ManageQualityLabels::route('/'),
+        ];
+    }
+}

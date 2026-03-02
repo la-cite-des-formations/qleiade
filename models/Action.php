@@ -4,15 +4,11 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Orchid\Filters\Filterable;
-use Orchid\Screen\AsSource;
-
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Action extends Model
 {
-    use HasFactory, AsSource, Filterable;
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -29,44 +25,17 @@ class Action extends Model
     protected $fillable = [
         'name',
         'label',
-        'order',
         'description',
-    ];
-
-    /**
-     * @var array
-     */
-    protected $allowedSorts = [
-        'name',
         'order',
-        'label',
+        'stage_id',
     ];
-
-    /**
-     * @var array
-     */
-    protected $allowedFilters = [
-        'name',
-        'order',
-        'label',
-    ];
-
-    // /**
-    //  * The attributes that should be hidden for serialization.
-    //  *
-    //  * @var array<int, string>
-    //  */
-    // protected $hidden = [
-    //     'password',
-    //     'remember_token',
-    // ];
 
     /**
      * wealths
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-    public function wealths(): BelongsToMany
+    public function wealths(): Relation
     {
         return $this->belongsToMany(
             Wealth::class,
@@ -79,20 +48,19 @@ class Action extends Model
     /**
      * stage
      *
-     * @return BelongsTo
+     * @return Relation
      */
-    public function stage(): BelongsTo
+    public function stage(): Relation
     {
         return $this->belongsTo(Stage::class);
     }
 
     /**
-     * unit
+     * units
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-
-    public function unit(): BelongsToMany
+    public function units(): Relation
     {
         return $this->belongsToMany(
             Unit::class,

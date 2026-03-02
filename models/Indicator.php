@@ -4,15 +4,13 @@ namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Log;
-use Orchid\Filters\Filterable;
 
 class Indicator extends Model
 {
-    use HasFactory, Filterable;
+    use HasFactory;
 
     /**
      * The table associated with the model.
@@ -30,6 +28,7 @@ class Indicator extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'criteria_id',
         'name',
         'label',
         'description',
@@ -43,9 +42,10 @@ class Indicator extends Model
      *
      * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  array  $dependency // Les valeurs des champs dont on dépend
+     * 
      * @return \Illuminate\Database\Eloquent\Builder
      */
-    public function scopeByQualityLabelAndSort($query, $dependency = [])
+    public function scopeByQualityLabelAndSort($query, $dependency = []): Builder
     {
         Log::info('--- DÉPENDANCE INDICATEUR REÇUE ---', $dependency);
         // 1. On récupère l'ID du label qualité depuis le champ dépendant
@@ -72,9 +72,9 @@ class Indicator extends Model
     /**
      * wealths
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-    public function wealths(): BelongsToMany
+    public function wealths(): Relation
     {
         return $this->belongsToMany(
             Wealth::class,
@@ -82,30 +82,33 @@ class Indicator extends Model
             "indicator_id",
             "wealth_id"
         )
-        ->withPivot('is_essential')
-        ->withTimestamps();
+            ->withPivot('is_essential')
+            ->withTimestamps();
     }
 
     /**
      * qualityLabel
      *
-     * @return HasOneThrough
+     * @return Relation
      */
-    public function qualityLabel(): HasOneThrough
+    public function qualityLabel(): Relation
     {
         return $this->hasOneThrough(
-            QualityLabel::class, Criteria::class,
-            'id', 'id',
-            'criteria_id', 'quality_label_id'
+            QualityLabel::class,
+            Criteria::class,
+            'id',
+            'id',
+            'criteria_id',
+            'quality_label_id'
         );
     }
 
     /**
      * criteria
      *
-     * @return BelongsTo
+     * @return Relation
      */
-    public function criteria(): BelongsTo
+    public function criteria(): Relation
     {
         return $this->belongsTo(Criteria::class);
     }

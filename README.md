@@ -2,11 +2,11 @@
 
   ![author](https://img.shields.io/badge/Author-Claude%20Agier-blue)
   ![filesystem](https://img.shields.io/badge/Filesystem-google%20drive-blueviolet)
-  ![orchid](https://img.shields.io/badge/Orchid--Platform-V.11.0.1-green)
+  
 
 ## Liens utiles
 
-- Documentation Orchid admin panel : https://orchid.software/en/docs
+
 
 - Documentation de google drive adapter : https://github.com/nao-pon/flysystem-google-drive  
 
@@ -39,7 +39,7 @@
   APP_NAME=Qleiade
   APP_ENV=local
   APP_DEBUG=true
-  APP_URL=http://qleiade.toto
+  APP_URL=https://qleiade.test
 ```
   
   - db:
@@ -59,14 +59,8 @@
   GOOGLE_DRIVE_APPLICATION_CREDENTIALS = "credentialsofserviceaccount.json"
   GOOGLE_DRIVE_TEAM_DRIVE_ID=idtomyshareddirectory
 ```
-  - information de création de l'administrateur Orchid:
-  
-```Shell
-  # orchid user admin required
-  ORCHID_USER_ADMIN_NAME =myadminname
-  ORCHID_USER_ADMIN_MAIL =toto.escargot@jardin.com
-  ORCHID_USER_ADMIN_PASSWORD =mypassword
-```
+  - information de création de l'administrateur (panel d'administration en migration vers Filament)
+
 ### Google drive Api
 
   - Créer un compte de service google drive api  
@@ -230,7 +224,8 @@ Ajouter la nouvelle permission dans PermissionServiceProvider
 puis pour se les ajouter à soi
   
 ```php
-    php artisan orchid:admin --id=monIdInt
+  # Permissions: ajouter via `PermissionServiceProvider` et créer un compte administrateur
+  # (panel d'administration migré vers Filament — utiliser le UI Filament ou un seeder pour créer un admin)
 ```
 
 ### Modification ou ajout de clé dans le fichier des traductions

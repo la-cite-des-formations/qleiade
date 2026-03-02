@@ -2,12 +2,20 @@
 
 namespace Models;
 
-use Orchid\Platform\Models\User as Authenticatable;
-use Admin\Orchid\Presenters\UserPresenter;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use Laravel\Sanctum\HasApiTokens;
+use Filament\Models\Contracts\FilamentUser;
+use Filament\Panel;
 
-class User extends Authenticatable
+use Spatie\Permission\Traits\HasRoles;
+
+class User extends Authenticatable implements FilamentUser
 {
+    use HasApiTokens, HasFactory, Notifiable, HasRoles;
+
     /**
      * The attributes that are mass assignable.
      *
@@ -17,7 +25,6 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
-        'permissions',
     ];
 
     /**
@@ -36,52 +43,15 @@ class User extends Authenticatable
      * @var array
      */
     protected $casts = [
-        'permissions'          => 'array',
         'email_verified_at'    => 'datetime',
     ];
 
     /**
-     * The attributes for which you can use filters in url.
+     * units
      *
-     * @var array
+     * @return Relation
      */
-    protected $allowedFilters = [
-        'id',
-        'name',
-        'email',
-        'permissions',
-    ];
-
-    /**
-     * The attributes for which can use sort in url.
-     *
-     * @var array
-     */
-    protected $allowedSorts = [
-        'id',
-        'name',
-        'email',
-        'updated_at',
-        'created_at',
-    ];
-
-    /**
-     * Get the presenter for the model.
-     *
-     * @return UserPresenter
-     */
-    public function presenter()
-    {
-        return new UserPresenter($this);
-    }
-
-    /**
-     * unit
-     *
-     * @return BelongsToMany
-     */
-
-    public function unit(): BelongsToMany
+    public function units(): Relation
     {
         return $this->belongsToMany(
             Unit::class,
@@ -89,5 +59,14 @@ class User extends Authenticatable
             "user_id",
             "unit_id"
         );
+    }
+
+    public function canAccessPanel(Panel $panel): bool
+    {
+        if ($panel->getId() === 'admin') {
+            return $this->can('public_admin');
+        }
+
+        return true;
     }
 }

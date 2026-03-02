@@ -3,6 +3,7 @@
 namespace Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class FileWealth extends Model
 {
@@ -18,14 +19,22 @@ class FileWealth extends Model
     // On désactive les timestamps (created_at/updated_at) pour cette table
     public $timestamps = false;
 
-    // Relation inverse (optionnelle, mais utile)
-    public function wealth()
+    /**
+     * wealth
+     *
+     * @return Relation
+     */
+    public function wealth(): Relation
     {
         return $this->belongsTo(Wealth::class, 'wealth_id');
     }
 
-    // Relation vers le fichier (optionnelle, mais utile)
-    public function file()
+    /**
+     * file
+     *
+     * @return Relation
+     */
+    public function file(): Relation
     {
         return $this->belongsTo(File::class, 'file_id');
     }

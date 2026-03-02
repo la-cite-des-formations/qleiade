@@ -5,12 +5,11 @@ namespace Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Orchid\Screen\AsSource;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class File extends Model
 {
-    use HasFactory, AsSource, SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     /**
      * The table associated with the model.
@@ -48,9 +47,9 @@ class File extends Model
     /**
      * wealths
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-    public function wealths(): BelongsToMany
+    public function wealths(): Relation
     {
         return $this->belongsToMany(
             Wealth::class,

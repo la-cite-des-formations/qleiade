@@ -5,20 +5,16 @@ namespace Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
 use Laravel\Scout\Searchable;
 use Laravel\Scout\EngineManager;
 
 use Database\Factories\WealthFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasOneThrough;
-use Orchid\Filters\Filterable;
-use Orchid\Screen\AsSource;
-
 
 class Wealth extends Model
 {
-    use HasFactory, AsSource, Searchable, Filterable;
+    use HasFactory, Searchable, HasRelationships;
 
     /**
      * The table associated with the model.
@@ -26,7 +22,6 @@ class Wealth extends Model
      * @var string
      */
     protected $table = 'wealth';
-
 
     //Scout functions
     /**
@@ -87,44 +82,25 @@ class Wealth extends Model
         'archived_at',
         // json les visuelles de la preuve file, link, ypareo
         'attachment',
+        // foreign keys
+        'wealth_type_id',
+        'unit_id',
     ];
 
     /**
-     * The attributes that should be cast.
+     * Get the attributes that should be cast.
      *
-     * @var array<string, string>
+     * @return array<string, string>
      */
-    protected $casts = [
-        'validity_date' => 'datetime',
-        'archived_at' => 'datetime',
-        'attachment' => 'array',
-        'granularity' => 'array',
-    ];
-
-    /**
-     * The attributes for which you can use filters in url.
-     *
-     * @var array
-     */
-    protected $allowedFilters = [
-        'id',
-        'name',
-        'unit',
-        'validity_date',
-        'archived_at',
-    ];
-
-    /**
-     * The attributes for which can use sort in url.
-     *
-     * @var array
-     */
-    protected $allowedSorts = [
-        'id',
-        'name',
-        'validity_date',
-        'archived_at',
-    ];
+    protected function casts(): array
+    {
+        return [
+            'validity_date' => 'datetime',
+            'archived_at' => 'datetime',
+            'attachment' => 'array',
+            'granularity' => 'array',
+        ];
+    }
 
     /**
      * Create a new factory instance for the model.
@@ -137,9 +113,9 @@ class Wealth extends Model
     /**
      * actions
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-    public function actions(): BelongsToMany
+    public function actions(): Relation
     {
         return $this->belongsToMany(
             Action::class,
@@ -152,9 +128,9 @@ class Wealth extends Model
     /**
      * wealthType
      *
-     * @return BelongsTo
+     * @return Relation
      */
-    public function wealthType(): BelongsTo
+    public function wealthType(): Relation
     {
         return $this->belongsTo(WealthType::class);
     }
@@ -162,10 +138,10 @@ class Wealth extends Model
     /**
      * indicators
      *
-     * @return BelongsToMany
+     * @return Relation
      */
 
-    public function indicators(): BelongsToMany
+    public function indicators(): Relation
     {
         return $this->belongsToMany(
             Indicator::class,
@@ -178,11 +154,37 @@ class Wealth extends Model
     }
 
     /**
+     * qualityLabels
+     *
+     * @return Relation
+     */
+    public function qualityLabels(): Relation
+    {
+        return $this->hasManyDeep(
+            QualityLabel::class,
+            ['wealths_indicators', Indicator::class, Criteria::class],
+            [
+                'wealth_id',
+                'id',
+                'id',
+                'id'
+            ],
+            [
+                'id',
+                'indicator_id',
+                'criteria_id',
+                'quality_label_id'
+            ]
+        )
+        ->distinct();
+    }
+
+    /**
      * files
      *
-     * @return HasOneThrough
+     * @return Relation
      */
-    public function file(): HasOneThrough
+    public function file(): Relation
     {
         return $this->hasOneThrough(
             File::class,
@@ -198,9 +200,9 @@ class Wealth extends Model
     /**
      * unit
      *
-     * @return BelongsTo
+     * @return Relation
      */
-    public function unit(): BelongsTo
+    public function unit(): Relation
     {
         return $this->belongsTo(Unit::class);
     }
@@ -208,9 +210,9 @@ class Wealth extends Model
     /**
      * tags
      *
-     * @return BelongsToMany
+     * @return Relation
      */
-    public function tags(): BelongsToMany
+    public function tags(): Relation
     {
         return $this->belongsToMany(
             Tag::class,
@@ -220,27 +222,25 @@ class Wealth extends Model
         );
     }
 
-    // return one level of child items
-    public function wealths()
+    /**
+     * wealths
+     *
+     * @return Relation
+     */
+    public function wealths(): Relation
     {
         return $this->hasMany(Wealth::class, 'parent_id');
     }
 
-    // recursive relationship
-    public function childWealths()
+    /**
+     * childWealths
+     *
+     * @return Relation
+     */
+    public function childWealths(): Relation
     {
         return $this->hasMany(Wealth::class, 'parent_id')->with('wealths');
     }
-
-    // /**
-    //  * Get the presenter for the model.
-    //  *
-    //  * @return WealthPresenter
-    //  */
-    // public function presenter()
-    // {
-    //     return new WealthPresenter($this);
-    // }
 
     /**
      * Get the indexable data array for the model.

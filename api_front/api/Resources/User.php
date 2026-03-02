@@ -18,11 +18,21 @@ class User extends JsonResource
      */
     public function toArray($request)
     {
-        $perms = Arr::where($this->permissions, function ($value, $key) {
-            return Str::startsWith($key, "public");
-        });
+        // Liste des permissions attendues par React
+        $features = [
+            'public_home',
+            'public_admin',
+            'public_quality_labels_audit',
+            'public_quality_labels_dashboard',
+        ];
 
-        $pr = new UnitCollection($this->unit);
+        $perms = [];
+        foreach ($features as $feature) {
+            // Utilisation directe de can() sur le modèle pour plus de fiabilité
+            $perms[$feature] = $this->resource->can($feature);
+        }
+
+        $pr = new UnitCollection($this->units);
         $procs = json_decode($pr->toJson());
 
         $user = [
@@ -33,6 +43,15 @@ class User extends JsonResource
             "permissions" => $perms,
             "unit" => $procs,
         ];
+
         return $user;
+    }
+
+    /**
+     * S'assure que la réponse n'est pas mise en cache par le navigateur.
+     */
+    public function withResponse($request, $response)
+    {
+        $response->header('Cache-Control', 'no-cache, no-store, must-revalidate');
     }
 }

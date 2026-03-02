@@ -2,7 +2,7 @@
 /public
 /public/hot
 /public/storage
-/storage/*.key
+/storage
 /vendor
 .env
 .env.*
@@ -14,6 +14,8 @@ npm-debug.log
 yarn-error.log
 /.idea
 /.vscode
+/.github
+/.idx
 creds.json
 attachment_payload.json
 _ide_helper.php

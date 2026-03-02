@@ -94,7 +94,7 @@ class GraphController extends Controller
     #region manage data
     function getActions($unitId, $filters)
     {
-        $actionQuery = Action::with(['unit', 'wealths.indicators.qualityLabel'])->whereHas('unit', function ($query) use ($unitId) {
+        $actionQuery = Action::with(['units', 'wealths.indicators.qualityLabel'])->whereHas('units', function ($query) use ($unitId) {
             $query->where('unit_id', $unitId);
         });
 
@@ -112,7 +112,7 @@ class GraphController extends Controller
     {
         switch ($what) {
             case 'unit':
-                $act  = Action::with(['unit'])->whereHas('unit', function ($query) use ($who) {
+                $act  = Action::with(['units'])->whereHas('units', function ($query) use ($who) {
                     $query->where('unit_id', '=', $who);
                 })->orderBy('order')
                     ->get();

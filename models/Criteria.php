@@ -2,11 +2,10 @@
 
 namespace Models;
 
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\Relation;
 
 class Criteria extends Model
 {
@@ -24,6 +23,7 @@ class Criteria extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'quality_label_id',
         'name',
         'label',
         'order',
@@ -33,9 +33,9 @@ class Criteria extends Model
     /**
      * Indicators
      * Un critère a plusieurs indicateurs
-     * @return HasMany
+     * @return Relation
      */
-    public function indicators(): HasMany
+    public function indicators(): Relation
     {
         return $this->hasMany(Indicator::class);
     }
@@ -43,9 +43,9 @@ class Criteria extends Model
     /**
      * qualityLabel
      *
-     * @return BelongsTo
+     * @return Relation
      */
-    public function qualityLabel(): BelongsTo
+    public function qualityLabel(): Relation
     {
         return $this->belongsTo(QualityLabel::class);
     }
@@ -55,7 +55,7 @@ class Criteria extends Model
      *
      * @return Builder
      */
-    public function scopeLabel($query, $v)
+    public function scopeLabel(Builder $query, $v): Builder
     {
         return $query->where('quality_label_id', $v);
     }
