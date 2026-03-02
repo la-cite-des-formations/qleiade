@@ -75,6 +75,11 @@
         "sort-packages": true,
         "allow-plugins": {
             "php-http/discovery": true
+        },
+        "audit": {
+            "ignore": [
+                "PKSA-y896-hf4j-cr9c"
+            ]
         }
     },
     "minimum-stability": "dev",
