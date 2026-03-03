@@ -7,6 +7,7 @@ use Socialite;
 use Models\User;
 use GuzzleHttp\Exception\ClientException;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
 use Exception;
 
 class SocialiteController extends Controller
@@ -114,12 +115,15 @@ class SocialiteController extends Controller
         try {
             $googleUser = Socialite::driver('google')->user();
         } catch (Exception $e) {
-            return redirect()->route('login')->withErrors(['email' => 'Erreur lors de la connexion avec Google.']);
+            Log::error('Socialite Google selection error: ' . $e->getMessage());
+            return redirect('/auth/login')->withErrors(['email' => 'Erreur lors de la connexion avec Google.']);
         }
 
-        $user = User::where('email', $googleUser->getEmail())->first();
+        $email = $googleUser->getEmail();
+        $user = User::where('email', $email)->first();
 
         if ($user) {
+            Log::info('Google Login success for: ' . $email);
             if ($user->name !== $googleUser->getName()) {
                 $user->update(['name' => $googleUser->getName()]);
             }
@@ -129,6 +133,7 @@ class SocialiteController extends Controller
             return redirect()->intended('/home');
         }
 
-        return redirect()->route('login')->withErrors(['email' => 'Aucun compte associé à cette adresse email.']);
+        Log::warning('Google Login failed: User not found for email ' . $email);
+        return redirect('/auth/login')->withErrors(['email' => 'Aucun compte associé à cette adresse email (' . $email . ').']);
     }
 }

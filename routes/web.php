@@ -20,7 +20,7 @@ Route::get('/login', fn() => redirect('/auth/login'))->name('login');
 
 // Routes pour l'authentification Google via Socialite (version Web/Filament)
 Route::get('/auth/google/redirect', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google.redirect');
-Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])->name('auth.google.callback');
+Route::get('/auth', [SocialiteController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::get('language/{locale}', function ($locale) {
     app()->setLocale($locale);
