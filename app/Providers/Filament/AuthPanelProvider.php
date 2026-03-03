@@ -9,6 +9,7 @@ use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Filament\View\PanelsRenderHook;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -25,6 +26,10 @@ class AuthPanelProvider extends PanelProvider
             \Filament\Auth\Http\Responses\Contracts\LoginResponse::class,
             \App\Http\Responses\Filament\LoginResponse::class
         );
+        $this->app->bind(
+            \Filament\Auth\Http\Responses\Contracts\LogoutResponse::class,
+            \App\Http\Responses\Filament\LogoutResponse::class
+        );
     }
 
     public function panel(Panel $panel): Panel
@@ -32,11 +37,12 @@ class AuthPanelProvider extends PanelProvider
         return $panel
             ->default()
             ->id('auth')
-            ->path('')
+            ->path('auth')
             ->colors([
                 'primary' => Color::Amber,
             ])
             ->login(\App\Filament\Admin\Pages\Auth\Login::class)
+            ->theme(asset('css/filament/auth/theme.css'))
             ->middleware([
                 EncryptCookies::class,
                 AddQueuedCookiesToResponse::class,
@@ -50,6 +56,10 @@ class AuthPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
-            ]);
+            ])
+            ->renderHook(
+                PanelsRenderHook::AUTH_LOGIN_FORM_AFTER,
+                fn () => \Illuminate\Support\Facades\Blade::render('<x-google-login-button />'),
+            );
     }
 }

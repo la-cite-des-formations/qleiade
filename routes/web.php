@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\SocialiteController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -9,13 +10,17 @@ use Illuminate\Support\Facades\Route;
 |--------------------------------------------------------------------------
 */
 
-// Redirection vers home par défaut
+// Redirection vers home par défaut (sera gérée par le middleware auth)
 Route::get('/', function () {
     return redirect("/home");
 });
 
-// Route pivot pour l'authentification
-Route::get('/login', \App\Filament\Admin\Pages\Auth\Login::class)->name('login');
+// Route 'login' nommée pour les besoins de Laravel, redirigeant vers le panel Filament
+Route::get('/login', fn() => redirect('/auth/login'))->name('login');
+
+// Routes pour l'authentification Google via Socialite (version Web/Filament)
+Route::get('/auth/google/redirect', [SocialiteController::class, 'redirectToGoogle'])->name('auth.google.redirect');
+Route::get('/auth/google/callback', [SocialiteController::class, 'handleGoogleCallback'])->name('auth.google.callback');
 
 Route::get('language/{locale}', function ($locale) {
     app()->setLocale($locale);
