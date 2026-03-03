@@ -11,11 +11,12 @@ const LogoutButton = ({ authenticated, user, signOut }) => {
 
         signOut()
             .then(() => {
-                window.alert("Signed out!");
-                nav("/login");
-            }
-            )
-            .catch(() => window.alert("not signed out"));
+                window.location.href = "/login";
+            })
+            .catch((error) => {
+                console.error("Logout error:", error);
+                window.location.href = "/login";
+            });
     };
     return <Button variant="outlined" onClick={handleLogout}>{t("signout")}</Button>;
 };

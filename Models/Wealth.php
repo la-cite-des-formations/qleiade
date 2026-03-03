@@ -1,0 +1,297 @@
+<?php
+
+namespace Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Database\Eloquent\Relations\Relation;
+use \Staudenmeir\EloquentHasManyDeep\HasRelationships;
+use Laravel\Scout\Searchable;
+use Laravel\Scout\EngineManager;
+
+use Database\Factories\WealthFactory;
+
+class Wealth extends Model
+{
+    use HasFactory, Searchable, HasRelationships;
+
+    /**
+     * The table associated with the model.
+     *
+     * @var string
+     */
+    protected $table = 'wealth';
+
+    //Scout functions
+    /**
+     * Get the engine used to index the model.
+     *
+     * @return \Laravel\Scout\Engines\Engine
+     */
+    public function searchableUsing()
+    {
+        return app(EngineManager::class)->engine('meilisearch');
+    }
+
+    /**
+     * Get the name of the index associated with the model.
+     *
+     * @return string
+     */
+    public function searchableAs()
+    {
+        return 'wealths';
+    }
+
+    /**
+     * Get the value used to index the model.
+     *
+     * @return mixed
+     */
+    public function getScoutKey()
+    {
+        return $this->id;
+    }
+
+    /**
+     * Get the key name used to index the model.
+     *
+     * @return mixed
+     */
+    public function getScoutKeyName()
+    {
+        return 'id';
+    }
+
+    /**
+     * The attributes that are mass assignable.
+     *
+     * @var array<int, string>
+     */
+    protected $fillable = [
+        'name',
+        'description',
+        //suivi de la preuve
+        'tracking',
+        // 0 a 99
+        'conformity_level',
+        //json
+        'granularity',
+        'validity_date',
+        'archived_at',
+        // json les visuelles de la preuve file, link, ypareo
+        'attachment',
+        // foreign keys
+        'wealth_type_id',
+        'unit_id',
+    ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'validity_date' => 'datetime',
+            'archived_at' => 'datetime',
+            'attachment' => 'array',
+            'granularity' => 'array',
+        ];
+    }
+
+    /**
+     * Create a new factory instance for the model.
+     */
+    protected static function newFactory(): Factory
+    {
+        return WealthFactory::new();
+    }
+
+    /**
+     * actions
+     *
+     * @return Relation
+     */
+    public function actions(): Relation
+    {
+        return $this->belongsToMany(
+            Action::class,
+            "wealths_actions",
+            "wealth_id",
+            "action_id"
+        );
+    }
+
+    /**
+     * wealthType
+     *
+     * @return Relation
+     */
+    public function wealthType(): Relation
+    {
+        return $this->belongsTo(WealthType::class);
+    }
+
+    /**
+     * indicators
+     *
+     * @return Relation
+     */
+
+    public function indicators(): Relation
+    {
+        return $this->belongsToMany(
+            Indicator::class,
+            "wealths_indicators",
+            "wealth_id",
+            "indicator_id"
+        )
+        ->withPivot('is_essential')
+        ->withTimestamps();
+    }
+
+    /**
+     * qualityLabels
+     *
+     * @return Relation
+     */
+    public function qualityLabels(): Relation
+    {
+        return $this->hasManyDeep(
+            QualityLabel::class,
+            ['wealths_indicators', Indicator::class, Criteria::class],
+            [
+                'wealth_id',
+                'id',
+                'id',
+                'id'
+            ],
+            [
+                'id',
+                'indicator_id',
+                'criteria_id',
+                'quality_label_id'
+            ]
+        )
+        ->distinct();
+    }
+
+    /**
+     * files
+     *
+     * @return Relation
+     */
+    public function file(): Relation
+    {
+        return $this->hasOneThrough(
+            File::class,
+            FileWealth::class,
+            'wealth_id',
+            'id',
+            'id',
+            'file_id'
+        );
+    }
+
+    //NOTE peut être faut il supprimer ce lien direct mais attention ça casse tout le crud
+    /**
+     * unit
+     *
+     * @return Relation
+     */
+    public function unit(): Relation
+    {
+        return $this->belongsTo(Unit::class);
+    }
+
+    /**
+     * tags
+     *
+     * @return Relation
+     */
+    public function tags(): Relation
+    {
+        return $this->belongsToMany(
+            Tag::class,
+            "wealths_tags",
+            "wealth_id",
+            "tag_id"
+        );
+    }
+
+    /**
+     * wealths
+     *
+     * @return Relation
+     */
+    public function wealths(): Relation
+    {
+        return $this->hasMany(Wealth::class, 'parent_id');
+    }
+
+    /**
+     * childWealths
+     *
+     * @return Relation
+     */
+    public function childWealths(): Relation
+    {
+        return $this->hasMany(Wealth::class, 'parent_id')->with('wealths');
+    }
+
+    /**
+     * Get the indexable data array for the model.
+     *
+     * @return array
+     */
+    public function toSearchableArray()
+    {
+        // $array = $this->toArray();
+
+        return [
+            "id" => $this->id,
+            "name" => $this->name,
+            "description" => $this->description,
+            "parent_id" => $this->parent_id,
+            "granularity_type" => $this->granularity['type'] ?? null,
+            "granularity_id" => $this->granularity['id'] ?? null,
+            "conformity_level" => $this->conformity_level == 100 ? "essentielle" : "complémentaire",
+            "validity_date" => $this->validity_date?->toDateTimeString(),
+            "created_at" => $this->created_at?->toDateTimeString(),
+            "archived" => !is_null($this->archived_at),
+            "unit_name" => $this->unit->name,
+            "unit" => [
+                "id" => $this->unit->id,
+                "label" => $this->unit->label
+            ],
+            "wealth_type" => $this->wealthType->label,
+            "indicators_labels" => $this->indicators->pluck('label')->all(),
+            "indicators_quality_labels" => $this->indicators->map(fn($item) => $item['qualityLabel']->label)->unique()->all(),
+            "indicators" => $this->indicators->map(fn($item) => [
+                'id' => $item['id'],
+            ])->toArray(),
+            "tags_label" => $this->tags->pluck('label')->all(),
+            "actions" => $this->actions->map(function ($item, $key) {
+                $value = [
+                    "label" => $item["label"],
+                    "stage" => $item['stage']->label,
+                ];
+                return $value;
+            })->toArray(),
+        ];
+    }
+
+    /**
+     * Modify the query used to retrieve models when making all of the models searchable.
+     *
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
+     * @return \Illuminate\Database\Eloquent\Builder
+     */
+    protected function makeAllSearchableUsing($query)
+    {
+        return $query->with(['indicators', 'tags', 'actions', 'wealthType', 'unit']);
+    }
+}

@@ -4,5 +4,4 @@
  * building robust, powerful web applications using React + Laravel.
  */
 
-require('@admin_panel/bootstrap');
 require('@app/index');

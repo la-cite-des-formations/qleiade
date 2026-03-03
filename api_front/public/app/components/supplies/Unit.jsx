@@ -10,13 +10,15 @@ export default function Unit(props) {
 
 
     var slug = props.item.name ? "/" + props.item.name : "";
-    var button = <Button
-        component={Link}
-        to={"/dashboards/unit" + slug}
-        variant="contained"
-        sx={{ mt: 3, ml: 1 }}
-        color="primary"
-    >{"Suivre"}</Button>;
+    var button = props.canSee('public_quality_labels_dashboard') ? (
+        <Button
+            component={Link}
+            to={"/dashboards/unit" + slug}
+            variant="contained"
+            sx={{ mt: 3, ml: 1 }}
+            color="primary"
+        >{"Suivre"}</Button>
+    ) : null;
 
     return (<Card sx={{ minWidth: '100%', minHeight: '100%' }} className="unit">
         <CardContent>

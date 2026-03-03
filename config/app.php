@@ -209,13 +209,14 @@ return [
         App\Providers\AuthServiceProvider::class,
         // App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
+        App\Providers\Filament\AdminPanelProvider::class,
+        App\Providers\Filament\AuthPanelProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\FortifyServiceProvider::class,
-        App\Providers\PermissionServiceProvider::class,
         App\Providers\GoogleDriveServiceProvider::class,
         School\SchoolProvider::class,
         // Barryvdh\LaravelIdeHelper\IdeHelperServiceProvider::class,
-        //Barryvdh\Debugbar\ServiceProvider::class,
+        // Barryvdh\Debugbar\ServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class
     ],
 

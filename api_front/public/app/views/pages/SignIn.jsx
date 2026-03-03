@@ -26,7 +26,7 @@ const SignIn = ({ signIn, setUser }) => {
                     nav("/home");
                 }
             })
-            .catch(() => window.alert("Incorrect email or password"));
+            .catch((error) => console.error("Login error:", error));
     };
 
     return (

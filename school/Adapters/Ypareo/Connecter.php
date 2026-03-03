@@ -32,9 +32,9 @@ class Connecter implements ConnecterInterface
 
     public function __construct($config = [])
     {
-        $this->base_uri = config('ypareo.token');
+        $this->base_uri = config('ypareo.base_uri');
         $this->client = new Client([
-            'base_uri' => config('ypareo.base_uri'),
+            'base_uri' => $this->base_uri,
         ]);
         $this->token = config('ypareo.token');
     }
@@ -47,6 +47,7 @@ class Connecter implements ConnecterInterface
     protected function call($uri, $params = [])
     {
         //je vais avoir des filtres et des paramètres
+        $uri = ltrim($uri, '/');
 
         try {
             $response = $this->client->request('get', $uri, [
@@ -54,7 +55,7 @@ class Connecter implements ConnecterInterface
                     "X-auth-Token" => $this->token,
                     "content-type" => "application/json",
                 ],
-                'form_params' => $params
+                'query' => $params
             ]);
         } catch (ClientException $e) {
             throw $e;
@@ -76,7 +77,7 @@ class Connecter implements ConnecterInterface
                     try {
                         $thinkValue = $value[$filterKey];
                     } catch (\Throwable $th) {
-                        throw 'not filtered';
+                        throw new \Exception('not filtered');
                     }
                     if ($thinkValue == $filterValue) {
                         $find += 1;

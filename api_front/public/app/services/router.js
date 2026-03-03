@@ -13,11 +13,13 @@ import { Auth, GoogleCallBack } from "@services/middleWear";
 
 
 export default createBrowserRouter([
-    {
-        path: "/login",
-        element: <SignIn />,
-        errorElement: <ErrorPage />,
-    },
+    /*
+        {
+            path: "/login",
+            element: <SignIn />,
+            errorElement: <ErrorPage />,
+        },
+    */
     {
         path: "/auth",
         element: <GoogleCallBack />,

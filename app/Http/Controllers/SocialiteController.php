@@ -6,6 +6,9 @@ use Illuminate\Http\Request;
 use Socialite;
 use Models\User;
 use GuzzleHttp\Exception\ClientException;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Log;
+use Exception;
 
 class SocialiteController extends Controller
 {
@@ -50,9 +53,7 @@ class SocialiteController extends Controller
 
         if (in_array($provider, $this->providers)) {
 
-            // Les informations provenant du provider
             try {
-                /** @var SocialiteUser $socialiteUser */
                 $data = Socialite::driver('google')->stateless()->user();
             } catch (ClientException $e) {
                 return response()->json(['error' => 'Invalid credentials provided.'], 422);
@@ -87,14 +88,52 @@ class SocialiteController extends Controller
             }
 
             # 4. On connecte l'utilisateur
-            auth()->login($user);
+            Auth::login($user);
 
             # 5. On redirige l'utilisateur vers /home
-            if (auth()->check()) return response()->json([
+            if (Auth::check()) return response()->json([
                 'user' => $user,
             ]);
-            // if (auth()->check()) return redirect(route('home'));
+            // if (Auth::check()) return redirect(route('home'));
         }
         abort(404);
+    }
+
+    /**
+     * Web Redirection (Filament)
+     */
+    public function redirectToGoogle()
+    {
+        return Socialite::driver('google')->redirect();
+    }
+
+    /**
+     * Web Callback (Filament)
+     */
+    public function handleGoogleCallback()
+    {
+        try {
+            $googleUser = Socialite::driver('google')->user();
+        } catch (Exception $e) {
+            Log::error('Socialite Google selection error: ' . $e->getMessage());
+            return redirect('/auth/login')->withErrors(['email' => 'Erreur lors de la connexion avec Google.']);
+        }
+
+        $email = $googleUser->getEmail();
+        $user = User::where('email', $email)->first();
+
+        if ($user) {
+            Log::info('Google Login success for: ' . $email);
+            if ($user->name !== $googleUser->getName()) {
+                $user->update(['name' => $googleUser->getName()]);
+            }
+
+            Auth::login($user);
+
+            return redirect()->intended('/home');
+        }
+
+        Log::warning('Google Login failed: User not found for email ' . $email);
+        return redirect('/auth/login')->withErrors(['email' => 'Aucun compte associé à cette adresse email (' . $email . ').']);
     }
 }

@@ -42,9 +42,13 @@ let ImageminPlugin = require('imagemin-webpack-plugin').default;
  */
 
 mix.js('resources/js/app.jsx', 'public/js')
-    .js('resources/js/admin/search-reactive.js', 'public/js')
     .react()
-    .sass('resources/sass/app.scss', 'public/css')
+    .sass('resources/sass/app.scss', 'public/css', {
+        sassOptions: {
+            quietDeps: true,
+            silenceDeprecations: ['import', 'legacy-js-api', 'color-functions', 'global-builtin'],
+        }
+    })
     .copyDirectory('resources/images', 'public/images');
 
 mix.webpackConfig({
@@ -52,7 +56,6 @@ mix.webpackConfig({
         alias: {
             // '@': path.resolve(__dirname, 'resources/js'),
             '@app': path.resolve(__dirname, 'api_front/public/app'),
-            '@admin_panel': path.resolve(__dirname, 'admin_panel/public/js'),
             '@components': path.resolve(__dirname, 'api_front/public/app/components'),
             '@parts': path.resolve(__dirname, 'api_front/public/app/parts'),
             '@services': path.resolve(__dirname, 'api_front/public/app/services'),

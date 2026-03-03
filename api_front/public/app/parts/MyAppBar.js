@@ -129,7 +129,7 @@ function PrimarySearchAppBar() {
                     : <div />
             }
             {
-                canSee('public_admin') ?
+                canSee('public_quality_labels_dashboard') ?
                     <MenuItem onClick={handleMenuClose}>
                         <MyLink href='/labels'>
                             {t("appBar.submenu.labels")}
