@@ -55,7 +55,7 @@ class Connecter implements ConnecterInterface
                     "X-auth-Token" => $this->token,
                     "content-type" => "application/json",
                 ],
-                'form_params' => $params
+                'query' => $params
             ]);
         } catch (ClientException $e) {
             throw $e;

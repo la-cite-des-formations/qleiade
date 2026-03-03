@@ -168,6 +168,48 @@ class WealthResource extends Resource
                             return $typeLabel;
                         }
 
+                        if ($type === 'formation') {
+                            try {
+                                $schoolManager = app(SchoolManager::class);
+                                $formations = $schoolManager->getFormations();
+                                
+                                $resolved = $formations->resolve();
+                                $data = isset($resolved['data']) && method_exists($resolved['data'], 'resolve') 
+                                    ? $resolved['data']->resolve() 
+                                    : [];
+                                
+                                $formation = collect($data)->firstWhere('id', (int) $id);
+                                if ($formation) {
+                                    return "{$typeLabel} ({$formation['label']})";
+                                }
+                            } catch (\Exception $e) {
+                                // Fallback to ID if resolution fails
+                            }
+                        }
+
+                        if ($type === 'student') {
+                            try {
+                                $schoolManager = app(SchoolManager::class);
+                                $connecter = $schoolManager->connecter('ypareo');
+                                $rawResponse = $connecter->searchStudent(studentCode: $id);
+                                $content = (string) $rawResponse;
+                                $data = json_decode($content, true);
+                                $students = $data['data'] ?? $data;
+                                
+                                $student = collect($students)->first();
+                                if ($student) {
+                                    $fullName = ($student['prenomApprenant'] ?? '') . " " . ($student['nomApprenant'] ?? '');
+                                    $inscription = collect($student['inscriptions'] ?? [])
+                                        ->firstWhere('isInscriptionEnCours', 1);
+                                    $formationName = $inscription['formation']['nomFormation'] ?? 'Formation inconnue';
+                                    
+                                    return "{$typeLabel} ({$fullName} - {$formationName})";
+                                }
+                            } catch (\Exception $e) {
+                                // Fallback to ID if resolution fails
+                            }
+                        }
+
                         return "{$typeLabel} ({$id})";
                     })
                     ->columnSpanFull(),
@@ -271,6 +313,7 @@ class WealthResource extends Resource
                                     'autre' => 'Autre',
                                 ])
                                 ->required()
+                                ->default('google')
                                 ->native(false)
                                 ->columnSpan(1),
                             TextInput::make('url')
@@ -300,7 +343,12 @@ class WealthResource extends Resource
         return [
             Select::make('unit_id')
                 ->label('Service')
-                ->relationship('unit', 'label')
+                ->relationship(
+                    name: 'unit',
+                    titleAttribute: 'name',
+                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                )
+                ->getOptionLabelFromRecordUsing(fn (Unit $record): string => $record->full)
                 ->required()
                 ->placeholder('Choisir...')
                 ->native(false),
@@ -545,16 +593,30 @@ class WealthResource extends Resource
     private static function getTableFilters(): array
     {
         return [
-            SelectFilter::make('unit_id')
-                ->label('Service')
-                ->relationship(
-                    name: 'unit',
-                    titleAttribute: 'name',
-                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
-                )
-                ->getOptionLabelFromRecordUsing(fn (Unit $record): string => $record->full)
-                ->multiple()
-                ->columnSpan(9),
+            SelectFilter::make('status')
+                ->label('État')
+                ->options([
+                    'active' => 'Active',
+                    'temporary' => 'Temporaire',
+                    'archived' => 'Archivée',
+                ])
+                ->query(function (Builder $query, array $data): Builder {
+                    return $query
+                        ->when(
+                            $data['value'] === 'active',
+                            fn (Builder $query) => $query->whereNull('archived_at')->whereNull('validity_date'),
+                        )
+                        ->when(
+                            $data['value'] === 'temporary',
+                            fn (Builder $query) => $query->whereNull('archived_at')->whereNotNull('validity_date'),
+                        )
+                        ->when(
+                            $data['value'] === 'archived',
+                            fn (Builder $query) => $query->whereNotNull('archived_at'),
+                        );
+                })
+                ->native(false)
+                ->columnSpan(4),
             SelectFilter::make('wealth_type_id')
                 ->label('Type')
                 ->relationship('wealthType', 'label')
@@ -601,11 +663,21 @@ class WealthResource extends Resource
                     return $indicators;
                 })
                 ->columnSpan(5),
+            SelectFilter::make('unit_id')
+                ->label('Service')
+                ->relationship(
+                    name: 'unit',
+                    titleAttribute: 'name',
+                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('name'),
+                )
+                ->getOptionLabelFromRecordUsing(fn (Unit $record): string => $record->full)
+                ->multiple()
+                ->columnSpanFull(),
             SelectFilter::make('tags')
                 ->label('Libellés')
                 ->relationship('tags', 'label')
                 ->multiple()
-                ->columnSpan(8),
+                ->columnSpanFull(),
             Filter::make('quality_classification')
                 ->columns(13)
                 ->columnSpanFull()
