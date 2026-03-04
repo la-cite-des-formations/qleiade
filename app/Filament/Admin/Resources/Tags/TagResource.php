@@ -9,11 +9,10 @@ use Filament\Actions\BulkActionGroup;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\DeleteBulkAction;
 use Filament\Actions\EditAction;
-use Filament\Forms\Components\Textarea;
+use Filament\Forms\Components\RichEditor;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Resource;
 use Filament\Schemas\Schema;
-use Filament\Support\Enums\Width;
 use Filament\Support\Icons\Heroicon;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
@@ -47,10 +46,10 @@ class TagResource extends Resource
                     ->required()
                     ->maxLength(255)
                     ->label('Nom'),
-                Textarea::make('description')
+                RichEditor::make('description')
                     ->maxLength(1500)
                     ->label('Description')
-                    ->rows(3)
+                    ->extraInputAttributes(['style' => 'min-height: 20em;'])
                     ->columnSpanFull(),
             ]);
     }
