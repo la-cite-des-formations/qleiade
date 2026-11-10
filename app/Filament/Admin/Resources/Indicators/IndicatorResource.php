@@ -254,6 +254,16 @@ class IndicatorResource extends Resource
                     
                     return $record->toArray();
                 })
+                ->mutateDataUsing(function (array $data): array {
+                    if (!empty($data['number']) && !empty($data['criteria_id'])) {
+                        $criteria = Criteria::find($data['criteria_id']);
+                        $data['name'] = $criteria->order . '-' . $data['number'];
+                        if (empty($data['quality_label_id']) && $criteria) {
+                            $data['quality_label_id'] = $criteria->quality_label_id;
+                        }
+                    }
+                    return $data;
+                })
                 ->icon(Heroicon::OutlinedPencilSquare)
                 ->iconButton()
                 ->hiddenLabel()

@@ -51,6 +51,9 @@ class ManageIndicators extends ManageRecords
                     if (!empty($data['number']) && !empty($data['criteria_id'])) {
                         $criteria = Criteria::find($data['criteria_id']);
                         $data['name'] = $criteria->order . '-' . $data['number'];
+                        if (empty($data['quality_label_id']) && $criteria) {
+                            $data['quality_label_id'] = $criteria->quality_label_id;
+                        }
                     }
                     return $data;
                 }),

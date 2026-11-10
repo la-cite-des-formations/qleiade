@@ -28,6 +28,7 @@ class Indicator extends Model
      * @var array<int, string>
      */
     protected $fillable = [
+        'quality_label_id',
         'criteria_id',
         'name',
         'label',
@@ -93,14 +94,7 @@ class Indicator extends Model
      */
     public function qualityLabel(): Relation
     {
-        return $this->hasOneThrough(
-            QualityLabel::class,
-            Criteria::class,
-            'id',
-            'id',
-            'criteria_id',
-            'quality_label_id'
-        );
+        return $this->belongsTo(QualityLabel::class);
     }
 
     /**

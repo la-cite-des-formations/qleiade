@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Récapitulatif de l'Audit Ypareo - Projet Qléiade</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            background-color: #f8f9fa;
+        }
+        .container {
+            background-color: #ffffff;
+            padding: 2.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 0.5rem;
+            margin-bottom: 1.5rem;
+        }
+        h2 {
+            color: #2980b9;
+            margin-top: 2rem;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.3rem;
+        }
+        h3 {
+            color: #34495e;
+            margin-top: 1.5rem;
+        }
+        ul, ol {
+            margin-bottom: 1.5rem;
+        }
+        li {
+            margin-bottom: 0.5rem;
+        }
+        code {
+            background-color: #f1f2f6;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New", monospace;
+            font-size: 0.9em;
+            color: #e83e8c;
+        }
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid transparent;
+            border-radius: 4px;
+        }
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeeba;
+        }
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+        .note {
+            font-style: italic;
+            color: #7f8c8d;
+            background-color: #f8f9fa;
+            padding: 1rem;
+            border-left: 4px solid #95a5a6;
+            margin-bottom: 1.5rem;
+        }
+        .highlight {
+            font-weight: bold;
+            color: #c0392b;
+        }
+        .impact {
+            background-color: #e67e22;
+            color: white;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            font-weight: bold;
+        }
+        .trigger {
+            font-size: 0.9em;
+            color: #16a085;
+            background-color: #e2fbf5;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 0.2rem;
+        }
+        .feature {
+            font-size: 0.9em;
+            color: #8e44ad;
+            background-color: #f4ecf7;
+            padding: 0.1rem 0.3rem;
+            border-radius: 3px;
+            display: inline-block;
+            margin-top: 0.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Récapitulatif de l'Audit Ypareo - Projet Qléiade</h1>
+
+    <div class="alert alert-info" style="margin-top: 2rem; border-left: 5px solid #2980b9;">
+        <h3 style="margin-top: 0; color: #0c5460;">🎯 Contexte Stratégique Global</h3>
+        <p>Cet audit s'inscrit dans une démarche globale de cartographie des appels à l'API REST d'Ymag (BDES, iResto, Qléiade, etc.). Suite au changement de facturation de l'éditeur reposant désormais sur un système de paliers liés au <strong>volume de requêtes</strong>, et eu égard au positionnement actuel de la structure dans la tranche la plus haute, l'objectif est d'identifier de manière précise et isolée les foyers de consommation par application, afin d'optimiser ensuite globalement les services les plus sollicités.</p>
+    </div>
+
+    <h2>1. Objectif sur l'Application Qléiade</h2>
+    <p>L'audit du code du projet Qléiade a permis d'isoler l'ensemble des appels réalisés vers l'API Rest Ypareo, leurs contextes d'utilisation dans la structure du code (principalement sur le back-office Filament) et les données manipulées.</p>
+    <p>Le tableau de bord central (<code>TDB Usages API Rest Ypareo - TdB.csv</code>) a été complété par les lignes propres au projet "Qléiade" en respectant la structure de votre document de pilotage général.</p>
+    <p><strong>Environnements cartographiés :</strong> L'analyse englobe les deux instances du projet (liées à la même base métier Ymag <code>ymag.cloud</code>) :</p>
+    <ul>
+        <li>Qléiade Production (<code>qleiade.cite-formations-tours.fr</code>)</li>
+        <li>Qléiade Pré-Production (<code>qleiade-dev.cite-formations-tours.fr</code>)</li>
+    </ul>
+
+    <h2>2. Découvertes Clés : Mappage des Endpoints et Déclencheurs</h2>
+    <p>Quatre requêtes réelles se distinguent au sein du fichier <code>app/Filament/Admin/Resources/Wealths/WealthResource.php</code>, particulièrement liées à la granularité des "Preuves" (Wealth) :</p>
+    <ol>
+        <li>
+            <strong>Formations (<code>getFormations</code>)</strong> : Récupère la liste de toutes les formations via <code>/r/v1/formations</code>.<br>
+            <span class="feature">📌 Fonctionnalité : Création / Édition d'une Preuve</span><br>
+            <span class="trigger">⚡ Déclencheur UI : À chaque fois que l'utilisateur ouvre/charge la liste déroulante des "Formations" dans le formulaire de Preuve.</span>
+        </li>
+        <li style="margin-top: 1rem;">
+            <strong>Périodes Scolaires (<code>getPeriods</code>)</strong> : Récupère via <code>/r/v1/periodes</code> l'intégralité des périodes.<br>
+            <span class="feature">📌 Fonctionnalité : Création / Édition d'une Preuve</span><br>
+            <span class="trigger">⚡ Déclencheur UI : À chaque fois que l'utilisateur charge la liste déroulante des "Apprenants" (nécessaire pour filtrer la période).</span>
+        </li>
+        <li style="margin-top: 1rem;">
+            <strong>Apprenants FI (<code>apprenants</code>)</strong> : Récupère via <code>/r/v1/formation-longue/apprenants</code> les apprenants en "Formation Initiale".<br>
+            <span class="feature">📌 Fonctionnalité : Création / Édition d'une Preuve</span><br>
+            <span class="trigger">⚡ Déclencheur UI : À chaque fois que l'utilisateur charge la liste déroulante des "Apprenants" dans le formulaire (pour les lister).</span>
+        </li>
+        <li style="margin-top: 1rem;">
+            <strong>Recherche Unitaire Apprenant (<code>searchStudent</code>)</strong> : Trouve les informations détaillées d'un apprenant unitaire via <code>/r/v1/rechercher/apprenants</code>.<br>
+            <span class="feature">📌 Fonctionnalité : Analyse API / Visualisation (Liste des Preuves)</span><br>
+            <span class="trigger">⚡ Déclencheur UI : À chaque fois que l'application affiche à l'écran une preuve liée à un apprenant (dans un tableau ou en vue détaillée).</span>
+        </li>
+    </ol>
+    <div class="note">
+        (Note : L'intégration technique est gérée et centralisée par la classe <code>SchoolManager</code> et le composant Guzzle <code>Connecter.php</code>).
+    </div>
+
+    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ddd;">
+
+    <h2>3. 🚨 Pistes d'Optimisation Potentielles (Alerte Volume)</h2>
+
+    <p>Dans la perspective d'une réduction globale du volume d'appels API, le code de Qléiade révèle trois foyers d'appels "à risques" par rapport à sa propre utilisation (modérée ou non). Ces points pourraient contribuer, à leur échelle, à la surconsommation totale mesurée par Ymag :</p>
+
+    <div class="alert alert-warning">
+        <span class="impact">Impact Massif Potentiel</span> <strong> 1. Multiplicateur de requêtes N+1 :</strong><br>
+        Dans la vue détaillée d'une preuve ou dans des tableaux Filament (<code>TextEntry::make('granularity_unified')</code>), le code interroge Ypareo (<code>searchStudent()</code>) de manière unitaire pour chaque apprenant rattaché à une ligne. <br><br>
+        <span class="highlight">Le point de vigilance :</span> Si le back-office devait afficher 50 preuves simultanées liées à des apprenants distincts, le serveur lancerait mécaniquement 50 appels REST synchrones et consécutifs. Ce comportement d'une vue peut être un gros contributeur s'il est utilisé de manière récurrente.
+    </div>
+
+    <div class="alert alert-warning">
+        <span class="impact">Impact Fort Potentiel</span> <strong> 2. L'absence de cache sur des référentiels statiques :</strong><br>
+        Lors de la création ou de l'édition d'une preuve liée à l'Entité "Formation", Qléiade fait un appel systématique à l'API Ymag pour rapatrier le catalogue entier des formations, uniquement pour alimenter une liste déroulante (select field).<br><br>
+        <span class="highlight">Le point de vigilance :</span> En l'absence de système de cache local, ce lourd catalogue est re-passé dans les requêtes de serveurs Ymag pour chaque simple ouverture de ce formulaire spécifique.
+    </div>
+
+    <div class="alert alert-warning">
+        <span class="impact">Impact Moyen Potentiel</span> <strong> 3. Les appels itératifs imbriqués (Foreach) :</strong><br>
+        Lors de la construction de la vue permettant de sélectionner un stagiaire, le code itère dynamiquement (<code>foreach ($periodIds as $periodId)</code>) sur les périodes en cours pour lancer autant d'appels API apprenants qu'il y a de périodes scolaires actives.<br><br>
+        <span class="highlight">Le point de vigilance :</span> C'est un multiplicateur fixe du paramètre de requête qui n'est pas optimisé via une seule requête de groupe mais bien via un appel déclenché par période lors de l'ouverture du champ.
+    </div>
+
+    <h2>4. Renseignement du Rapport et Indicateurs Complémentaires</h2>
+    <p>Afin de finaliser l'audit et donner plus de relief à l'analyse, les données complémentaires suivantes ont été insérées :</p>
+    <ul>
+        <li><strong>Fonctionnalité et Interactions :</strong> La colonne "Fréquence" et "Cycle" détaillent désormais précisément le parcours fonctionnel ("Création / Édition") et les déclencheurs UI explicites provoquant la requête, afin de compenser par la théorie l'absence de trafic chiffré.</li>
+        <li><strong>Population Estimée :</strong> La consultation de la base de données indique une population cible précise de <strong>19 utilisateurs inscrits</strong> pouvant potentiellement utiliser l'application. Cette limite fixe permet de relativiser la portée brute des appels de Qléiade vis-à-vis des autres systèmes.</li>
+        <li><strong>Environnements (Prod / Pré-prod) :</strong> Les deux instances applicatives de Qléiade ont été correctement dupliquées et assignées à leurs domaines de rattachement effectifs dans le tableau de bord CSV. Ces deux instances sollicitent d'ailleurs la même base mutualisée <code>ymag.cloud</code>.</li>
+    </ul>
+
+    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid #ddd;">
+
+    <h2>5. ✅ Solution Technique Validée pour une Phase Ultérieure</h2>
+    <div class="alert alert-success">
+        <h3 style="margin-top: 0; color: #155724;">Stratégie de Caching Actée</h3>
+        <p>Afin d'endiguer efficacement la volumétrie décrite aux points 3.1 et 3.2, et après confirmation fonctionnelle, <strong>la solution technique pertinente retenue pour une intervention future est l'implémentation robuste d'un Cache (local File ou Redis)</strong> au sein des méthodes d'interface métier (ex. <code>SchoolManager</code>).</p>
+        <ul>
+            <li><strong>Mise en cache des Référentiels (Formations, Périodes) :</strong> Permettra de ne faire qu'un seul appel ponctuel à l'API Ymag par jour (ou par 12h) tout en conservant la structure en mémoire pour tous les affichages des listes déroulantes de Filament.</li>
+            <li><strong>Mise en cache ou Synchronisation de l'Annuaire Apprenant :</strong> Viendra enrayer l'impact dévastateur des requêtes "N+1" générées lors d'affichages unitaires consécutifs sur des listes ou l'administration des "Preuves".</li>
+        </ul>
+        <p>Cette optimisation technique sera opérée et appliquée selon le niveau de priorité accordé à Qléiade une fois la cartographie globale finalisée sur l'ensemble de l'écosystème numérique ciblant Ypareo.</p>
+    </div>
+    
+</div>
+
+</body>
+</html>
